@@ -460,6 +460,13 @@ ninja.data = [{
           window.open("https://scholar.google.com/citations?user=OJ45nEQAAAAJ", "_blank");
         },
       },{
+        id: 'social-x',
+        title: 'X',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://twitter.com/rshia_afz", "_blank");
+        },
+      },{
       id: 'light-theme',
       title: 'Change theme to light',
       description: 'Change the theme of the site to Light',
