@@ -9,9 +9,9 @@ profile:
   image: prof_pic.jpg
   image_circular: false # crops the image to make it circular
   more_info: >
-    <p>555 your office number</p>
-    <p>123 your address street</p>
-    <p>Your City, State 12345</p>
+     <p>EPFL STI IEM LIONS</p>
+     <p>ELD 244 (Bâtiment ELD)</p>
+     <p>Station 11, 1015 Lausanne</p>
 
 selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
@@ -27,4 +27,11 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-Hi I am Arshia very nice guy!
+I’m Arshia, a third-year Ph.D. student in Electrical Engineering at EPFL under Professors Volkan Cevher and Mahsa Shoaran. My research explores efficient and fast LLMs by merging deep learning architectures with systems. Previously, I studied Electrical Engineering at Sharif University of Technology and earned a Bronze Medal at the 2018 International Physics Olympiad. Beyond academics, I’m a passionate rock climber and pianist! :)
+
+
+
+
+
+
+
