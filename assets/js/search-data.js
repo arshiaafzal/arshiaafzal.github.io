@@ -23,16 +23,14 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "news-a-long-announcement-with-details",
-          title: 'A long announcement with details',
-          description: "",
-          section: "News",handler: () => {
-              window.location.href = "/news/announcement_2/";
-            },},{id: "news-a-simple-inline-announcement-with-markdown-emoji-sparkles-smile",
+        },{id: "news-a-simple-inline-announcement-with-markdown-emoji-sparkles-smile",
           title: 'A simple inline announcement with Markdown emoji! :sparkles: :smile:',
           description: "",
           section: "News",},{id: "news-rest-was-accepted-at-icml",
           title: 'REST was accepted at ICML! 🤩',
+          description: "",
+          section: "News",},{id: "news-best-poster-award-of-neuro-x",
+          title: 'Best Poster award of Neuro-X!',
           description: "",
           section: "News",},{id: "projects-project-1",
           title: 'project 1',
