@@ -183,6 +183,7 @@ exclude:
   - _pages/repositories.md
   - _pages/projects.md
   - _pages/profiles.md
+  - _posts/
   - CUSTOMIZE.md
   - Dockerfile
   - docker-compose.yml
