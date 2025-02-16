@@ -71,11 +71,14 @@
         - Inference, Systems
         - Pre-training
         - SSMs
-    - title: Climbing
+        - Linear Attention
+    - title: ML for Bio-medical signals
       items:
-        - 6b+ climber
+        - Efficient ML for Neural Decoding
+        - Graph Signal Processing
 
 - title: Other Interests
   type: list
   contents:
     - Piano (playing since 6)
+    - 6b+ climber (climbing for 2 years)
