@@ -27,7 +27,9 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-I’m Arshia, a third-year Ph.D. student in Electrical Engineering at EPFL under Professors Volkan Cevher and Mahsa Shoaran. My research explores efficient and fast LLMs by merging deep learning architectures with systems. Previously, I studied Electrical Engineering at Sharif University of Technology and earned a Bronze Medal at the 2018 International Physics Olympiad. Beyond academics, I’m a passionate rock climber and pianist! :)
+I’m Arshia, a third-year Ph.D. student in Electrical Engineering at EPFL under Professors Volkan Cevher and Mahsa Shoaran. My research explores efficient and fast LLMs by merging deep learning architectures with systems. 
+
+Previously, I studied Electrical Engineering at Sharif University of Technology and earned a Bronze Medal at the 2018 International Physics Olympiad. Beyond academics, I’m a passionate rock climber and pianist! :)
 
 
 
