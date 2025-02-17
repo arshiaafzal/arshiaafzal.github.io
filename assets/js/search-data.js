@@ -30,26 +30,48 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-a-distill-style-blog-post",
+        },{id: "post-state-space-duality-mamba-2-part-iv-the-systems",
       
-        title: "a distill-style blog post",
+        title: "State Space Duality (Mamba-2) Part IV - The Systems",
       
-      description: "an example of a distill-style blog post and main elements",
+      description: "",
       section: "Posts",
       handler: () => {
         
-          window.location.href = "/blog/2021/distill/";
+          window.location.href = "/blog/2024/mamba2-part4-systems/";
         
       },
-    },{id: "post-a-post-with-math",
+    },{id: "post-state-space-duality-mamba-2-part-iii-the-algorithm",
       
-        title: "a post with math",
+        title: "State Space Duality (Mamba-2) Part III - The Algorithm",
       
-      description: "an example of a blog post with some math",
+      description: "",
       section: "Posts",
       handler: () => {
         
-          window.location.href = "/blog/2015/math/";
+          window.location.href = "/blog/2024/mamba2-part3-algorithm/";
+        
+      },
+    },{id: "post-state-space-duality-mamba-2-part-ii-the-theory",
+      
+        title: "State Space Duality (Mamba-2) Part II - The Theory",
+      
+      description: "",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2024/mamba2-part2-theory/";
+        
+      },
+    },{id: "post-state-space-duality-mamba-2-part-i-the-model",
+      
+        title: "State Space Duality (Mamba-2) Part I - The Model",
+      
+      description: "",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2024/mamba2-part1-model/";
         
       },
     },{id: "news-rest-was-accepted-at-icml",
