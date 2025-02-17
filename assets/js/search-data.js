@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-state-space-duality-mamba-2-part-iv-the-systems",
+        },{id: "post-lion-part-i-full-linear-attention",
+      
+        title: "LION Part I - Full Linear Attention",
+      
+      description: "LION part",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/lion-part1-full-Linear-Attention/";
+        
+      },
+    },{id: "post-state-space-duality-mamba-2-part-iv-the-systems",
       
         title: "State Space Duality (Mamba-2) Part IV - The Systems",
       
