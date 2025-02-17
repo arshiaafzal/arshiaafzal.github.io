@@ -9,14 +9,14 @@ featured: false
 thumbnail: assets/img/2024-05-31-mamba-2/mamba-2-V3-transparent.png
 
 authors:
-  - name: Albert Gu
+  - name: Arshia Afzal
     url:
     affiliations:
-      name: CMU
-  - name: Tri Dao
+      name: EPFL
+  - name: Elias Abad Rocamora
     url:
     affiliations:
-      name: Princeton
+      name: EPFL
 
 bibliography: albert.bib
 
@@ -31,7 +31,7 @@ toc:
     # subsections:
     #   - name: Example Child Subsection 1
     #   - name: Example Child Subsection 2
-  - name: The SSD Model
+  - name: The LION Model
     subsections:
       - name: The Linear (SSM) Mode
       - name: The Quadratic (Attention) Mode
@@ -44,13 +44,13 @@ toc:
 
 ---
 
-{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/mamba-2-V3-transparent.png" %}
+{% include figure.liquid loading="eager" path="assets/img/lion.jpg" %}
 
 
 [[Paper](https://arxiv.org/abs/2405.21060)]
 [[Code](https://github.com/state-spaces/mamba)]
 
-**This series is cross-posted at [tridao.me](https://tridao.me/blog/2024/mamba2-part1-model/)**
+
 
 
 1. Part I - The Model
@@ -96,7 +96,7 @@ While this isn't a problem for inference, which is bottlenecked by somewhat diff
 These are the main questions that Mamba-2 -- in particular, its new state space model variant -- tries to address.
 
 
-## The SSD Model
+## The LION Model
 
 The main point of the Mamba-2 paper is what we call **structured state space duality** (SSD),
 which refers to several things:
