@@ -6,7 +6,7 @@ tags:
 giscus_comments: false
 date: 2024-05-31
 featured: false
-thumbnail: assets/img/2024-05-31-mamba-2/mamba-2-V3-transparent.png
+thumbnail: assets/img/lion.jpg
 
 authors:
   - name: Arshia Afzal
@@ -14,6 +14,26 @@ authors:
     affiliations:
       name: EPFL
   - name: Elias Abad Rocamora
+    url:
+    affiliations:
+      name: EPFL
+  - name: Leyla Naz Candogan
+    url:
+    affiliations:
+      name: EPFL
+  - name: Pol
+    url:
+    affiliations:
+      name: EPFL
+  - name: Francesco Tonin
+    url:
+    affiliations:
+      name: EPFL
+  - name: Yongtao Wu
+    url:
+    affiliations:
+      name: EPFL
+  - name : Volkan Cevher
     url:
     affiliations:
       name: EPFL
@@ -51,58 +71,35 @@ toc:
 [[Code](https://github.com/state-spaces/mamba)]
 
 
-
+** We sincerely thank Albert Gu and Tri Dao for their amazing blog posts which we really use here for our blog post! **
 
 1. Part I - The Model
 2. [Part II - The Theory]({% post_url 2024-05-31-mamba2-part2-theory %})
 3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba2-part3-algorithm %})
 4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
 
-Since the release of [Mamba](https://arxiv.org/abs/2312.00752) 6 months ago, we've been pleasantly surprised by the overwhelming [community response](https://github.com/AvivBick/awesome-ssm-ml).
-It's been incredibly gratifying to see the line of research on efficient sequence models we've been pursuing for years really resonate with the machine learning community and take off more than we could have anticipated.
-We've seen an enormous amount of exciting follow-up work, from direct applications
-(e.g. vision <d-cite key="zhu2024vision"></d-cite><d-cite key="ma2024u"></d-cite><d-cite key="liu2024vmamba"></d-cite>, genomics <d-cite key="schiff2024caduceus"></d-cite>, graphs <d-cite key="wang2024graph"></d-cite><d-cite key="behrouz2024graph"></d-cite>, and more)
-to understanding (e.g. on recall abilities <d-cite key="jelassi2024repeat"></d-cite>,
-in-context learning<d-cite key="akyurek2024context"></d-cite> <d-cite key="grazzi2024mamba"></d-cite> <d-cite key="park2024can"></d-cite>,
-and formal language expressivity <d-cite key="merrill2024illusion"></d-cite><d-cite key="sarrof2024expressive"></d-cite>),
-and an enormous number of [online](https://jackcook.com/2024/02/23/mamba.html) [blogs](https://srush.github.io/annotated-mamba/hard.html),
-[tutorials](https://www.youtube.com/watch?v=dVH1dRoMPBc),
-[and](https://www.youtube.com/watch?v=8Q_tqwpTpVU)
-[videos](https://www.youtube.com/watch?v=N6Piou4oYx8).
-We couldn't be more excited about the direction of this research!
+Recently, Transformers with Linear Attention and State Space Models (SSMs) have gained significant popularity for causal sequence modeling due to their ability to efficiently support both parallel training and RNN-like inference. These models have demonstrated impressive accuracy in causal tasks, particularly in causal language modeling. However, their evaluation in bi-directional sequence modeling, such as image classification and masked language modeling, has been relatively limited. In contrast, SSMs, particularly Mamba, have been extensively evaluated in vision tasks, including models like Vision Mamba and Hydra, which represent official extensions of Mamba for bi-directional sequence modeling.
 
+We’re curious to explore whether Linear Attention Transformers, including the simple Linear Transformer and RetNet, can perform effectively on bi-directional sequence modeling. Or more precicley what modifications are needed to adapt them for tasks like image classification and masked language modeling? 😊
 
-Yet despite its potential so far, we weren't completely satisfied with the first version of Mamba...
+Let’s break this down with three key questions:
 
-### Problem 1 (Understanding)
-From a conceptual standpoint, one of the reasons we found SSMs so fascinating is how they just feel _fundamental_. One way this is exemplified is how they have rich ties to many major paradigms of sequence models.
-As developed in our earlier works on structured SSMs <d-cite key="gu2021combining"></d-cite><d-cite key="gu2023thesis"></d-cite>, they seem to capture the essence of continuous, convolutional, and recurrent sequence models -- all wrapped up in a simple and elegant model.
+### Question 1 (Applicability)
 
-But of course, aside from these, there's another major sequence model paradigm: variants of the ubiquitous **attention** mechanism<d-cite key="bahdanau2015neural"></d-cite><d-cite key="vaswani2017attention"></d-cite>.
-SSMs always felt somewhat disjoint from attention, and we've tried for a while to understand their relationship better.
+Given that Linear Transformers can be formulated as RNNs and offer efficiency benefits during inference, alongside parallel training for causal sequence modeling, can they also exhibit similar benefits for bi-directional processing? If so, what would the parallel form look like, and what would be the equivalent bi-directional RNN form?
 
-> Question 1: **What are the conceptual connections between state space models and attention?** Can we combine them?
+### Question 2 (Performance)
 
-### Problem 2 (Efficiency)
-From a computational standpoint, 
-despite the work that went into making Mamba fast (in particular, its hardware-aware selective scan implementation) it's still much less hardware-efficient than mechanisms such as attention.
-The missing piece is that modern accelerators such as GPUs and TPUs are *highly* specialized for matrix multiplications.
-While this isn't a problem for inference, which is bottlenecked by somewhat different considerations, this can be a big deal during training time.
+Assuming we’ve addressed the first question, can simple Linear Transformers—such as Linear Trans (cite), RetNet (cite), or even basic linear attention with a selective decay factor—perform well on bi-directional tasks, such as image classification or masked language modeling?
 
-[//]: # For example, an end-to-end Mamba-1 model is XX times slower than an equivalent Transformer.
+### Question 3 (Training Throughput)
 
-> Question 2: **Can we speed up the training of Mamba models by recasting them as matrix multiplications?**
+While bi-directional SSMs like Hydra and Vision Mamba show impressive performance on bi-directional sequence modeling tasks, they tend to be difficult and slow to train compared to Transformers with full attention (e.g., ViT and BERT). If we’ve answered the first two questions affirmatively, can Linear Transformers match the accuracy of deep bi-directional SSMs while maintaining the training throughput of softmax Transformers and the inference efficiency of RNNs? Also, maybe we can achive this without need for CUDA kernel programming and simply using torch ;)
 
-These are the main questions that Mamba-2 -- in particular, its new state space model variant -- tries to address.
 
 
 ## The LION Model
 
-The main point of the Mamba-2 paper is what we call **structured state space duality** (SSD),
-which refers to several things:
-1. The **SSD model** refers to a specific standalone layer, like attention or an SSM, that can be incorporated into deep neural networks
-2. The **SSD framework** is a general framework for reasoning about this model (and many more theoretical connections)
-3. The **SSD algorithm** is an algorithm for computing SSD layers much more efficiently than previous SSMs
 
 The main SSD model or "state space dual model" itself really isn't so complicated!
 In this first part of a series of blog posts, we'll provide a self-contained description of the SSD layer (and Mamba-2) in isolation and how it compares to related models, particularly Mamba-1.
