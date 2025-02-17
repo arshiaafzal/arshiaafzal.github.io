@@ -1,12 +1,12 @@
 ---
 layout: distill
 title: LION Part I - Full Linear Attention
-description: 
+description: LION part
 tags:
 giscus_comments: false
 date: 2025-02-17
 featured: false
-thumbnail: assets/img/lion.webp
+thumbnail: assets/img/8.jpg
 authors:
   - name: Arshia Afzal
     url:
@@ -14,18 +14,10 @@ authors:
       name: EPFL
 
 
-
-toc:
-    # if a section has subsections, you can add them as follows:
-    # subsections:
-    #   - name: Example Child Subsection 1
-    #   - name: Example Child Subsection 2
-
-
 ---
 
 
-{% include figure.liquid loading="eager" path="assets/img/lion.webp" %}
+{% include figure.liquid loading="eager" path="assets/img/8.jpg" %}
 
 
 
