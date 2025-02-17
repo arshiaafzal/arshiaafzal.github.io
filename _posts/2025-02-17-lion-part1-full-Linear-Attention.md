@@ -1,6 +1,6 @@
 ---
 layout: distill
-title: LION 🦁 Part I - Full Linear Attention
+title: LION Part I - Full Linear Attention
 description: 
 tags:
 giscus_comments: false
@@ -20,16 +20,7 @@ toc:
     # subsections:
     #   - name: Example Child Subsection 1
     #   - name: Example Child Subsection 2
-  - name: The SSD Model
-    subsections:
-      - name: The Linear (SSM) Mode
-      - name: The Quadratic (Attention) Mode
-  - name: State Space Duality
-    subsections:
-      - name: SSD vs. State Space Models
-      - name: SSD vs. Attention
-  - name: Best of Both Worlds
-  - name: The Mamba-2 Architecture
+
 
 ---
 
