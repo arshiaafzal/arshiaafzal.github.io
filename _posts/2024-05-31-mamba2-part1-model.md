@@ -1,6 +1,6 @@
 ---
 layout: distill
-title: State Space Duality (Mamba-2) Part I - The Model
+title: LION 🦁 Part I - Full Linear Attention for Bi-directional Sequence Modleing
 description: 
 tags:
 giscus_comments: false
@@ -21,7 +21,7 @@ authors:
     url:
     affiliations:
       name: EPFL
-  - name: Pol
+  - name: Pol Puigdemont Plana
     url:
     affiliations:
       name: EPFL
@@ -40,21 +40,12 @@ authors:
 
 bibliography: albert.bib
 
-# Optionally, you can add a table of contents to your post.
-# NOTES:
-#   - make sure that TOC names match the actual section names
-#     for hyperlinks within the post to work correctly.
-#   - we may want to automate TOC generation in the future using
-#     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
+
 toc:
-    # if a section has subsections, you can add them as follows:
-    # subsections:
-    #   - name: Example Child Subsection 1
-    #   - name: Example Child Subsection 2
-  - name: The LION Model
+  - name: Full Linear Attention
     subsections:
-      - name: The Linear (SSM) Mode
-      - name: The Quadratic (Attention) Mode
+      - name: From Causal to FUll Linear Attention
+      - name: The RNN form of Causal Linear Transformers
   - name: State Space Duality
     subsections:
       - name: SSD vs. State Space Models
@@ -71,9 +62,9 @@ toc:
 [[Code](https://github.com/state-spaces/mamba)]
 
 
-** We sincerely thank Albert Gu and Tri Dao for their amazing blog posts which we really use here for our blog post! **
+**We sincerely appreciate Albert Gu and Tri Dao for their insightful blog posts, which have been invaluable in shaping our own!**
 
-1. Part I - The Model
+1. Part I - Full Linear Attention for Bi-directional Sequence Modleing
 2. [Part II - The Theory]({% post_url 2024-05-31-mamba2-part2-theory %})
 3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba2-part3-algorithm %})
 4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
@@ -98,13 +89,56 @@ While bi-directional SSMs like Hydra and Vision Mamba show impressive performanc
 
 
 
-## The LION Model
+## Full Linear Attention
 
+Let's start with Linear Attention:
 
-The main SSD model or "state space dual model" itself really isn't so complicated!
-In this first part of a series of blog posts, we'll provide a self-contained description of the SSD layer (and Mamba-2) in isolation and how it compares to related models, particularly Mamba-1.
+> #### Linear Attention Reccurence
+> 
+> $$ \mathbf{S}_i = \mathbf{S}_{i-1} + \mathbf{k}_i\mathbf{v}_i^\top, \quad  \mathbf{z}_i = \mathbf{z}_{i-1} + \mathbf{k}_i, \quad Scaled:  \mathbf{y}_i = \frac{\mathbf{q}_i^\top\mathbf{S}_i}{\mathbf{q}_i^\top\mathbf{z}_i} \quad, Non-Scaled:  \mathbf{y}_i = \mathbf{q}_i^\top\mathbf{S}_i$$
+>
 
-In the next parts of this series, we'll describe the general framework and theoretical connections, which aren't necessary to actually use Mamba-2.
+Above is the RNN form of the Linear Attention which have the parallel form of:
+
+> #### Linear Attention Parallel
+> 
+> $$ \mathbf{Y} = Scale \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M}^C \right) $$
+>
+
+and the mask $\mathbf{M}^C$ is a lower triangular binary matrix. Causal Linear Transformers are a class of models introduced following the development of Linear Transformers as shown above (cite). These models typically define a recurrence of the form:  
+
+> **Linear Transformers as category of Models**
+> $$
+\begin{aligned}
+& \mathbf{S}_i = {\boldsymbol{\Lambda_i}} \hspace{0.3mm}  \hspace{0.3mm} {\star} \mathbf{S}_{i-1} +  {\boldsymbol{\gamma_i}} \cdot \hspace{0.5mm} 
+    % \phi(
+    \mathbf{k}_i
+    % )
+    \mathbf{v}_i^{\top}, \quad
+    \mathbf{z}_i  = {\boldsymbol{\Lambda_i}} \star \hspace{0.5mm}  \hspace{0.5mm} \mathbf{z}_{i-1} +  {\boldsymbol{\gamma_i}} \cdot \hspace{0.5mm} \hspace{0.5mm} 
+    % \phi(
+    {\mathbf{k}_i}
+    % )
+    , \\
+    & Scale: \mathbf{y}_i= \frac{{
+    % \phi(
+    {\mathbf{q}_i}
+    % )
+    }^{\top} \mathbf{S}_i}{{
+    % \phi(
+    {\mathbf{q}_i}
+    % )
+    }^{\top} \mathbf{z_i}}, \quad
+    {Non-Scaled}: \mathbf{y}_i= {
+    % \phi(
+    {\mathbf{q}_i}
+    % )
+    }^{\top} \mathbf{S}_i,
+\end{aligned}
+$$
+
+Here, \(\boldsymbol{\Lambda_i}\) and \(\gamma_i\) are decay factors introduced after Linear Transformers to enhance their performance. (Spoiler alert: these have deep connections to SSMs 😉).
+
 
 ### The Linear (SSM) Mode
 
