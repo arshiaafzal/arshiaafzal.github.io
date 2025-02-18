@@ -49,7 +49,6 @@ toc:
       - name: LION-🔥 
       - name: LION-D
       - name: LION-S
-  - name: Extending more Linear Transformers into Bi-diretcional setting with 🦁 
 
 ---
 
@@ -122,7 +121,7 @@ Cool! Now, both the upper part (equivalent to the RNN in the forward direction) 
 \mathbf{z}^{F/B}_i &= \lambda_i \mathbf{z}^{F/B}_{i-1} + \mathbf{k}_i,  \\
 c^{F/B}_i & = \mathbf{q}_i^{\top} \mathbf{z}^{F/B}_{i} - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2},  \\
 \mathbf{y}^{F/B}_i &= \mathbf{q}_i^{\top} \mathbf{S}^{F/B}_i - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2} \mathbf{v}_i, \\ 
-output: \mathbf{y}_i = \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i}. \\ \end{aligned} $$
+out&put: \mathbf{y}_i = \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i}. \\ \end{aligned} $$
 {: .block-tip}
 
 
@@ -170,7 +169,7 @@ By fixing $$\lambda_i = \lambda$$, the mask $$\mathbf{M}$$ has the form:
 
 $$
 \begin{align}
-    \mathbf{M}_{ij} = \lambda^{|i-j|}, \quad \mathbf{D}_{ij} = |i-j|\log(\lambda), \quad \mathbf{M} = \exp(\mathbf{D}).
+    \mathbf{M}_{ij} = \lambda^{|i-j|}, \quad \mathbf{D}_{ij} = |i-j|\log(\lambda), \quad \mathbf{M} = \exp(\mathbf{D}). \notag
 \end{align}
 $$
 
@@ -188,7 +187,88 @@ def Decay_Mask(a , L):
 
 ### LION-S
 
-now we do LION_S
+Observing the structure of $\mathbf{M}$, its upper ($\mathbf{M}^B$) and lower ($\mathbf{M}^F$) triangular parts are rank-1 [semi-separable matrices](https://people.cs.kuleuven.be/~raf.vandebril/homepage/publications/papers_html/qrq_07/node16.html) (cite), allowing for efficient computation via matrix multiplications.  
+
+During training, the decay factors $\lambda_i$ are stacked into $\boldsymbol{\lambda}^F \in \mathbb{R}^L$, and the cumulative product  
+
+$$
+\mathbf{L}^F = cumprod(\boldsymbol{\lambda}^F) = \prod_{k=0}^{i} \boldsymbol{\lambda}^F_k
+$$
+
+is used to generate the lower triangular mask \(\mathbf{M}^F\). For the upper triangular mask $\mathbf{M}^B$, the input sequence is flipped, and the decay factors are computed as  
+
+$$
+\boldsymbol{\lambda}^B = \text{Flip}(\boldsymbol{\lambda}^F), \quad \mathbf{L}^B = cumprod(\boldsymbol{\lambda}^B).
+$$
+
+The masks are then constructed as  
+
+$$
+\mathbf{M}^F = \text{Tril} \left(\mathbf{L}^F \hspace{1mm} \frac{1}{{\mathbf{L}^F}^\top} \right), \quad \mathbf{M}^B = \text{Triu} \left(\mathbf{L}^B \hspace{1mm} \frac{1}{{\mathbf{L}^B}^\top} \right),
+$$ 
+
+where $\text{Tril}(\mathbf{X})$ and $\text{Triu}(\mathbf{X})$ extract the lower and upper triangular parts of the matrix $\mathbf{X}$, respectively.  
+
+The full mask is then obtained as  
+
+$$
+\mathbf{M} = \mathbf{M}^F + \mathbf{M}^B - \mathbf{I}.
+$$  
+
+To improve numerical stability, the selective scalar $\lambda_i$ is designed in exponential form  
+
+$$
+\lambda_i = e^{a_i}.
+$$ 
+
+This results in the cumulative sum:  
+
+$$
+\mathbf{D}^F_{ij} = 
+\begin{cases} 
+\sum_{k=i}^{j+1} a_k, & \text{if } i > j,  \\
+\sum_{k=i+1}^{j} a_k, & \text{if } i < j,  \\
+0, & \text{if } i = j,
+\end{cases}
+$$
+
+$$
+\mathbf{M^F} = \exp(\mathbf{D^F}),
+$$
+
+where $\exp(\cdot)$ is applied element-wise. The same process applies to $\mathbf{M}^B$ by flipping the input sequence order.  
+
+Here, $\mathbf{D}^{F/B} = cumsum(\mathbf{a}^{F/B})$, where $\mathbf{a} \in \mathbb{R}^L$ contains the selective exponents $a_i$.  
+
+Ensuring stability is crucial, as $\mathbf{L}^{F/B}$ can overflow or underflow when forming the full mask without chunking. To mitigate this, we define  
+
+$$
+a_i = \log(\sigma(\mathbf{W}_{a}^\top\mathbf{x}_i + b)),
+$$
+
+where $\sigma(.)$ is the sigmoid function. This approach ensures numerical stability by bounding $a_i$ within the interval $[0,1]$. 
+
+**Note:** It is crucial that the activation function is a **sigmoid**, as other activations do not produce stable masks and can lead to NaN values in the loss function. To maintain stability, **chunking** is required during training. This issue has been specifically highlighted in the **Mamba2** blog post.  
+We provide a detailed explanation in the **Results** section of this blog post, where we discuss why using **full attention** is beneficial for achieving **high throughput** during training.
+
+The code for building the mask of LION-S is so simple and flexible even in Pytorch:
+
+```python
+def create_causal_mask_lions(tensor):
+    cumsum = torch.cumsum(tensor, dim=-1 )
+    cumprod = torch.exp(cumsum)
+    A = torch.matmul(cumprod.unsqueeze(-1) , 1/ ( cumprod.unsqueeze(-1).transpose(-1,-2) + 1e-7 )  )
+    return torch.tril(A)
+```
+
+```python
+def Selective_Mask(vec):
+    vec_shape = vec.shape
+    A_for = create_matrix_from_tensor(vec.unsqueeze(-1).transpose(-1,-2)).squeeze()
+    A_back = create_matrix_from_tensor(torch.cat((vec,torch.ones((vec_shape[0],vec_shape[1],1),device=vec.device)),dim=-1)[:,:,1:].unsqueeze(-1).transpose(-1,-2)).transpose(-1,-2).squeeze()
+    return A_for + A_back - torch.eye(A_for.shape[-1]).to(A_for.device)
+```
+
 
 ### Matrix Transformations
 The idea is that many sequence models, i.e. *sequence transformations* $X \in \mathbb{R}^\mathtt{(T,P)} \mapsto Y \in \mathbb{R}^\mathtt{(T,P)}$,
