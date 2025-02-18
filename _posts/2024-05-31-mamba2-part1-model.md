@@ -94,7 +94,8 @@ Let's start with Linear Attention:
 
 $$
 \begin{aligned} 
-S_i & = \Lambda_i \star S_{i-1} + \gamma_i k_i v^\top_i, \quad z_i = \Lambda_i \star z_{i-1} + \gamma_i k_i, \\ Scaled: y_i &= \frac{q^\top_i S_i}{q^\top_i z_i}, \quad Non-Scaled: y_i  = q^\top_i S_i \\ 
+S_i & = \Lambda_i \star S_{i-1} + \gamma_i k_i v^\top_i, \quad z_i = \Lambda_i \star z_{i-1} + \gamma_i k_i, \\
+Scaled: y_i &= \frac{q^\top_i S_i}{q^\top_i z_i}, \quad Non-Scaled: y_i  = q^\top_i S_i \\ 
 \end{aligned}
 $$
 
