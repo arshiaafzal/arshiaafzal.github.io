@@ -63,9 +63,9 @@ ninja.data = [{
           window.location.href = "/blog/2024/mamba2-part2-theory/";
         
       },
-    },{id: "post-lion-part-i-full-linear-attention-for-bi-directional-sequence-modleing",
+    },{id: "post-lion-part-i-full-linear-attention",
       
-        title: "LION 🦁 Part I - Full Linear Attention for Bi-directional Sequence Modleing",
+        title: "LION 🦁 Part I - Full Linear Attention",
       
       description: "",
       section: "Posts",
