@@ -93,7 +93,7 @@ While bi-directional SSMs like Hydra and Vision Mamba show impressive performanc
 Let's start with Linear Attention:
 
 > #### Linear Attention Reccurence
-> $${S}_{i}   $$
+> $${S}_{i}  = {\Lambda}_{i} \star {S}_{i-1} + {\gamma}_{i} {k}_{i} {{v}_{i}}^\top,  $$
 {: .block-tip }
 
 Above is the RNN form of the Linear Attention which have the parallel form of:
