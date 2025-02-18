@@ -43,16 +43,12 @@ bibliography: albert.bib
 
 toc:
   - name: Finding Bidirectional RNN Equal to Full Linear Attention
-  - name: Some Important details about of our RNN
+  - name: Some Important details of our RNN
   - name: LION's Different Masks
     subsections:
       - name: LION-🔥 
       - name: LION-D
       - name: LION-S
-  - name: Even More on Masks
-    subsections:
-    - name: Stability of LION-D
-    - name: Stability of LION-S
   - name: Extending more Linear Transformers into Bi-diretcional setting with 🦁 
 
 ---
@@ -95,7 +91,7 @@ and by writting the scaling part as:
 
 $$
 \begin{aligned}
-   \mathbf{Y} = \big(\text{scale}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M})\big) \mathbf{V}  \notag \\
+   \mathbf{Y} = \big(\text{scale}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M})\big) \mathbf{V}  
     = (\mathbf{C}^{-1}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M}))\mathbf{V}, \hspace{1mm}
    \mathbf{C}_i = \mathbf{q}^{\top}_i\sum\limits_{j=1}^{L} \mathbf{M}_{ij}\mathbf{k}_j. 
 \end{aligned} 
@@ -122,17 +118,17 @@ Cool! Now, both the upper part (equivalent to the RNN in the forward direction) 
 
 > **LION: Reccurence form**
 > 
-> $$ \bagin{aligned} \mathbf{S}_i^{F/B} &= \lambda_i \mathbf{S}^{F/B}_{i-1} + \mathbf{k}_i \mathbf{v}_i^{\top}, \\ 
+> $$ \begin{aligned} \mathbf{S}_i^{F/B} &= \lambda_i \mathbf{S}^{F/B}_{i-1} + \mathbf{k}_i \mathbf{v}_i^{\top}, \\ 
 \mathbf{z}^{F/B}_i &= \lambda_i \mathbf{z}^{F/B}_{i-1} + \mathbf{k}_i,  \\
 c^{F/B}_i & = \mathbf{q}_i^{\top} \mathbf{z}^{F/B}_{i} - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2},  \\
 \mathbf{y}^{F/B}_i &= \mathbf{q}_i^{\top} \mathbf{S}^{F/B}_i - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2} \mathbf{v}_i, \\ 
-output: \mathbf{y}_i &= \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i}. \\ \end{aligned} $$
+output: \mathbf{y}_i = \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i}. \\ \end{aligned} $$
 {: .block-tip}
 
 
 The RNN derived above is equivalent to the full linear attention described in the previous section of this blog post.
 
-## Some Important details about of our RNN
+## Some Important details of our RNN
 
 > Only the states $$c^{F/B}_i$$ and $$\mathbf{y}^{F/B}_i$$ are stored per token, resulting in $$\mathcal{O}(Ld)$$ memory usage. In contrast, naively storing full matrix-valued hidden states would require $$\mathcal{O}(Ld^2)$$, which becomes infeasible for large models.
 
@@ -150,13 +146,49 @@ All in one we can visulaize our framework nicely like:
 Now that we have created our framework let's see what are the choices of the decay factor $$\lambda_i$$ and how they resemble the famous linear Transformer models. Let's set:
 
 > $$\lambda_i=1$$ this results in mighty simple Linear Transformer (cite) which we refrer to as <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>
+
 > $$\lambda_i=\lambda$$ this results in mighty RetNet (cite) which we refrer to as <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
+
 > $$\lambda_i=\sigma(\mathbf{W}\mathbf{x}_i)$$ being input dependent, and bi-directional Linear Transformer inspired by selectivity of Mamba2 (cite) which we refrer to as <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
 
+We evaluate all above models, extended to bidirectional sequence modeling using LION, on several bidirectional tasks. Also as all Linear Transformers use feature mapping $$\phi(.)$$ to queries and keys we also applied SILU shifted $$\phi(x) = \frac{SILU(x)+0.5}{||SILU(x)+0.5||}$$ non-linear activation function.
 
-## SSD Framework 1: Structured Matrix Transformations
+Let's delve deep in each of these models in LION framework.
 
-The first framing of the duality will be from an SSM-centric perspective, where we'll prove the duality through the framework of **matrix sequence transformations** or "matrix mixers".
+### LION-🔥 
+
+LION-🔥 is an extension of the very first Linear Transformer (cite). Without any masking, the bidirectional parallel form can be simply written as:
+
+$$\mathbf{Y} = Scale(\mathbf{Q} \mathbf{K}^\top )\mathbf{V} $$
+
+and the RNN form of the above parallel full linear attention is simply the RNN form mentioned above in this section in green box just by simply not using any mask.
+
+
+### LION-D
+
+By fixing $$\lambda_i = \lambda$$, the mask $$\mathbf{M}$$ has the form:
+
+$$
+\begin{align}
+    \mathbf{M}_{ij} = \lambda^{|i-j|}, \quad \mathbf{D}_{ij} = |i-j|\log(\lambda), \quad \mathbf{M} = \exp(\mathbf{D}).
+\end{align}
+$$
+
+$$\mathbf{M}$$ above is a Toeplitz mask cite(tnn) and therefore, creating the decay mask can be made even faster using simple PyTorch commands. To ensure numerical stability, we bound the parameter $$\lambda$$ using the **sigmoid function**, setting $$\lambda = \sigma(a)$$. Without this constraint, the scalar $$\lambda^L$$ could become excessively large, leading to instability. Additionally, as we all know, summation is generally more numerically stable than multiplication. Therefore, in some cases, instead of multiplying a matrix repeatedly, we can leverage summation for improved stability. However, in practice, for **RetNet-style masks** with a fixed decay, multiplication remains stable. This allows for a more straightforward implementation when generating the mask in code:
+
+```python
+def Decay_Mask(a , L):
+    idx = torch.arange(L,device=a_i.device)
+    I, J = torch.meshgrid(idx, idx, indexing='ij')
+    E = (torch.abs((I-J)).float().view(1,1,L,L))
+    M = torch.sigmoid(a).view(1,-1,1,1)**E
+    return M
+```
+
+
+### LION-S
+
+now we do LION_S
 
 ### Matrix Transformations
 The idea is that many sequence models, i.e. *sequence transformations* $X \in \mathbb{R}^\mathtt{(T,P)} \mapsto Y \in \mathbb{R}^\mathtt{(T,P)}$,
