@@ -58,7 +58,7 @@ toc:
 
 1. Part I - Full Linear Attention
 2. [Part II - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
-3. [Part III - LION Chunk: CHunkwise Parallel of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
+3. [Part III - LION Chunk: Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
 4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
 
 Recently, Transformers with Linear Attention and State Space Models (SSMs) have gained significant popularity for causal sequence modeling due to their ability to efficiently support both parallel training and RNN-like inference. These models have demonstrated impressive accuracy in causal tasks, particularly in causal language modeling. However, their evaluation in bi-directional sequence modeling, such as image classification and masked language modeling, has been relatively limited. In contrast, SSMs, particularly Mamba, have been recently evaluated in vision tasks, including models like Vision Mamba and Hydra, which represent official extensions of Mamba for bi-directional sequence modeling.
