@@ -168,11 +168,11 @@ $$
      {\mathbf{q}_L^{\top}\mathbf{k}_L}\\
   \end{array} \right)}_{\hspace{1mm}{\mathbf{A}={\mathbf{Q}\mathbf{K}^{\top}} }} } \odot
    { \underbrace{ \left(  \renewcommand*{\arraystretch} \begin{array}{ccccc}
-    {\mathbf{1}}  & {{\lambda}_2} & {{\lambda}_2 {\lambda}_3}  & {\cdots} & {{\lambda}_2\cdots{\lambda}_L} \\
-    {{\lambda}_1} &  {\mathbf{1}} & {{\lambda}_3} & {\cdots} & {{\lambda}_3 \cdots {\lambda}_L} \\
-    {{\lambda}_1 {\lambda}_2} & {{\lambda}_2} & {\mathbf{1}} & {\cdots} & {{\lambda}_4 \cdots {\lambda}_L} \\
+    {\mathbf{1}}  & {\lambda_2} & {\lambda_2 \lambda_3}  & {\cdots} & {\lambda_2\cdots\lambda_L} \\
+    {\lambda_1} &  {\mathbf{1}} & {\lambda_3} & {\cdots} & {\lambda_3 \cdots \lambda_L} \\
+    {\lambda_1 \lambda_2} & {\lambda_2} & {\mathbf{1}} & {\cdots} & {\lambda_4 \cdots \lambda_L} \\
     \vdots & \vdots & \vdots & {\ddots} &  \vdots \\
-    {{{\lambda}_{L-1}\cdots {\lambda}_1}} & {{{\lambda}_{L-1}\cdots {\lambda}_2}} & {{{\lambda}_{L-1}\cdots {\lambda}_3}} & {\cdots} &   {\mathbf{1}} \\   
+    {{\lambda_{L-1}\cdots \lambda_1}} & {{\lambda_{L-1}\cdots \lambda_2}} & {{\lambda_{L-1}\cdots \lambda_3}} & {\cdots} &   {\mathbf{1}} \\   
 \end{array}  \right)  }_{\hspace{1mm}{\mathbf{M} }} }  \right) \left( \renewcommand*{\arraystretch} \begin{array}{c}
     \mathbf{v}_1^\top \\  
     \mathbf{v}_2^\top \\
