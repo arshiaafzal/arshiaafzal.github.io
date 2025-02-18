@@ -42,6 +42,7 @@ authors:
 bibliography: albert.bib
 
 toc:
+
   - name: LION: Finding Bidirectional RNN Equal to Full Linear Attention
   - name: Advantagous of our RNN
     subsections:
@@ -69,7 +70,6 @@ toc:
 In [Part I]({% post_url 2024-05-31-mamba2-part1-model %}) of this series, we defined full linear attention with masking and scaling.  
 Similar to all linear transformers designed for causal sequence modeling, we aim to derive an RNN form for efficiency during inference.  
 In this section, we establish and theoretically demonstrate the equivalent bidirectional RNN for the Linear Transformer.
-
 
 
 
