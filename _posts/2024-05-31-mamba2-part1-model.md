@@ -42,10 +42,10 @@ bibliography: albert.bib
 
 
 toc:
-  - name: Full Linear Attention
+  - name: From Causal to FUll Linear Attention
     subsections:
-      - name: From Causal to FUll Linear Attention
-      - name: The RNN form of Causal Linear Transformers
+      - name: Creating Scaled and Masked Full Attention
+      - name: Hi
   - name: State Space Duality
     subsections:
       - name: SSD vs. State Space Models
@@ -69,9 +69,9 @@ toc:
 3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba2-part3-algorithm %})
 4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
 
-Recently, Transformers with Linear Attention and State Space Models (SSMs) have gained significant popularity for causal sequence modeling due to their ability to efficiently support both parallel training and RNN-like inference. These models have demonstrated impressive accuracy in causal tasks, particularly in causal language modeling. However, their evaluation in bi-directional sequence modeling, such as image classification and masked language modeling, has been relatively limited. In contrast, SSMs, particularly Mamba, have been extensively evaluated in vision tasks, including models like Vision Mamba and Hydra, which represent official extensions of Mamba for bi-directional sequence modeling.
+Recently, Transformers with Linear Attention and State Space Models (SSMs) have gained significant popularity for causal sequence modeling due to their ability to efficiently support both parallel training and RNN-like inference. These models have demonstrated impressive accuracy in causal tasks, particularly in causal language modeling. However, their evaluation in bi-directional sequence modeling, such as image classification and masked language modeling, has been relatively limited. In contrast, SSMs, particularly Mamba, have been recently evaluated in vision tasks, including models like Vision Mamba and Hydra, which represent official extensions of Mamba for bi-directional sequence modeling.
 
-We’re curious to explore whether Linear Attention Transformers, including the simple Linear Transformer and RetNet, can perform effectively on bi-directional sequence modeling. Or more precicley what modifications are needed to adapt them for tasks like image classification and masked language modeling? 😊
+We’re curious to explore whether Linear Attention Transformers, including the simple Linear Transformer and RetNet or simple selctive varient, can perform effectively on bi-directional sequence modeling. Or more precicley what modifications are needed to adapt them for tasks like image classification and masked language modeling? 😊
 
 Let’s break this down with three key questions:
 
@@ -85,21 +85,19 @@ Assuming we’ve addressed the first question, can simple Linear Transformers—
 
 ### Question 3 (Training Throughput)
 
-While bi-directional SSMs like Hydra and Vision Mamba show impressive performance on bi-directional sequence modeling tasks, they tend to be difficult and slow to train compared to Transformers with full attention (e.g., ViT and BERT). If we’ve answered the first two questions affirmatively, can Linear Transformers match the accuracy of deep bi-directional SSMs while maintaining the training throughput of softmax Transformers and the inference efficiency of RNNs? Also, maybe we can achive this without need for CUDA kernel programming and simply using torch ;)
+While bi-directional SSMs like Hydra and Vision Mamba show impressive performance on bi-directional sequence modeling tasks, they tend to be difficult and slow to train compared to Transformers with full attention (e.g., ViT and BERT). If we’ve answered the first two questions affirmatively, can Linear Transformers match the accuracy of deep bi-directional SSMs while maintaining the training throughput of softmax Transformers and the inference efficiency of RNNs/SSMs? Also, maybe we can achive this without need for CUDA kernel programming and simply using torch ;)
 
 
-## Full Linear Attention
+## From Causal to Full Linear Attention
 
 Let's start with Linear Attention Reccurence:
 
 $$
 \begin{aligned} 
-S_i = \Lambda_i \star S_{i-1} + \gamma_i k_i v^\top_i, \quad z_i = \Lambda_i \star z_{i-1} + \gamma_i k_i, \\
+S_i = S_{i-1} + k_i v^\top_i, \quad z_i =  z_{i-1} + k_i, \\
 Scaled: y_i = \frac{q^\top_i S_i}{q^\top_i z_i}, \quad Non-Scaled: y_i  = q^\top_i S_i \\ 
 \end{aligned}
 $$
-
-
 
 Above is the RNN form of the Linear Attention which have the parallel form of:
 
@@ -108,13 +106,40 @@ $$\mathbf{Y} = Scale \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M}^C \right
 
 and the mask $\mathbf{M}^C$ is a lower triangular binary matrix. Causal Linear Transformers are a class of models introduced following the development of Linear Transformers as shown above (cite). These models typically define a recurrence of the form:  
 
+$$
+\begin{aligned} 
+S_i = \boldsymbol{\Lambda_i} \star S_{i-1} + \gamma_i k_i v^\top_i, \quad z_i = \boldsymbol{\Lambda_i} \star z_{i-1} + \gamma_i k_i, \\
+Scaled: y_i = \frac{q^\top_i S_i}{q^\top_i z_i}, \quad Non-Scaled: y_i  = q^\top_i S_i \\ 
+\end{aligned}
+$$
 
-Here, $\boldsymbol{\Lambda_i}$ and $\gamma_i$ are decay factors introduced after Linear Transformers to enhance their performance. (Spoiler alert: these have deep connections to SSMs 😉).
+Here, \(\boldsymbol{\Lambda_i}\) and \(\gamma_i\) are decay factors introduced after Linear Transformers to enhance their performance. (Spoiler alert ⚠️: this family of Linear Transformers has strong connections to SSMs, as explored in works like (DeltaNet) and (Mamba-2) 😉). For simplicity, we consider \(\boldsymbol{\Lambda_i} = \lambda_i\) as a scalar in this study. As shown, this choice is as effective as the full matrix form. We now present the general scaled linear attention in the following form:
 
+$$
+\begin{aligned} 
+S_i &= \lambda_i  S_{i-1} + \gamma_i k_i v^\top_i,\\
+z_i &= \lambda_i  z_{i-1} + \gamma_i k_i, \\
+y_i &= \frac{q^\top_i S_i}{q^\top_i z_i} \\ 
+\end{aligned}
+$$
 
-### The Linear (SSM) Mode
+The first goal is to extend the causal linear attention parallel form  
 
-SSD starts from the same set of equations as Mamba:
+$$
+\mathbf{Y} = \text{Scale} \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M}^C \right)
+$$
+
+to a fully *scaled* and *masked* attention mechanism for linear attention.
+
+### Creating Scaled and Masked Full Attention
+
+The first step is quite simple the masked and scaled attention can easily have the form as its name:
+
+> **Linear Transformers as category of Models**
+> $$ \mathbf{Y} = \text{Scale} \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M} \right)
+$$
+{: .block-tip}
+
 
 $$
 \begin{aligned}
