@@ -93,7 +93,7 @@ While bi-directional SSMs like Hydra and Vision Mamba show impressive performanc
 
 Let's start with Linear Attention:
 
-> #### Linear Attention Reccurence
+> #### Linear Attention
 > 
 > $$ \mathbf{S}_i = \mathbf{S}_{i-1} + \mathbf{k}_i\mathbf{v}_i^\top, \quad  \mathbf{z}_i = \mathbf{z}_{i-1} + \mathbf{k}_i, \quad Scaled:  \mathbf{y}_i = \frac{\mathbf{q}_i^\top\mathbf{S}_i}{\mathbf{q}_i^\top\mathbf{z}_i} \quad, Non-Scaled:  \mathbf{y}_i = \mathbf{q}_i^\top\mathbf{S}_i$$
 >
