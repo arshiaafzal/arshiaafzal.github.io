@@ -42,7 +42,7 @@ authors:
 bibliography: albert.bib
 
 toc:
-  - name: LION Theory Finding Bi-directional RNN
+  - name: LION: Finding Bi-directional RNN Equal to Full Linear Attention
   - name: Advantagous of our RNN
     subsections:
       - name: Memory Allocation of LION in RNN form
@@ -73,7 +73,7 @@ In this section, we establish and theoretically demonstrate the equivalent bidir
 
 
 
-#### LION Theory Finding Bi-directional RNN
+## LION: Finding Bi-directional RNN Equal to Full Linear Attention
 
 Let's start by separating the upper, lower, and diagonal elements of the attention matrix and the mask. Since the idea of a bidirectional RNN is to process the sequence in both the forward order (from first to last) and the reverse order (from last to first), these naturally correspond to the upper and lower parts of the attention matrix and mask.
 
@@ -99,31 +99,43 @@ and by writting the scaling part as:
 
 $$
 \begin{aligned}
-   \mathbf{Y} &= \big(\textsc{scale}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M})\big) \mathbf{V}  \notag \\
-   & = (\mathbf{C}^{-1}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M}))\mathbf{V}, \hspace{1mm}
+   \mathbf{Y} &= \big(\text{scale}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M})\big) \mathbf{V}  \notag \\
+    = (\mathbf{C}^{-1}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M}))\mathbf{V}, \hspace{1mm}
    \mathbf{C}_i = \mathbf{q}^{\top}_i\sum\limits_{j=1}^{L} \mathbf{M}_{ij}\mathbf{k}_j. 
 \end{aligned} 
 $$
 
 Let's decompose the $$\mathbf{C}_i$$ of scaling:
 
-
-## Recap: The SSD Model
-
-[Part I]({% post_url 2024-05-31-mamba2-part1-model %}) of this series introduced the SSD layer, which is
-defined as a selective SSM
-
 $$
 \begin{aligned}
-h_{t} &= A_t h_{t-1} + B_t x_t \\
-y_t &= C_t^{\top} y_t
-\end{aligned}
+\mathbf{C}_{i}=
+  \underbrace{\mathbf{q}^{\top}_i\sum\nolimits_{j=1}^{i} \mathbf{M}_{ij}\mathbf{k}_j - \frac{1}{2} \mathbf{q}^{\top}_i\mathbf{k}_i}_{\mathbf{C}^F_i} + \underbrace{\mathbf{q}^{\top}_i\sum\nolimits_{j=i}^{L} \mathbf{M}_{ij}\mathbf{k}_j - \frac{1}{2} \mathbf{q}^{\top}_i\mathbf{k}_i}_{\mathbf{C}^B_i}
+\end{aligned} 
 $$
 
-\begin{equation}
-\label{eq:ssm}
-(\text{Selective state space model (SSM)})
-\end{equation}
+Interestingly, many terms naturally cancel out with each other.
+
+{% include figure.liquid loading="eager" path="assets/img/proofC.png"%}
+
+This results in only the forward and backward directions of the RNN remaining. As observed, the forward path aligns with causal linear attention with masking. Now, we need to demonstrate that the backward path follows the same RNN structure in the reverse direction. We can simply flip the upper triangular matrices using the [exchange matrix](https://en.wikipedia.org/wiki/Exchange_matrix) $$\mathbf{J}_L$$ and the function $$F(X) = \mathbf{J}_L X \mathbf{J}_L$$:
+
+{% include figure.liquid loading="eager" path="assets/img/flip.png"%}
+
+Cool! Now, both the upper part (equivalent to the RNN in the forward direction) and the lower part (equivalent to the RNN in the backward direction) can be formulated as RNNs. This is exactly what we need to construct our bidirectional RNN equivalent to full linear attention.
+
+> **LION: Reccurence form**
+> 
+> $$ \mathbf{S}_i^{F/B} &= \lambda_i \mathbf{S}^{F/B}_{i-1} + \mathbf{k}_i \mathbf{v}_i^{\top}, \\ 
+\mathbf{z}^{F/B}_i &= \lambda_i \mathbf{z}^{F/B}_{i-1} + \mathbf{k}_i,  \\
+c^{F/B}_i = \mathbf{q}_i^{\top} \mathbf{z}^{F/B}_{i} - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2},  \\
+\mathbf{y}^{F/B}_i &= \mathbf{q}_i^{\top} \mathbf{S}^{F/B}_i - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2} \mathbf{v}_i, \\ 
+output: \mathbf{y}_i &= \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i}. \\ $$
+{: .block-tip}
+
+The RNN derived above is equivalent to the full linear attention described in the previous section of this blog post.
+
+## Advantagous of our RNN
 
 with scalar-identity structure on $A$.
 
