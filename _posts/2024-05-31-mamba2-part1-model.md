@@ -86,8 +86,8 @@ Let's start with Linear Attention Reccurence:
 
 $$
 \begin{aligned} 
-S_i = S_{i-1} + k_i v^\top_i, \quad z_i =  z_{i-1} + k_i, \\
-Scaled: y_i = \frac{q^\top_i S_i}{q^\top_i z_i}, \quad Non-Scaled: y_i  = q^\top_i S_i \\ 
+& S_i = S_{i-1} + k_i v^\top_i, \quad z_i =  z_{i-1} + k_i, \\
+& Scaled: y_i = \frac{q^\top_i S_i}{q^\top_i z_i}, \quad Non-Scaled: y_i  = q^\top_i S_i \\ 
 \end{aligned}
 $$
 
@@ -149,9 +149,8 @@ $$
 To recap, the full output of full LInear Attention can be presented as:
 
 <span style="font-size: 0.8em;">
-  
 $$
-\mathbf{Y} = 
+\mathbf{Y} = Scale
     \left(
    \underbrace{\left( \renewcommand*{\arraystretch} \begin{array}{ccccc}
        \mathbf{q}_1^{\top}\mathbf{k}_1  &  \mathbf{q}_1^{\top}\mathbf{k}_2 & \cdots &  \mathbf{q}_1^{\top}\mathbf{k}_L \\
@@ -174,7 +173,6 @@ $$
     \mathbf{v}_L^\top \\   
   \end{array} \right)
 $$
-  
 </span>
 
 The above represents the full **Li**near Attenti**on** in parallel form, which also inspired the name of our framework, **LION** 🦁. Now that we have established full linear attention for bidirectional sequence modeling, it's time to derive its equivalent bidirectional RNN.
