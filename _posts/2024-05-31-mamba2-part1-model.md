@@ -88,13 +88,12 @@ Assuming we’ve addressed the first question, can simple Linear Transformers—
 While bi-directional SSMs like Hydra and Vision Mamba show impressive performance on bi-directional sequence modeling tasks, they tend to be difficult and slow to train compared to Transformers with full attention (e.g., ViT and BERT). If we’ve answered the first two questions affirmatively, can Linear Transformers match the accuracy of deep bi-directional SSMs while maintaining the training throughput of softmax Transformers and the inference efficiency of RNNs? Also, maybe we can achive this without need for CUDA kernel programming and simply using torch ;)
 
 
-
 ## Full Linear Attention
 
 Let's start with Linear Attention:
 
 > #### Linear Attention Reccurence
-> $$S_i$$
+> $${S}_i = {S}_{i-1}$$
 {: .block-tip }
 
 Above is the RNN form of the Linear Attention which have the parallel form of:
