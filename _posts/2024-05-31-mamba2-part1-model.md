@@ -178,6 +178,17 @@ $$
 
 The above represents the full **Li**near Attenti**on** in parallel form, which also inspired the name of our framework, **LION** 🦁. Now that we have established full linear attention for bidirectional sequence modeling, it's time to derive its equivalent bidirectional RNN.
 
+
+### **An Important Question:**
+
+> **Question:** Is it worth using full attention with quadratic memory for bidirectional sequence modeling?
+
+The answer is **yes**! For real-world bidirectional tasks such as **Vision** (\(L = 196\)) and **Masked Language Modeling (MLM)** (\(L = 128\)), sequence lengths are relatively short. This means that using **full attention** actually increases the model's **throughput** without a significant trade-off in complexity.  
+
+Unlike **causal language modeling**, where sequences can become extremely long, bidirectional tasks in real datasets do not suffer from the same scalability challenges.  
+
+(That being said, we believe that architectures designed for causal tasks do not **directly** transfer to bidirectional tasks without proper modifications. ¯\\_(ツ)_/¯ )
+
 ## Next Up  
 
 - We introduce our framework, **LION**, which derives an equivalent bidirectional RNN for full linear attention.  
