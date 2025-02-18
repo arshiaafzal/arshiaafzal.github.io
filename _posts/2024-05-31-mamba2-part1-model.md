@@ -93,10 +93,6 @@ While bi-directional SSMs like Hydra and Vision Mamba show impressive performanc
 
 Let's start with Linear Attention:
 
-> #### Linear Attention
-> 
-> $$ \mathbf{S}_i = \mathbf{S}_{i-1} + \mathbf{k}_i\mathbf{v}_i^\top, \quad  \mathbf{z}_i = \mathbf{z}_{i-1} + \mathbf{k}_i, \quad Scaled:  \mathbf{y}_i = \frac{\mathbf{q}_i^\top\mathbf{S}_i}{\mathbf{q}_i^\top\mathbf{z}_i} \quad, Non-Scaled:  \mathbf{y}_i = \mathbf{q}_i^\top\mathbf{S}_i$$
->
 
 Above is the RNN form of the Linear Attention which have the parallel form of:
 
@@ -107,37 +103,8 @@ Above is the RNN form of the Linear Attention which have the parallel form of:
 
 and the mask $\mathbf{M}^C$ is a lower triangular binary matrix. Causal Linear Transformers are a class of models introduced following the development of Linear Transformers as shown above (cite). These models typically define a recurrence of the form:  
 
-> **Linear Transformers as category of Models**
-> $$
-\begin{aligned}
-& \mathbf{S}_i = {\boldsymbol{\Lambda_i}} \hspace{0.3mm}  \hspace{0.3mm} {\star} \mathbf{S}_{i-1} +  {\boldsymbol{\gamma_i}} \cdot \hspace{0.5mm} 
-    % \phi(
-    \mathbf{k}_i
-    % )
-    \mathbf{v}_i^{\top}, \quad
-    \mathbf{z}_i  = {\boldsymbol{\Lambda_i}} \star \hspace{0.5mm}  \hspace{0.5mm} \mathbf{z}_{i-1} +  {\boldsymbol{\gamma_i}} \cdot \hspace{0.5mm} \hspace{0.5mm} 
-    % \phi(
-    {\mathbf{k}_i}
-    % )
-    , \\
-    & Scale: \mathbf{y}_i= \frac{{
-    % \phi(
-    {\mathbf{q}_i}
-    % )
-    }^{\top} \mathbf{S}_i}{{
-    % \phi(
-    {\mathbf{q}_i}
-    % )
-    }^{\top} \mathbf{z_i}}, \quad
-    {Non-Scaled}: \mathbf{y}_i= {
-    % \phi(
-    {\mathbf{q}_i}
-    % )
-    }^{\top} \mathbf{S}_i,
-\end{aligned}
-$$
 
-Here, \(\boldsymbol{\Lambda_i}\) and \(\gamma_i\) are decay factors introduced after Linear Transformers to enhance their performance. (Spoiler alert: these have deep connections to SSMs 😉).
+Here, $\boldsymbol{\Lambda_i}$ and $\gamma_i$ are decay factors introduced after Linear Transformers to enhance their performance. (Spoiler alert: these have deep connections to SSMs 😉).
 
 
 ### The Linear (SSM) Mode
