@@ -43,10 +43,7 @@ bibliography: albert.bib
 
 toc:
   - name: Finding Bidirectional RNN Equal to Full Linear Attention
-  - name: Advantagous of our RNN
-    subsections:
-      - name: Memory Allocation of LION in RNN form
-      - name: Complexity of LION in RNN form
+  - name: Some Important details about of our RNN
   - name: LION's Different Masks
     subsections:
       - name: LION-🔥 
@@ -98,7 +95,7 @@ and by writting the scaling part as:
 
 $$
 \begin{aligned}
-   \mathbf{Y} &= \big(\text{scale}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M})\big) \mathbf{V}  \notag \\
+   \mathbf{Y} = \big(\text{scale}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M})\big) \mathbf{V}  \notag \\
     = (\mathbf{C}^{-1}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M}))\mathbf{V}, \hspace{1mm}
    \mathbf{C}_i = \mathbf{q}^{\top}_i\sum\limits_{j=1}^{L} \mathbf{M}_{ij}\mathbf{k}_j. 
 \end{aligned} 
@@ -127,7 +124,7 @@ Cool! Now, both the upper part (equivalent to the RNN in the forward direction) 
 > 
 > $$ \bagin{aligned} \mathbf{S}_i^{F/B} &= \lambda_i \mathbf{S}^{F/B}_{i-1} + \mathbf{k}_i \mathbf{v}_i^{\top}, \\ 
 \mathbf{z}^{F/B}_i &= \lambda_i \mathbf{z}^{F/B}_{i-1} + \mathbf{k}_i,  \\
-c^{F/B}_i = \mathbf{q}_i^{\top} \mathbf{z}^{F/B}_{i} - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2},  \\
+c^{F/B}_i & = \mathbf{q}_i^{\top} \mathbf{z}^{F/B}_{i} - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2},  \\
 \mathbf{y}^{F/B}_i &= \mathbf{q}_i^{\top} \mathbf{S}^{F/B}_i - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2} \mathbf{v}_i, \\ 
 output: \mathbf{y}_i &= \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i}. \\ \end{aligned} $$
 {: .block-tip}
@@ -135,27 +132,27 @@ output: \mathbf{y}_i &= \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i
 
 The RNN derived above is equivalent to the full linear attention described in the previous section of this blog post.
 
-## Advantagous of our RNN
+## Some Important details about of our RNN
 
-with scalar-identity structure on $A$.
+> Only the states $$c^{F/B}_i$$ and $$\mathbf{y}^{F/B}_i$$ are stored per token, resulting in $$\mathcal{O}(Ld)$$ memory usage. In contrast, naively storing full matrix-valued hidden states would require $$\mathcal{O}(Ld^2)$$, which becomes infeasible for large models.
 
-More formally, we view it as a *sequence transformation* $X \mapsto Y$
+> Forward and backward recurrences run independently, completing in $$L$$ time steps with $$L$$ memory units, compared to $$2L$$ in the naive approach. 
 
-\begin{equation}
-\label{eq:ssm-transformation}
-Y^\mathtt{(T,P)} = \mathsf{SSM}(A^\mathtt{(T)}, B^\mathtt{(T,N)}, C^\mathtt{(T,N)})(X^\mathtt{(T,P)})
-\end{equation}
+{% include figure.liquid loading="eager" path="assets/img/memory.png" title="Memory Allocation of LION in RNN form" caption="Memory allocation in LION during Forward and Backward recurrences." %}
 
-The dual attention-like form of the SSD layer is
 
-\begin{equation}
-\label{eq:ssd-attention}
-M = L \circ C B^\top \in \mathbb{R}^{\mathtt{(T,T)}}
-\end{equation}
+All in one we can visulaize our framework nicely like:
 
-Now let's see how to prove this!
+{% include figure.liquid loading="eager" path="assets/img/frlion.png" title="LION" caption="LION 🦁: Our framework for training in parallel using Full Linear Attention which also supports the efficient bi-directional RNN format." %}
 
-[//]: # In this post, we'll prove the equivalence of these two forms in multiple ways.
+## LION's Different Masks
+
+Now that we have created our framework let's see what are the choices of the decay factor $$\lambda_i$$ and how they resemble the famous linear Transformer models. Let's set:
+
+> $$\lambda_i=1$$ this results in mighty simple Linear Transformer (cite) which we refrer to as <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>
+> $$\lambda_i=\lambda$$ this results in mighty RetNet (cite) which we refrer to as <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
+> $$\lambda_i=\sigma(\mathbf{W}\mathbf{x}_i)$$ being input dependent, and bi-directional Linear Transformer inspired by selectivity of Mamba2 (cite) which we refrer to as <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
+
 
 ## SSD Framework 1: Structured Matrix Transformations
 
