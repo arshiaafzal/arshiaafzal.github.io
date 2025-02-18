@@ -201,12 +201,8 @@ $$
 \boldsymbol{\lambda}^B = \text{Flip}(\boldsymbol{\lambda}^F), \quad \mathbf{L}^B = cumprod(\boldsymbol{\lambda}^B).
 $$
 
-The masks are then constructed as:  
-
-$\mathbf{M}^F =$ `tril(LF@inv(LF)^T)` for the forward part and  $\mathbf{M}^B =$ `triu(LB@inv(LB)^T)` for the backward part.
-
-where `tril(.)` and `trilu.)` extract the lower and upper triangular parts of the matrix $\mathbf{X}$, respectively.  
-
+The masks are then constructed as,  $\mathbf{M}^F =$ `tril(LF@inv(LF)^T)` for the forward part and  $\mathbf{M}^B =$ `triu(LB@inv(LB)^T)` for the backward part.
+where `tril(.)` and `trilu(.)` extract the lower and upper triangular parts of the matrix $\mathbf{X}$, respectively.  
 The full mask is then obtained as  
 
 $$
