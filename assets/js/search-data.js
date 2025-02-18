@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-state-space-duality-mamba-2-part-iv-the-systems",
+        },{id: "post-",
+      
+        title: "",
+      
+      description: "",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/2024-05-31-mamba2-part2-theory/";
+        
+      },
+    },{id: "post-state-space-duality-mamba-2-part-iv-the-systems",
       
         title: "State Space Duality (Mamba-2) Part IV - The Systems",
       
@@ -50,17 +61,6 @@ ninja.data = [{
       handler: () => {
         
           window.location.href = "/blog/2024/mamba2-part3-algorithm/";
-        
-      },
-    },{id: "post-state-space-duality-mamba-2-part-ii-the-theory",
-      
-        title: "State Space Duality (Mamba-2) Part II - The Theory",
-      
-      description: "",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2024/mamba2-part2-theory/";
         
       },
     },{id: "post-lion-part-i-full-linear-attention",
