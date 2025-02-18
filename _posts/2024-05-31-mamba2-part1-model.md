@@ -57,7 +57,7 @@ toc:
 **We sincerely appreciate Albert Gu and Tri Dao for their insightful blog posts, which have been invaluable in shaping our own!**
 
 1. Part I - Full Linear Attention
-2. [Part II - LION: Bi-directional RNN for Full Linear Attention]({% post_url 2024-05-31-mamba2-part2-theory %})
+2. [Part II - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
 3. [Part III - LION Chunk: CHunkwise Parallel of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
 4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
 
