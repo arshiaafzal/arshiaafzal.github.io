@@ -41,7 +41,6 @@ authors:
 
 bibliography: albert.bib
 
-
 toc:
   - name: LION Theory Finding Bi-directional RNN
   - name: Advantagous of our RNN
@@ -57,7 +56,7 @@ toc:
     subsections:
     - name: Stability of LION-D
     - name: Stability of LION-S
-  -name: Extending more Linear Transformers into Bi-diretcional setting with 🦁 
+  - name: Extending more Linear Transformers into Bi-diretcional setting with 🦁 
 
 ---
 
