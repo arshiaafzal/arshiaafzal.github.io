@@ -72,7 +72,7 @@ In this section, we establish and theoretically demonstrate the equivalent bidir
 
 
 
-## LION: Finding Bi-directional RNN Equal to Full Linear Attention
+## Finding Bidirectional RNN Equal to Full Linear Attention
 
 Let's start by separating the upper, lower, and diagonal elements of the attention matrix and the mask. Since the idea of a bidirectional RNN is to process the sequence in both the forward order (from first to last) and the reverse order (from last to first), these naturally correspond to the upper and lower parts of the attention matrix and mask.
 
