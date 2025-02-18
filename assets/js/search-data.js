@@ -63,9 +63,9 @@ ninja.data = [{
           window.location.href = "/blog/2024/mamba2-part2-theory/";
         
       },
-    },{id: "post-state-space-duality-mamba-2-part-i-the-model",
+    },{id: "post-lion-part-i-full-linear-attention-for-bi-directional-sequence-modleing",
       
-        title: "State Space Duality (Mamba-2) Part I - The Model",
+        title: "LION 🦁 Part I - Full Linear Attention for Bi-directional Sequence Modleing",
       
       description: "",
       section: "Posts",
