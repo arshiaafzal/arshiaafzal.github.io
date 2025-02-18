@@ -42,7 +42,7 @@ authors:
 bibliography: albert.bib
 
 toc:
-  - name: LION: Finding Bi-directional RNN Equal to Full Linear Attention
+  - name: LION: Finding Bidirectional RNN Equal to Full Linear Attention
   - name: Advantagous of our RNN
     subsections:
       - name: Memory Allocation of LION in RNN form
