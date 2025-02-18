@@ -1,84 +1,113 @@
 ---
 layout: distill
-title: State Space Duality (Mamba-2) Part II - The Theory
+title:  LION 🦁 Part II - Bi-directional RNN
 description: 
 tags:
 giscus_comments: false
 date: 2024-05-31
 featured: false
-thumbnail: assets/img/2024-05-31-mamba-2/ssd_venn.png
+thumbnail: assets/img/lion.jpg
 
 authors:
-  - name: Albert Gu
+  - name: Arshia Afzal
     url:
     affiliations:
-      name: CMU
-  - name: Tri Dao
+      name: EPFL
+  - name: Elias Abad Rocamora
     url:
     affiliations:
-      name: Princeton
+      name: EPFL
+  - name: Leyla Naz Candogan
+    url:
+    affiliations:
+      name: EPFL
+  - name: Pol Puigdemont Plana
+    url:
+    affiliations:
+      name: EPFL
+  - name: Francesco Tonin
+    url:
+    affiliations:
+      name: EPFL
+  - name: Yongtao Wu
+    url:
+    affiliations:
+      name: EPFL
+  - name : Volkan Cevher
+    url:
+    affiliations:
+      name: EPFL
+
 
 bibliography: albert.bib
 
-# Optionally, you can add a table of contents to your post.
-# NOTES:
-#   - make sure that TOC names match the actual section names
-#     for hyperlinks within the post to work correctly.
-#   - we may want to automate TOC generation in the future using
-#     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
+
 toc:
-    # if a section has subsections, you can add them as follows:
-    # subsections:
-    #   - name: Example Child Subsection 1
-    #   - name: Example Child Subsection 2
-  - name: "Recap: The SSD Model"
-  - name: "SSD Framework 1: Structured Matrix Transformations"
+  - name: LION Theory Finding Bi-directional RNN
+  - name: Advantagous of our RNN
     subsections:
-      - name: Matrix Transformations
-      - name: Semiseparable Matrices
-      - name: "Deriving the Duality: SSM to Attention"
-      - name: Going Beyond the SSD Layer 1
-  - name: "SSD Framework 2: Structured Attention"
+      - name: Memory Allocation of LION in RNN form
+      - name: Complexity of LION in RNN form
+  - name: LION's Different Masks
     subsections:
-      - name: "Warm-up: Kernel Attention"
-      - name: (Causal) Linear Attention
-      - name: A Tensor Contraction Proof of Linear Attention
-      - name: Structured Masked Attention
-      - name: "Deriving the Duality: Attention to SSM"
-      - name: Going Beyond the SSD Layer 2
-  - name: State Space Duality
+      - name: LION-🔥 
+      - name: LION-D
+      - name: LION-S
+  - name: Even More on Masks
+    subsections:
+    - name: Stability of LION-D
+    - name: Stability of LION-S
+  -name: Extending more Linear Transformers into Bi-diretcional setting with 🦁 
 
 ---
 
-1. [Part I - The Model]({% post_url 2024-05-31-mamba2-part1-model %})
-2. Part II - The Theory
+1. [Part I - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
+2. Part II - Bi-directional RNN
 3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba2-part3-algorithm %})
 4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
 
-In [Part I]({% post_url 2024-05-31-mamba2-part1-model %}) of this series, we defined the state space dual (SSD) *model*.
-In isolation, this model is relatively simple to define,
-and we claimed that it can be computed either as an SSM recurrence or with an attention-like pattern.
-If you just want to use the model, feel free to skip this post!
 
-In this post, we'll dive into the theory behind the model.
-We'll derive the SSD "duality" in two completely separate ways, one starting from the SSM perspective and one from the attention perspective.
-Each method is actually much more broad than the SSD model itself,
-and the union of these two strong generalizations is what we call the SSD *framework*.
-This framework provides a rich body of connections between state space models, attention, and structured matrices.
-While the SSD model can be viewed as a specific instantiation of each prong of the framework,
-the SSD framework is much more general opens up many directions for future work.
-
-#### The State Space Duality framework
-
-{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssd_venn.png" title="Structured State Space Duality" caption="SSD Framework (red, blue): State space models (i.e. semiseparable matrices) and structured masked attention encapsulate large classes of efficient sequence models. Their intersection is the SSD model (purple)." %}
+In [Part I]({% post_url 2024-05-31-mamba2-part1-model %}) of this series, we defined full linear attention with masking and scaling.  
+Similar to all linear transformers designed for causal sequence modeling, we aim to derive an RNN form for efficiency during inference.  
+In this section, we establish and theoretically demonstrate the equivalent bidirectional RNN for the Linear Transformer.
 
 
-For each of the two parts of this framework, we'll
-1. Define the general concepts
-2. Show how the SSD model is an instantiation, and prove the duality
-3. Suggest future directions for how the framework can be used
 
-Note that this theory is *not necessary* to use the SSD model itself; this part of the series can be safely skipped for the practitioner that just wants to use SSD (Mamba-2).
+
+#### LION Theory Finding Bi-directional RNN
+
+Let's start by separating the upper, lower, and diagonal elements of the attention matrix and the mask. Since the idea of a bidirectional RNN is to process the sequence in both the forward order (from first to last) and the reverse order (from last to first), these naturally correspond to the upper and lower parts of the attention matrix and mask.
+
+Ideally, we aim to construct an RNN that is equivalent to the masked and scaled Linear Attention.
+
+{% include figure.liquid loading="eager" path="assets/img/att_mask_color.png"%}
+
+**Important:** We made a strong effort to maintain a consistent color coding for this section of the blog post and throughout our paper :).  
+
+- Wherever you see a <span style="background-color: rgb(255, 248, 203); padding: 3px; color:black">Yellow</span> color, it indicates the **upper part of the matrix (non-causal)**.  
+- Whenever you see a <span style="background-color: rgb(254, 200, 201); padding: 3px; color:black">Red</span> color, it represents the **diagonal elements**.  
+- Whenever you see a <span style="background-color: rgb(208, 243, 248); padding: 3px; color:black">Blue</span> color, it corresponds to the **lower triangular (causal) part**.  
+
+By seperating the attention into upper and lower parts:
+
+{% include figure.liquid loading="eager" path="assets/img/att_sep.png"%}
+
+And also the mask:
+
+{% include figure.liquid loading="eager" path="assets/img/mask_sep.png"%}
+
+and by writting the scaling part as:
+
+$$
+\begin{aligned}
+   \mathbf{Y} &= \big(\textsc{scale}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M})\big) \mathbf{V}  \notag \\
+   & = (\mathbf{C}^{-1}(\mathbf{Q}\mathbf{K}^{\top} \odot \mathbf{M}))\mathbf{V}, \hspace{1mm}
+   \mathbf{C}_i = \mathbf{q}^{\top}_i\sum\limits_{j=1}^{L} \mathbf{M}_{ij}\mathbf{k}_j. 
+\end{aligned} 
+$$
+
+Let's decompose the $$\mathbf{C}_i$$ of scaling:
+
 
 ## Recap: The SSD Model
 
