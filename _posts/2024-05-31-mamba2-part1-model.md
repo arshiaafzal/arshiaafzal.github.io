@@ -160,20 +160,20 @@ To recap, the full output of full LInear Attention can be presented as:
 $$
 \mathbf{Y} = 
     \left(
-   {\underbrace{\left( \renewcommand*{\arraystretch} \begin{array}{ccccc}
-       {\mathbf{q}_1^{\top}\mathbf{k}_1}  &  {\mathbf{q}_1^{\top}\mathbf{k}_2} & \cdots &  {\mathbf{q}_1^{\top}\mathbf{k}_L} \\
-     {\mathbf{q}_2^{\top}\mathbf{k}_1}  &   {\mathbf{q}_2^{\top}\mathbf{k}_2}  &   \cdots &  {\mathbf{q}_2^{\top}\mathbf{k}_L}\\\
+   \underbrace{\left( \renewcommand*{\arraystretch} \begin{array}{ccccc}
+       \mathbf{q}_1^{\top}\mathbf{k}_1  &  \mathbf{q}_1^{\top}\mathbf{k}_2 & \cdots &  \mathbf{q}_1^{\top}\mathbf{k}_L \\
+     \mathbf{q}_2^{\top}\mathbf{k}_1  &   \mathbf{q}_2^{\top}\mathbf{k}_2  &   \cdots &  \mathbf{q}_2^{\top}\mathbf{k}_L\\
      \vdots &  \vdots & \ddots  &  \vdots \\
-      {\mathbf{q}_L^{\top}\mathbf{k}_1} &   {\mathbf{q}_L^{\top}\mathbf{k}_2}  &   \cdots  & 
-     {\mathbf{q}_L^{\top}\mathbf{k}_L}\\
-  \end{array} \right)}_{\hspace{1mm}{\mathbf{A}={\mathbf{Q}\mathbf{K}^{\top}} }} } \odot
-   { \underbrace{ \left(  \renewcommand*{\arraystretch} \begin{array}{ccccc}
-    {\mathbf{1}}  & {\lambda_2} & {\lambda_2 \lambda_3}  & {\cdots} & {\lambda_2\cdots\lambda_L} \\
-    {\lambda_1} &  {\mathbf{1}} & {\lambda_3} & {\cdots} & {\lambda_3 \cdots \lambda_L} \\
-    {\lambda_1 \lambda_2} & {\lambda_2} & {\mathbf{1}} & {\cdots} & {\lambda_4 \cdots \lambda_L} \\
-    \vdots & \vdots & \vdots & {\ddots} &  \vdots \\
-    {{\lambda_{L-1}\cdots \lambda_1}} & {{\lambda_{L-1}\cdots \lambda_2}} & {{\lambda_{L-1}\cdots \lambda_3}} & {\cdots} &   {\mathbf{1}} \\   
-\end{array}  \right)  }_{\hspace{1mm}{\mathbf{M} }} }  \right) \left( \renewcommand*{\arraystretch} \begin{array}{c}
+      \mathbf{q}_L^{\top}\mathbf{k}_1 &   \mathbf{q}_L^{\top}\mathbf{k}_2  &   \cdots  & 
+     \mathbf{q}_L^{\top}\mathbf{k}_L\\
+  \end{array} \right)}_{\hspace{1mm} \mathbf{A} = \mathbf{Q} \mathbf{K}^{\top}}  \odot
+   \underbrace{ \left(  \renewcommand*{\arraystretch} \begin{array}{ccccc}
+    1  & \lambda_2 & \lambda_2 \lambda_3  & \cdots & \lambda_2 \cdots \lambda_L \\
+    \lambda_1 &  1 & \lambda_3 & \cdots & \lambda_3 \cdots \lambda_L \\
+    \lambda_1 \lambda_2 & \lambda_2 & 1 & \cdots & \lambda_4 \cdots \lambda_L \\
+    \vdots & \vdots & \vdots & \ddots &  \vdots \\
+    \lambda_{L-1} \cdots \lambda_1 & \lambda_{L-1} \cdots \lambda_2 & \lambda_{L-1} \cdots \lambda_3 & \cdots &   1 \\   
+\end{array}  \right)  }_{\hspace{1mm} \mathbf{M}}  \right) \left( \renewcommand*{\arraystretch} \begin{array}{c}
     \mathbf{v}_1^\top \\  
     \mathbf{v}_2^\top \\
     \mathbf{v}_3^\top \\  
