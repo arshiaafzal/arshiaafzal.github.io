@@ -46,9 +46,9 @@ toc:
   - name: Some Important details of our RNN
   - name: Different Masks of LION
     subsections:
-      - name: <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>
-      - name: <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
-      - name: <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
+      - name: LION-🔥 
+      - name: LION-D
+      - name: LION-S
 
 ---
 
@@ -154,7 +154,7 @@ Now that we have created our framework let's see what are the choices of the dec
 
 We evaluate all above models, extended to bidirectional sequence modeling using LION, on several bidirectional tasks. Also as all Linear Transformers use feature mapping $\phi(.)$ to queries and keys we also applied SILU shifted $\phi(x) = \frac{SILU(x)+0.5}{||SILU(x)+0.5||}$ non-linear activation function. Let's delve deep in each of these models in LION framework.
 
-### <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>
+### LION-🔥 
 
 LION-🔥 is an extension of the very first Linear Transformer (cite). Without any masking, the bidirectional parallel form can be simply written as:
 
@@ -163,7 +163,7 @@ $$\mathbf{Y} = Scale(\mathbf{Q} \mathbf{K}^\top )\mathbf{V} $$
 and the RNN form of the above parallel full linear attention is simply the RNN form mentioned above in this section in green box just by simply not using any mask.
 
 
-### <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
+### LION-D
 
 By fixing $$\lambda_i = \lambda$$, the mask $$\mathbf{M}$$ has the form:
 
@@ -185,7 +185,7 @@ def Decay_Mask(a , L):
 ```
 
 
-### <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
+### LION-S
 
 Observing the structure of $\mathbf{M}$, its upper ($\mathbf{M}^B$) and lower ($\mathbf{M}^F$) triangular parts are rank-1 [semi-separable matrices](https://people.cs.kuleuven.be/~raf.vandebril/homepage/publications/papers_html/qrq_07/node16.html) (cite), allowing for efficient computation via matrix multiplications.  
 
