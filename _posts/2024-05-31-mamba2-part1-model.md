@@ -94,14 +94,14 @@ While bi-directional SSMs like Hydra and Vision Mamba show impressive performanc
 Let's start with Linear Attention:
 
 > #### Linear Attention Reccurence
-> $$ \mathbf{S} = \Lambda \mathbf{S} + \gamma_i \mathbf{k}{\mathbf{v}}^\top $$
+> $$\mathbf{S} = \Lambda \mathbf{S} + \gamma_i \mathbf{k}{\mathbf{v}}^\top$$
 {: .block-tip }
 
 Above is the RNN form of the Linear Attention which have the parallel form of:
 
 > #### Linear Attention Parallel
 > 
-> $$ \mathbf{Y} = Scale \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M}^C \right) $$
+> $$\mathbf{Y} = Scale \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M}^C \right)$$
 {: .block-tip }
 
 and the mask $\mathbf{M}^C$ is a lower triangular binary matrix. Causal Linear Transformers are a class of models introduced following the development of Linear Transformers as shown above (cite). These models typically define a recurrence of the form:  
