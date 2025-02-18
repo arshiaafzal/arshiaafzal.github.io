@@ -133,32 +133,54 @@ to a fully *scaled* and *masked* attention mechanism for linear attention.
 
 ### Creating Scaled and Masked Full Attention
 
-The first step is quite simple the masked and scaled attention can easily have the form as its name:
+The first step is quite simple: the masked and scaled attention can naturally take the following form, as suggested by its name:
 
-> **Linear Transformers as category of Models**
-> $$ \mathbf{Y} = \text{Scale} \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M} \right)
-$$
+> **Full Linear Attention**
+> $$ \mathbf{Y} = \text{Scale} \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M} \right)$$
 {: .block-tip}
 
+The important part is how to well define the matrix $$\mathbf{M}$$. A natural choice is to extend the causal mask $$\mathbf{M^C}$$, where the causal mask between tokens $$i,j$$ is given by $$\mathbf{M}^C_{ij} = \lambda_{j+1} \lambda_{j+2} \dots \lambda_i$$, representing the product of all selective scalers between $$i$$ and $$j$$. In the bidirectional case, the full mask should preserve this property. Since this is indeed a desirable property, one can interpret it as a form of relative positional encoding between two tokens. Saying so the mask cen be shaped as:
 
 $$
 \begin{aligned}
-h_{t} &= A_t h_{t-1} + B_t x_t \\
-y_t &= C_t^{\top} h_t
+    \mathbf{M}_{ij} = 
+    \begin{cases} 
+    \Pi_{k=j+1}^{i}{\lambda_k}, & i > j  \\
+    1 & i=j\\ 
+    \Pi_{k=i+1}^{j}{\lambda_k}, & i < j.
+\end{cases} 
 \end{aligned}
 $$
 
-\begin{equation}
-\label{eq:ssm}
-(\text{Selective state space model (SSM)})
-\end{equation}
+
+To recap, the full output of full LInear Attention can be presented as:
 
 
-To recap, a **structured state space model (SSM)** <d-cite key="gu2022efficiently"></d-cite><d-cite key="gu2023thesis"></d-cite> defines a map from $x \in \mathbb{R}^\mathtt{T} \to y \in \mathbb{R}^\mathtt{T}$.
-Think of $x_t$ and $y_t$ as being scalars, and the hidden state $h_t$ as an $\mathtt{N}$-dimensional vector, where $\mathtt{N}$ is an independent hyperparameter called the *state size, state dimension, or state expansion factor*.
+$$
+\mathbf{Y} = 
+    \left(
+   {\underbrace{\left( \renewcommand*{\arraystretch} \begin{array}{ccccc}
+       {\mathbf{q}_1^{\top}\mathbf{k}_1}  &  {\mathbf{q}_1^{\top}\mathbf{k}_2} & \cdots &  {\mathbf{q}_1^{\top}\mathbf{k}_L} \\
+     {\mathbf{q}_2^{\top}\mathbf{k}_1}  &   {\mathbf{q}_2^{\top}\mathbf{k}_2}  &   \cdots &  {\mathbf{q}_2^{\top}\mathbf{k}_L}\\\
+     \vdots &  \vdots & \ddots  &  \vdots \\
+      {\mathbf{q}_L^{\top}\mathbf{k}_1} &   {\mathbf{q}_L^{\top}\mathbf{k}_2}  &   \cdots  & 
+     {\mathbf{q}_L^{\top}\mathbf{k}_L}\\
+  \end{array} \right)}_{\hspace{1mm}{\mathbf{A}={\mathbf{Q}\mathbf{K}^{\top}} }} } \odot
+   { \underbrace{ \left(  \renewcommand*{\arraystretch} \begin{array}{ccccc}
+    {\mathbf{1}}  & {\boldsymbol{\lambda}_2} & {\boldsymbol{\lambda}_2 \boldsymbol{\lambda}_3}  & {\cdots} & {\boldsymbol{\lambda}_2\cdots\boldsymbol{\lambda}_L} \\
+    {\boldsymbol{\lambda}_1} &  {\mathbf{1}} & {\boldsymbol{\lambda}_3} & {\cdots} & {\boldsymbol{\lambda}_3 \cdots \boldsymbol{\lambda}_L} \\
+    {\boldsymbol{\lambda}_1 \boldsymbol{\lambda}_2} & {\boldsymbol{\lambda}_2} & {\mathbf{1}} & {\cdots} & {\boldsymbol{\lambda}_4 \cdots \boldsymbol{\lambda}_L} \\
+    \vdots & \vdots & \vdots & {\ddots} &  \vdots \\
+    {{\boldsymbol{\lambda}_{L-1}\cdots \boldsymbol{\lambda}_1}} & {{\boldsymbol{\lambda}_{L-1}\cdots \boldsymbol{\lambda}_2}} & {{\boldsymbol{\lambda}_{L-1}\cdots \boldsymbol{\lambda}_3}} & {\cdots} &   {\mathbf{1}} \\   
+\end{array}  \right)  }_{\hspace{1mm}{\mathbf{M} }} }  \right) \left( \renewcommand*{\arraystretch} \begin{array}{c}
+    \mathbf{v}_1^\top \\  
+    \mathbf{v}_2^\top \\
+    \mathbf{v}_3^\top \\  
+    \vdots \\
+    \mathbf{v}_L^\top \\   
+  \end{array} \right)
+$$
 
-A *selective* state space model allows the $(A, B, C)$ SSM parameters to vary across time <d-cite key="gu2023mamba"></d-cite>.
-We'll think of them as tensors with shapes $A \in \mathbb{R}^\mathtt{(T, N, N)}$, $B \in \mathbb{R}^\mathtt{(T, N)}$, and $C \in \mathbb{R}^\mathtt{(T, N)}$ respectively.<d-footnote>As with Mamba-1, we take everything over the reals $\mathbb{R}$, although complex variants as with other structured SSMs like the S4 lineage <d-cite key="gu2022efficiently"></d-cite> are also possible.</d-footnote>
 
 Structured SSMs require $A$ to have structure to be efficiently computable, such as the most commonly used diagonal structure <d-cite key="gu2022parameterization"></d-cite><d-cite key="gupta2022diagonal"></d-cite><d-cite key="smith2023s5"></d-cite><d-cite key="gupta2022simplifying"></d-cite>.
 In this case $A$ has shape $\mathtt{(T, N)}$ where only the diagonal elements of the $\mathtt{N} \times \mathtt{N}$ matrices are stored.
