@@ -9,7 +9,7 @@ featured: false
 thumbnail: assets/img/lion.jpg
 
 authors:
-  - name: Arshia Afzal
+  - name: Arshia Afzal (Author of the blogpost)
     url:
     affiliations:
       name: EPFL
@@ -150,7 +150,7 @@ Now that we have created our framework let's see what are the choices of the dec
 
 > $$\lambda_i=\sigma(\mathbf{W}\mathbf{x}_i)$$ being input dependent, and bi-directional Linear Transformer inspired by selectivity of Mamba2 (cite) which we refrer to as <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
 
-We evaluate all above models, extended to bidirectional sequence modeling using LION, on several bidirectional tasks. Also as all Linear Transformers use feature mapping $$\phi(.)$$ to queries and keys we also applied SILU shifted $$\phi(x) = \frac{SILU(x)+0.5}{||SILU(x)+0.5||}$$ non-linear activation function.
+We evaluate all above models, extended to bidirectional sequence modeling using LION, on several bidirectional tasks. Also as all Linear Transformers use feature mapping $\phi(.)$ to queries and keys we also applied SILU shifted $\phi(x) = \frac{SILU(x)+0.5}{||SILU(x)+0.5||}$ non-linear activation function.
 
 Let's delve deep in each of these models in LION framework.
 
