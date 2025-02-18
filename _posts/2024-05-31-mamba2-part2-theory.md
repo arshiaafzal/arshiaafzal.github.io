@@ -42,8 +42,7 @@ authors:
 bibliography: albert.bib
 
 toc:
-
-  - name: LION: Finding Bidirectional RNN Equal to Full Linear Attention
+  - name: Finding Bidirectional RNN Equal to Full Linear Attention
   - name: Advantagous of our RNN
     subsections:
       - name: Memory Allocation of LION in RNN form
@@ -123,6 +122,15 @@ This results in only the forward and backward directions of the RNN remaining. A
 {% include figure.liquid loading="eager" path="assets/img/flip.png"%}
 
 Cool! Now, both the upper part (equivalent to the RNN in the forward direction) and the lower part (equivalent to the RNN in the backward direction) can be formulated as RNNs. This is exactly what we need to construct our bidirectional RNN equivalent to full linear attention.
+
+> **LION: Reccurence form**
+> 
+> $$ \mathbf{S}_i^{F/B} &= \lambda_i \mathbf{S}^{F/B}_{i-1} + \mathbf{k}_i \mathbf{v}_i^{\top}, \\ 
+\mathbf{z}^{F/B}_i &= \lambda_i \mathbf{z}^{F/B}_{i-1} + \mathbf{k}_i,  \\
+c^{F/B}_i = \mathbf{q}_i^{\top} \mathbf{z}^{F/B}_{i} - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2},  \\
+\mathbf{y}^{F/B}_i &= \mathbf{q}_i^{\top} \mathbf{S}^{F/B}_i - \frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2} \mathbf{v}_i, \\ 
+output: \mathbf{y}_i &= \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i}. \\ $$
+{: .block-tip}
 
 
 The RNN derived above is equivalent to the full linear attention described in the previous section of this blog post.
