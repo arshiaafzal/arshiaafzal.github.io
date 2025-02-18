@@ -204,8 +204,8 @@ $$
 The masks are then constructed as  
 
 $$
-\mathbf{M}^F = \text{Tril} \left(\mathbf{L}^F \hspace{1mm} \frac{1}{\mathbf{L}^F}^\top} \right), \quad \mathbf{M}^B = \text{Triu} \left(\mathbf{L}^B \hspace{1mm} \frac{1}{\mathbf{L}^B}^\top} \right),
-$$ 
+\mathbf{M}^F = \text{Tril} \left(\mathbf{L}^F \hspace{1mm} \frac{1}{(\mathbf{L}^F)^\top} \right), \quad \mathbf{M}^B = \text{Triu} \left(\mathbf{L}^B \hspace{1mm} \frac{1}{(\mathbf{L}^B)^\top} \right)
+$$
 
 where $\text{Tril}(\mathbf{X})$ and $\text{Triu}(\mathbf{X})$ extract the lower and upper triangular parts of the matrix $\mathbf{X}$, respectively.  
 
