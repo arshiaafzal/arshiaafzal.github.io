@@ -189,10 +189,10 @@ def Decay_Mask(a , L):
 
 Observing the structure of $\mathbf{M}$, its upper ($\mathbf{M}^B$) and lower ($\mathbf{M}^F$) triangular parts are rank-1 [semi-separable matrices](https://people.cs.kuleuven.be/~raf.vandebril/homepage/publications/papers_html/qrq_07/node16.html) (cite), allowing for efficient computation via matrix multiplications.  
 
-During training, the decay factors $\lambda_i$ are stacked into $\boldsymbol{\lambda}^F \in \mathbb{R}^L$, and the cumulative product  
+During training, the decay factors $\lambda_i$ are stacked into ${\lambda}^F \in \mathbb{R}^L$, and the cumulative product  
 
 $$
-\mathbf{L}^F = cumprod(\boldsymbol{\lambda}^F) = \prod_{k=0}^{i} \boldsymbol{\lambda}^F_k
+\mathbf{L}^F = cumprod(\lambda^F) = \prod_{k=0}^{i} \lambda^F_k
 $$
 
 is used to generate the lower triangular mask \(\mathbf{M}^F\). For the upper triangular mask $\mathbf{M}^B$, the input sequence is flipped, and the decay factors are computed as  
@@ -204,7 +204,7 @@ $$
 The masks are then constructed as  
 
 $$
-\mathbf{M}^F = \text{Tril} \left(\mathbf{L}^F \hspace{1mm} \frac{1}{{\mathbf{L}^F}^\top} \right), \quad \mathbf{M}^B = \text{Triu} \left(\mathbf{L}^B \hspace{1mm} \frac{1}{{\mathbf{L}^B}^\top} \right),
+\mathbf{M}^F = \text{Tril} \left(\mathbf{L}^F \hspace{1mm} \frac{1}{\mathbf{L}^F}^\top} \right), \quad \mathbf{M}^B = \text{Triu} \left(\mathbf{L}^B \hspace{1mm} \frac{1}{\mathbf{L}^B}^\top} \right),
 $$ 
 
 where $\text{Tril}(\mathbf{X})$ and $\text{Triu}(\mathbf{X})$ extract the lower and upper triangular parts of the matrix $\mathbf{X}$, respectively.  
