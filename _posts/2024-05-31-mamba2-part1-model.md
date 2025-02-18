@@ -175,6 +175,7 @@ $$
 $$
 </span>
 
+
 The above represents the full **Li**near Attenti**on** in parallel form, which also inspired the name of our framework, **LION** 🦁. Now that we have established full linear attention for bidirectional sequence modeling, it's time to derive its equivalent bidirectional RNN.
 
 ## Next Up  
