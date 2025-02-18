@@ -136,6 +136,7 @@ to a fully *scaled* and *masked* attention mechanism for linear attention.
 The first step is quite simple: the masked and scaled attention can naturally take the following form, as suggested by its name:
 
 > **Full Linear Attention**
+> 
 > $$ \mathbf{Y} = \text{Scale} \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M} \right)$$
 {: .block-tip}
 
@@ -167,11 +168,11 @@ $$
      {\mathbf{q}_L^{\top}\mathbf{k}_L}\\
   \end{array} \right)}_{\hspace{1mm}{\mathbf{A}={\mathbf{Q}\mathbf{K}^{\top}} }} } \odot
    { \underbrace{ \left(  \renewcommand*{\arraystretch} \begin{array}{ccccc}
-    {\mathbf{1}}  & {\boldsymbol{\lambda}_2} & {\boldsymbol{\lambda}_2 \boldsymbol{\lambda}_3}  & {\cdots} & {\boldsymbol{\lambda}_2\cdots\boldsymbol{\lambda}_L} \\
-    {\boldsymbol{\lambda}_1} &  {\mathbf{1}} & {\boldsymbol{\lambda}_3} & {\cdots} & {\boldsymbol{\lambda}_3 \cdots \boldsymbol{\lambda}_L} \\
-    {\boldsymbol{\lambda}_1 \boldsymbol{\lambda}_2} & {\boldsymbol{\lambda}_2} & {\mathbf{1}} & {\cdots} & {\boldsymbol{\lambda}_4 \cdots \boldsymbol{\lambda}_L} \\
+    {\mathbf{1}}  & {{\lambda}_2} & {{\lambda}_2 {\lambda}_3}  & {\cdots} & {{\lambda}_2\cdots{\lambda}_L} \\
+    {{\lambda}_1} &  {\mathbf{1}} & {{\lambda}_3} & {\cdots} & {{\lambda}_3 \cdots {\lambda}_L} \\
+    {{\lambda}_1 {\lambda}_2} & {{\lambda}_2} & {\mathbf{1}} & {\cdots} & {{\lambda}_4 \cdots {\lambda}_L} \\
     \vdots & \vdots & \vdots & {\ddots} &  \vdots \\
-    {{\boldsymbol{\lambda}_{L-1}\cdots \boldsymbol{\lambda}_1}} & {{\boldsymbol{\lambda}_{L-1}\cdots \boldsymbol{\lambda}_2}} & {{\boldsymbol{\lambda}_{L-1}\cdots \boldsymbol{\lambda}_3}} & {\cdots} &   {\mathbf{1}} \\   
+    {{{\lambda}_{L-1}\cdots {\lambda}_1}} & {{{\lambda}_{L-1}\cdots {\lambda}_2}} & {{{\lambda}_{L-1}\cdots {\lambda}_3}} & {\cdots} &   {\mathbf{1}} \\   
 \end{array}  \right)  }_{\hspace{1mm}{\mathbf{M} }} }  \right) \left( \renewcommand*{\arraystretch} \begin{array}{c}
     \mathbf{v}_1^\top \\  
     \mathbf{v}_2^\top \\
