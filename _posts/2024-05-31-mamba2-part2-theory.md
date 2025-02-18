@@ -9,7 +9,7 @@ featured: false
 thumbnail: assets/img/lion.jpg
 
 authors:
-  - name: Arshia Afzal (Author of the blogpost)
+  - name: Arshia Afzal (Writer of blogpost)
     url:
     affiliations:
       name: EPFL
@@ -44,11 +44,11 @@ bibliography: albert.bib
 toc:
   - name: Finding Bidirectional RNN Equal to Full Linear Attention
   - name: Some Important details of our RNN
-  - name: LION's Different Masks
+  - name: Different Masks of LION
     subsections:
-      - name: LION-🔥 
-      - name: LION-D
-      - name: LION-S
+      - name: <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>
+      - name: <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
+      - name: <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
 
 ---
 
@@ -140,19 +140,19 @@ All in one we can visulaize our framework nicely like:
 
 {% include figure.liquid loading="eager" path="assets/img/frlion.png" title="LION" caption="LION 🦁: Our framework for training in parallel using Full Linear Attention which also supports the efficient bi-directional RNN format." %}
 
-## LION's Different Masks
+## Different Masks of LION
 
 Now that we have created our framework let's see what are the choices of the decay factor $$\lambda_i$$ and how they resemble the famous linear Transformer models. Let's set:
 
-> $$\lambda_i=1$$ this results in mighty simple Linear Transformer (cite) which we refrer to as <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>
+> $\lambda_i=1$ this results in mighty simple Linear Transformer (cite) which we refrer to as <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>
 
-> $$\lambda_i=\lambda$$ this results in mighty RetNet (cite) which we refrer to as <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
+> $\lambda_i=\lambda$ this results in mighty RetNet (cite) which we refrer to as <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
 
-> $$\lambda_i=\sigma(\mathbf{W}\mathbf{x}_i)$$ being input dependent, and bi-directional Linear Transformer inspired by selectivity of Mamba2 (cite) which we refrer to as <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
+> $\lambda_i=\sigma(\mathbf{W}\mathbf{x}_i)$ being input dependent, and bi-directional Linear Transformer inspired by selectivity of Mamba2 (cite) which we refrer to as <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
 
-We evaluate all above models, extended to bidirectional sequence modeling using LION, on several bidirectional tasks. Also as all Linear Transformers use feature mapping $\phi(.)$ to queries and keys we also applied SILU shifted $\phi(x) = \frac{SILU(x)+0.5}{||SILU(x)+0.5||}$ non-linear activation function.
 
-Let's delve deep in each of these models in LION framework.
+
+We evaluate all above models, extended to bidirectional sequence modeling using LION, on several bidirectional tasks. Also as all Linear Transformers use feature mapping $\phi(.)$ to queries and keys we also applied SILU shifted $\phi(x) = \frac{SILU(x)+0.5}{||SILU(x)+0.5||}$ non-linear activation function. Let's delve deep in each of these models in LION framework.
 
 ### <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>
 
