@@ -152,7 +152,7 @@ Now that we have created our framework let's see what are the choices of the dec
 
 
 
-We evaluate all above models, extended to bidirectional sequence modeling using LION, on several bidirectional tasks. Also as all Linear Transformers use feature mapping $\phi(.)$ to queries and keys we also applied SILU shifted $\phi(x) = \frac{SILU(x)+0.5}{||SILU(x)+0.5||}$ non-linear activation function. Let's delve deep in each of these models in LION framework.
+We evaluate all above models, extended to bidirectional sequence modeling using LION, on several bidirectional tasks. Also as all Linear Transformers use feature mapping $\phi(.)$ to queries and keys we also applied SILU shifted $\phi(x)=$ `(SILU(x)+0.5)/(norm2(SILU(x)+0.5))` non-linear activation function. Let's delve deep in each of these models in LION framework.
 
 ### LION-🔥 
 
