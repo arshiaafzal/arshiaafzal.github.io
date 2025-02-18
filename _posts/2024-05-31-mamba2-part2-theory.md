@@ -154,7 +154,7 @@ We evaluate all above models, extended to bidirectional sequence modeling using 
 
 Let's delve deep in each of these models in LION framework.
 
-### LION-🔥 
+### <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>
 
 LION-🔥 is an extension of the very first Linear Transformer (cite). Without any masking, the bidirectional parallel form can be simply written as:
 
@@ -163,7 +163,7 @@ $$\mathbf{Y} = Scale(\mathbf{Q} \mathbf{K}^\top )\mathbf{V} $$
 and the RNN form of the above parallel full linear attention is simply the RNN form mentioned above in this section in green box just by simply not using any mask.
 
 
-### LION-D
+### <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
 
 By fixing $$\lambda_i = \lambda$$, the mask $$\mathbf{M}$$ has the form:
 
@@ -185,7 +185,7 @@ def Decay_Mask(a , L):
 ```
 
 
-### LION-S
+### <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
 
 Observing the structure of $\mathbf{M}$, its upper ($\mathbf{M}^B$) and lower ($\mathbf{M}^F$) triangular parts are rank-1 [semi-separable matrices](https://people.cs.kuleuven.be/~raf.vandebril/homepage/publications/papers_html/qrq_07/node16.html) (cite), allowing for efficient computation via matrix multiplications.  
 
@@ -201,13 +201,11 @@ $$
 \boldsymbol{\lambda}^B = \text{Flip}(\boldsymbol{\lambda}^F), \quad \mathbf{L}^B = cumprod(\boldsymbol{\lambda}^B).
 $$
 
-The masks are then constructed as  
+The masks are then constructed as:  
 
-$$
-\mathbf{M}^F = \text{Tril} \left(\mathbf{L}^F \hspace{1mm} \frac{1}{(\mathbf{L}^F)^\top} \right), \quad \mathbf{M}^B = \text{Triu} \left(\mathbf{L}^B \hspace{1mm} \frac{1}{(\mathbf{L}^B)^\top} \right)
-$$
+$\mathbf{M}^F =$ `tril(LF@inv(LF)^T)` for the forward part and  $\mathbf{M}^B =$ `triu(LB@inv(LB)^T)` for the backward part.
 
-where $\text{Tril}(\mathbf{X})$ and $\text{Triu}(\mathbf{X})$ extract the lower and upper triangular parts of the matrix $\mathbf{X}$, respectively.  
+where `tril(.)` and `trilu.)` extract the lower and upper triangular parts of the matrix $\mathbf{X}$, respectively.  
 
 The full mask is then obtained as  
 
