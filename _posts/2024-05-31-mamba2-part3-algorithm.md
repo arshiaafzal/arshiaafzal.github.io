@@ -144,7 +144,7 @@ def Casual_Mask_Decay_Partial(a_i , L,start,end):
 
 ### LION-S Chunk
 
-For selective mask creation of the chunkwise mask $\mathbf{M}_{[ij]}$ should be done seperatdly for upper and lower triangular part similr to the decau chunkwise matrix $\mathbf{M}_{[ij]}$ but a bit more complecated for diagonal as well since diagonal needs the interaction of both causal and non-causal parts. But the creation of the mask since the matrices are semi separable 
+
 
 $$
 \mathbf{M}_{[ij]} = 
