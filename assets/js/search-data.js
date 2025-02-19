@@ -41,9 +41,9 @@ ninja.data = [{
           window.location.href = "/blog/2024/mamba2-part4-systems/";
         
       },
-    },{id: "post-state-space-duality-mamba-2-part-iii-the-algorithm",
+    },{id: "post-lion-part-iii-chunkwise-parallel-from-of-lion",
       
-        title: "State Space Duality (Mamba-2) Part III - The Algorithm",
+        title: "LION 🦁 Part III - Chunkwise Parallel from of LION",
       
       description: "",
       section: "Posts",
