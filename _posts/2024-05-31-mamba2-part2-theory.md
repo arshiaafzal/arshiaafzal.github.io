@@ -319,7 +319,7 @@ Class LION_Attention(nn.Module):
 ```
 
 
-> **Question:** As seen above, the **RNN** is more efficient than the **Transformer** since it only requires storing the output for each token, resulting in a memory complexity of **\(\mathcal{O}(L d)\)**, as opposed to storing the full attention matrix, which requires **\(\mathcal{O}(L^2 d)\)**.  Can we achieve a balance between the speed of attention parallelism and the efficiency of an RNN?
+> **Question:** As seen above, the **RNN** is more efficient than the **Transformer** since it only requires storing the output for each token, resulting in a memory complexity of **$\mathcal{O}(Ld)$**, as opposed to storing the full attention matrix, which requires **$\mathcal{O}(L^2 d)$**.  Can we achieve a balance between the speed of attention parallelism and the efficiency of an RNN?
 
 
 We will answer this question in our next section by introducing LION-Chunk.
