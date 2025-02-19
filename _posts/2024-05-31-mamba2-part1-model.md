@@ -105,7 +105,7 @@ Scaled: y_i = \frac{q^\top_i S_i}{q^\top_i z_i}, \quad Non-Scaled: y_i  = q^\top
 \end{aligned}
 $$
 
-Here, $$\boldsymbol{\Lambda_i}$$ and $$\gamma_i$$ are decay factors introduced after Linear Transformers to enhance their performance. (Spoiler alert ⚠️: this family of Linear Transformers has strong connections to SSMs, as explored in works like (DeltaNet) and (Mamba-2) 😉). For simplicity, we consider $$\boldsymbol{\Lambda_i} = \lambda_i$$ as a scalar in this study. As shown, this choice is as effective as the full matrix form. We now present the general scaled linear attention in the following form:
+Here, $$\boldsymbol{\Lambda_i}$$ and $$\gamma_i$$ are decay factors introduced after Linear Transformers to enhance their performance. (Spoiler alert ⚠️: this family of Linear Transformers has strong connections to SSMs, as explored in works like (DeltaNet) and (Mamba-2) 😉). Many models apply a non-linear activation to queries and keys, such that $\mathbf{k}_i = \phi(\mathbf{k}_i)$ and $\mathbf{q}_i = \phi(\mathbf{q}_i)$. To avoid notation clutter, we omit explicitly writing $\phi(.)$ everywhere. By default, we assume that queries and keys are already non-linearized. For simplicity, we consider $$\boldsymbol{\Lambda_i} = \lambda_i$$ as a scalar in this study. As shown, this choice is as effective as the full matrix form. We now present the general scaled linear attention in the following form:
 
 $$
 \begin{aligned} 
@@ -183,11 +183,11 @@ The above represents the full **Li**near Attenti**on** in parallel form, which a
 
 > **Question:** Is it worth using full attention with quadratic memory for bidirectional sequence modeling?
 
-The answer is **yes**! For real-world bidirectional tasks such as **Vision** (\(L = 196\)) and **Masked Language Modeling (MLM)** (\(L = 128\)), sequence lengths are relatively short. This means that using **full attention** actually increases the model's **throughput** without a significant trade-off in complexity.  
+The answer is **yes**! For real-world bidirectional tasks such as Vision ($L=196$) and Masked Language Modeling (MLM) ($L=128$), sequence lengths are relatively short. This means that using full attention actually increases the model's throughput without a significant trade-off in complexity.  
 
-Unlike **causal language modeling**, where sequences can become extremely long, bidirectional tasks in real datasets do not suffer from the same scalability challenges.  
+Unlike causal language modeling, where sequences can become extremely long, bidirectional tasks in real datasets do not suffer from the same scalability challenges.  
 
-(That being said, we believe that architectures designed for causal tasks do not **directly** transfer to bidirectional tasks without proper modifications. ¯\\_(ツ)_/¯ )
+(That being said, we believe that architectures designed for causal tasks do not directly transfer to bidirectional tasks without proper modifications. ¯\_(ツ)_/¯ )
 
 ## Next Up  
 
