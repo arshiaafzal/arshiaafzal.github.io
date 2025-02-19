@@ -64,7 +64,7 @@ Chunkwise parallel form of full linear attention is kinda straight forward lets 
 
 
 $$
-\mathbf{Q}_{[i]} , \mathbf{K}_{[i]}, \mathbf{V}_{[i]}  \in \mathbb{R}^{C \times C}
+\mathbf{Q}_{[i]} , \mathbf{K}_{[i]}, \mathbf{V}_{[i]}  \in \mathbb{R}^{C \times d}
 $$
 
 we should now shape the chunkwise form which consist of four parts:
@@ -146,8 +146,14 @@ def Casual_Mask_Decay_Partial(a_i , L,start,end):
 
 
 
-
-
+$$
+\mathbf{M}_{[ij]} = 
+\begin{cases} 
+\mathbf{L}_{[j]}^\top \frac{1}{{\mathbf{L}^F_j}^\top} & \text{if } i > j,  \\
+\mathbf{L}^B_j \frac{1}{{\mathbf{L}^B_i}^\top} & \text{if } i < j,  \\
+\text{Tril}(\mathbf{L}^F_i \frac{1}{{\mathbf{L}^F_i}^\top}) + \text{Triu}(\mathbf{L}^B_i \frac{1}{{\mathbf{L}^B_i}^\top}) & \text{if } i=j
+\end{cases}
+$$
 
 
 
