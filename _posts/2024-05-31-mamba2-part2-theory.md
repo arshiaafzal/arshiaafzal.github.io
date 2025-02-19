@@ -262,7 +262,7 @@ def Selective_Mask(vec):
 
 We can formulate the parallel attention form of LION as shown below, supporting all three extensions of our main experiments:
 
-```
+```python
 Class LION_Attention(nn.Module):
     def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0., silunorm: bool = False, Mask_type):
         super().__init__()
