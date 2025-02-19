@@ -1,78 +1,106 @@
 ---
 layout: distill
-title: State Space Duality (Mamba-2) Part III - The Algorithm
+title:  LION 🦁 Part III - Chunkwise Parallel from of LION
 description: 
 tags:
 giscus_comments: false
 date: 2024-05-31
 featured: false
-thumbnail: assets/img/2024-05-31-mamba-2/ssd_algorithm.png
+thumbnail: assets/img/lion.jpg
 
 authors:
-  - name: Tri Dao
+  - name: Arshia Afzal 
     url:
     affiliations:
-      name: Princeton
-  - name: Albert Gu
+      name: Writer of blogpost
+  - name: Elias Abad Rocamora
     url:
     affiliations:
-      name: CMU
+  - name: Leyla Naz Candogan
+    url:
+    affiliations:
+  - name: Pol Puigdemont Plana
+    url:
+    affiliations:
+      name: Writer of blogpost
+  - name: Francesco Tonin
+    url:
+    affiliations:
+  - name: Yongtao Wu
+    url:
+    affiliations:
+  - name : Volkan Cevher
+    url:
+    affiliations:
+      name: All authors are with EPFL
 
 bibliography: albert.bib
 
-# Optionally, you can add a table of contents to your post.
-# NOTES:
-#   - make sure that TOC names match the actual section names
-#     for hyperlinks within the post to work correctly.
-#   - we may want to automate TOC generation in the future using
-#     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
+
 toc:
-    # if a section has subsections, you can add them as follows:
-    # subsections:
-    #   - name: Example Child Subsection 1
-    #   - name: Example Child Subsection 2
-  - name: The SSD Algorithm
+  - name: LION-Chunk
     subsections:
-      - name: "SSD Algorithm: Block Matrix Decomposition"
-      - name: "SSD Algorithm: Chunking and State Passing"
-      - name: Special Cases
-  - name: The Code
-  - name: The Details
-    subsections:
-      - name: The SSM Scan
-      - name: Stability
-      - name: Discretization
+      - name: LION-D Chunk
+      - name: LION-S Chunk
+
 
 ---
 
-1. [Part I - The Model]({% post_url 2024-05-31-mamba2-part1-model %})
-2. [Part II - The Theory]({% post_url 2024-05-31-mamba2-part2-theory %})
-3. Part III - The Algorithm
-4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
+1. [Part I - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
+2. [Part II - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
+3. Part III - Chunkwise Parallel from of LION
+4. [Part IV - Results]({% post_url 2024-05-31-mamba2-part4-systems %})
 
 
-The theoretical framework of structured state space duality
-(see [Part I]({% post_url 2024-05-31-mamba2-part1-model %}) and [Part II]({% post_url 2024-05-31-mamba2-part2-theory %}) of this series)
-connects SSMs and (linear) attention through structured matrices.
-As mentioned in Part I, this connection allows us to derive new algorithms for selective SSMs that are faster than the parallel associative scan in Mamba-1 by leveraging matrix multiplication as a primitive.
-Moreover, the connection can bring system optimizations (e.g. tensor parallelism, sequence parallelism, variable sequence length) originally developed for Transformer to SSM-land.
+Since we have now established the LION theorem, which maps full linear attention into a bidirectional RNN in [Part II]({% post_url 2024-05-31-mamba2-part2-theory %}) of this series, a key question arises:  
 
-## The SSD Algorithm
-Even though we already developed optimized scans implementations for Mamba-1, we were limited to small state expansion (typically $\mathtt{N}=16$) as the algorithm and implementation did not use tensor cores (specialized hardware units that perform matrix multiplication).
-Typically matrix multiplication (matmul) FLOPs are much faster (up to 16x) than non-matmul FLOPs: the A100 GPU has 312 TFLOPS of BF16 matmul but only 19 TFLOPS of FP32 arithmetics, and the H100 has 989 TFLOPS of BF16 matmul but only 67 TFLOPS of FP32 arithmetics.
-One of our primary goals with Mamba-2 is to **leverage tensor cores to speed up the SSM**.
+Given that RNNs are efficient and attention is fast, can we strike a balance between them?  
 
-To recap, after tying parameters and introducing the head structure, the SSM in Mamba-1 turns into SSD, a more restrictive form that has an attention-like formulation.
-And as SSD connects SSMs and structured matrices, we saw in Part II that efficient algorithms to compute SSMs correspond directly to different decompositions of the "token-mixing" or "sequence-mixing" matrix $M$.
+For causal Transformers like DeltaNet and GLA, as well as the SSD algorithm in Mamba2, a chunkwise parallel form of full linear attention could be an effective solution. Additionally, in models like Hydra, this balance is achieved by applying two SSD algorithms. However, can we derive a unified framework for chunking full linear attention, particularly for LION-S and LION-D, where the decay factor is fixed and the mask $\mathbf{M}$ follows a Toeplitz structure?  But it is important that this chunkwise form is particularly useful for **inference**, since during training, as we said, full linear attention will provide the highest throughput, especially for short sequences, which is the case for bidirectional tasks. The aim of chunking full attention in LION is to maintain a balance between efficiency and speed, particularly during inference. Since LION benefits from stable masks, it does not require chunking during training, unlike SSMs such as Hydra.
 
-{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssd_algorithm.png" title="SSD Algorithm" %}
+## LION-Chunk
 
-We can therefore create new algorithms to compute SSMs simply by looking for alternative ways to multiply this matrix, for example by decomposing it in various ways.
-A simple block decomposition of this matrix, with carefully chosen block sizes, turns out to get all the advantages of both the linear-recurrent and quadratic-attention dual forms of SSD.
-This leads to the SSD algorithm, which has 4 steps.
-There are two completely different interpretations of this algorithm!
+Chunking Full Linear Attention is simpler than for causal Linear Attention since there is no intra-chunk. Considering the chunks for queries, keys and values as $\mathbf{Q}_{[i]},\mathbf{K}_{[i]},\mathbf{V}_{[i]} \in \R^{C\times d}$ with chunk size being $C$ and total number of $N=\frac{L}{C}$ chunks, we can chunk the full Linear Attention as:
 
-### SSD Algorithm: Block Matrix Decomposition
+
+> **LION Chunk**
+> 
+> \begin{aligned}
+    \mathbf{A}_{[ij]} & = \mathbf{Q}_{[i]}\mathbf{K}_{[j]}^\top \odot \mathbf{M}_{[ij]}, \\ \mathbf{C}_{[ij]} &= \mathbf{C}_{[ij-1]} + \text{Sum} (\mathbf{A}_{[ij]}), \\
+     \mathbf{S}_{[ij]} & =\mathbf{S}_{[ij-1]} + \mathbf{A}_{[ij]} \mathbf{V}_{[j]} , \quad \mathbf{Y}_{[i]} = \frac{\mathbf{S}_{[iN]}}{\mathbf{C}_{[iN]}}
+\end{aligned}
+{: .block-tip}
+
+where $\text{Sum}$ operations applies summation over the row of the input matrix. The chunk hidden states $\mathbf{C}_{[ij]}$ and $\mathbf{S}_{[ij]}$ iterate over $j$, with the final output for chunk \(i\) computed using their last values at $j = N$. The chunk mask $\mathbf{M}_{[ij]}$ corresponds to a submatrix of the full attention mask from, defined as:
+
+$$
+\mathbf{M}_{[ij]} = \mathbf{M}_{iC+1:i(C+1),jC+1:j(C+1)} \in \mathbb{R}^{C \times C}.
+$$
+
+
+Now that this has been stated and proven, we will describe how to construct the **chunkwise mask** from the attention mask $\mathbf{M}$, particularly for the **fixed** and **selective** masks in our framework. The chunkwise form of the mask for chunk of $i$ and $j$ is annotated as $\mathbf{M}_{[ij]}$.
+
+### LION-D Chunk
+
+For the fixed mask, we have:  
+
+$$
+\begin{aligned}
+\mathbf{M}_{[ij]} = 
+\begin{cases} 
+\lambda^{|i-j|} (\frac{1}{\mathbf{L}}\hspace{1mm}\mathbf{L}^\top)& \text{if } i>j,  \\
+\lambda^{|i-j|} (\mathbf{L}\hspace{1mm}\frac{1}{\mathbf{L}^\top}) & \text{if } i<j,  \\
+\mathbf{\Gamma} & \text{if } i = j,
+\end{cases}
+\quad \mathbf{L}_i = \lambda^i, \quad \mathbf{\Gamma}_{ij}  = \lambda^{|i-j|}
+\end{aligned}
+$$
+
+
+with $\mathbf{L} \in R^C$ and $\mathbf{\Gamma} \in \R^{C\times C}$ being the vector and matrix used for creating the mask $\mathbf{M}_{[ij]}$ and they are only depending on the decay parameter $\lambda$ and the chunk size $C$. 
+
+
+### LION-S Chunk
 
 We first partition the SSM (semiseparable) matrix into blocks of size $\mathtt{Q} \times \mathtt{Q}$.
 Then, we use the properties of semiseparable matrices to factorize each off-diagonal block, which is low rank.
