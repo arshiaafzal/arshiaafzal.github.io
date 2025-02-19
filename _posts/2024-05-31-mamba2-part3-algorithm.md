@@ -146,14 +146,7 @@ def Casual_Mask_Decay_Partial(a_i , L,start,end):
 
 
 
-$$
-\mathbf{M}_{[ij]} = 
-\begin{cases} 
-\mathbf{L}^F_i \frac{1}{{\mathbf{L}^F_j}^\top} & \text{if } i > j,  \\
-\mathbf{L}^B_j \frac{1}{{\mathbf{L}^B_i}^\top} & \text{if } i < j,  \\
-\text{Tril}(\mathbf{L}^F_i \frac{1}{{\mathbf{L}^F_i}^\top}) + \text{Triu}(\mathbf{L}^B_i \frac{1}{{\mathbf{L}^B_i}^\top}) & \text{if } i=j
-\end{cases}
-$$
+
 
 
 
