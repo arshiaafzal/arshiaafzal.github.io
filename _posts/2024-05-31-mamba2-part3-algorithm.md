@@ -60,8 +60,21 @@ For causal Transformers like DeltaNet and GLA, as well as the SSD algorithm in M
 
 ## LION-Chunk
 
-Chunking Full Linear Attention is simpler than for causal Linear Attention since there is no intra-chunk. Considering the chunks for queries, keys and values as $\mathbf{Q}_{[i]}$ , $\mathbf{K}_{[i]}$ , $\mathbf{V}_{[i]} \in \mathbb{R}^{C \times d}$ with chunk size being $C$ and total number of $N=\frac{L}{C}$ chunks, we can chunk the full Linear Attention as:
+Chunkwise parallel form of full linear attention is kinda straight forward lets start by chunking the queries keys and values:
 
+
+$$
+\mathbf{Q}_{[i]} , \mathbf{K}_{[i]}, \mathbf{V}_{[i]}  \in \mathbb{R}^{C \times C}
+$$
+
+we should now shape the chunkwise form which consist of four parts:
+
+- Chunkwise form of the attention matrix $\mathbf{A}_{[ij]}$
+- Chunkwise form for the scaling matrix $\mathbf{C}$ which the chunkwise form can be written as $\mathbf{C}_{[ij]}$
+- The chunked hidden state to shape the unscaled output $\mathbf{S}_{[ij-1]}$
+- Finally the output of the chunk $i$ which is $\mathbf{Y}_{[i]}$
+
+using these chunked matrices we shape the full linear atteniton in chunk form as bellow:
 
 > **LION Chunk**
 > 
