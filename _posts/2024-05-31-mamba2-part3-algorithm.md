@@ -97,17 +97,15 @@ Now that this has been stated and proven, we will describe how to construct the 
 
 ### LION-D Chunk
 
-For the fixed mask, we have:  
+For the fixed mask, we can construct the chunkwise form of the mask $\mathbf{M}_{[ij]}$ as follows. Since the mask is a Toeplitz mask, we can decompose it as:  
 
 $$
-\begin{aligned}
 \mathbf{M}_{[ij]} = 
 \begin{cases} 
-\lambda^{|i-j|} (\frac{1}{\mathbf{L}}\hspace{1mm}\mathbf{L}^\top)& \text{if } i>j,  \\
-\lambda^{|i-j|} (\mathbf{L}\hspace{1mm}\frac{1}{\mathbf{L}^\top}) & \text{if } i<j,  \\
-\mathbf{\Gamma} & \text{if} i = j,
+\lambda^{|i-j|} (\frac{1}{\mathbf{L}} \mathbf{L}^\top) \quad  \text{if :} \quad i > j \\
+\lambda^{|i-j|} (\frac{1}{\mathbf{L}^\top} \mathbf{L}) \quad \text{if :} \quad i < j \\
+\mathbf{\Gamma} \quad \quad \quad \quad \quad \text{if :} \quad  i=j
 \end{cases}
-\end{aligned}
 $$
 
 with $\mathbf{L} \in \mathbb{R}^C$ and $\mathbf{\Gamma} \in \mathbb{R}^{C\times C}$ being the vector and matrix used for creating the chunked mask and they are only depending on the decay parameter $\lambda$ and the chunk size $C$. For the fixed decay mask we have  $\mathbf{L}_i = \lambda^i$. The chunkwise mask for chunk $i$ , $j$ can be written as:
@@ -126,7 +124,16 @@ For diagonal chunks the mask is fixed an equal to
 
 $$\mathbf{\Gamma}  = \lambda^{|i-j|} $$ 
 
-which is smaller version of the decay full mask $\mathbf{M}$.
+which is smaller version of the decay full mask $\mathbf{M}$. The code for chunkwise parallel form of the LION-D is simply in toch as:
+
+``` python
+def Casual_Mask_Decay_Partial(a_i , L,start,end):
+    idx = torch.arange(L,device=a_i.device)
+    I, J = torch.meshgrid(idx, idx[start:end], indexing='ij')
+    E = (torch.abs((I-J)).float().view(1,1,L,len(idx[start:end])))
+    M = torch.sigmoid(a_i).view(1,-1,1,1)**E
+    return M
+```
 
 
 ### LION-S Chunk
