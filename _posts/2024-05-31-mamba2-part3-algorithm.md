@@ -102,7 +102,7 @@ For the fixed mask, we have:
 {% include figure.liquid loading="eager" path="assets/img/fixed.png"%}
 
 
-with $\mathbf{L} \in \mathbb{R}^C$ and $\mathbf{\Gamma} \in \mathbb{R}^{C\times C}$ being the vector and matrix used for creating the mask  $\mathbf{M}_{[ij]}$ and they are only depending on the decay parameter $\lambda$ and the chunk size $C$. For the fixed decay mask we have  $\mathbf{L}_i = \lambda^i$. The chunkwise mask for $i, j$ can be written as:
+with $\mathbf{L} \in \mathbb{R}^C$ and $\mathbf{\Gamma} \in \mathbb{R}^{C\times C}$ being the vector and matrix used for creating the chunked mask and they are only depending on the decay parameter $\lambda$ and the chunk size $C$. For the fixed decay mask we have  $\mathbf{L}_i = \lambda^i$. The chunkwise mask for chunk $i$ , $j$ can be written as:
 
 $$
 \mathbf{M}_{[ij]} = \mathbf{L}_{[i]} \frac{1}{\mathbf{L}_{[j]}} = \lambda^{|i-j|} \mathbf{L}_{[0]} \frac{1}{\mathbf{L}_{[0]}}.
@@ -116,7 +116,7 @@ $$
 
 For diagonal chunks the mask is fixed an equal to 
 
-$$\Gamma = \lambda^{|i-j|}$$ 
+$$\Gamma = \lambda^{|i-j|} $$ 
 
 which is smaller version of the decay full mask $\mathbf{M}$.
 
