@@ -60,15 +60,15 @@ For causal Transformers like DeltaNet and GLA, as well as the SSD algorithm in M
 
 ## LION-Chunk
 
-Chunking Full Linear Attention is simpler than for causal Linear Attention since there is no intra-chunk. Considering the chunks for queries, keys and values as $\mathbf{Q}_{[i]},\mathbf{K}_{[i]},\mathbf{V}_{[i]} \in \R^{C\times d}$ with chunk size being $C$ and total number of $N=\frac{L}{C}$ chunks, we can chunk the full Linear Attention as:
+Chunking Full Linear Attention is simpler than for causal Linear Attention since there is no intra-chunk. Considering the chunks for queries, keys and values as $\mathbf{Q}_{[i]} , \mathbf{K}_{[i]} , \mathbf{V}_{[i]} \in \mathbb{R}^{C \times d}$ with chunk size being $C$ and total number of $N=\frac{L}{C}$ chunks, we can chunk the full Linear Attention as:
 
 
 > **LION Chunk**
 > 
-> \begin{aligned}
+> $$\begin{aligned}
     \mathbf{A}_{[ij]} & = \mathbf{Q}_{[i]}\mathbf{K}_{[j]}^\top \odot \mathbf{M}_{[ij]}, \\ \mathbf{C}_{[ij]} &= \mathbf{C}_{[ij-1]} + \text{Sum} (\mathbf{A}_{[ij]}), \\
      \mathbf{S}_{[ij]} & =\mathbf{S}_{[ij-1]} + \mathbf{A}_{[ij]} \mathbf{V}_{[j]} , \quad \mathbf{Y}_{[i]} = \frac{\mathbf{S}_{[iN]}}{\mathbf{C}_{[iN]}}
-\end{aligned}
+\end{aligned}$$
 {: .block-tip}
 
 where $\text{Sum}$ operations applies summation over the row of the input matrix. The chunk hidden states $\mathbf{C}_{[ij]}$ and $\mathbf{S}_{[ij]}$ iterate over $j$, with the final output for chunk \(i\) computed using their last values at $j = N$. The chunk mask $\mathbf{M}_{[ij]}$ corresponds to a submatrix of the full attention mask from, defined as:
@@ -97,7 +97,20 @@ $$
 $$
 
 
-with $\mathbf{L} \in R^C$ and $\mathbf{\Gamma} \in \R^{C\times C}$ being the vector and matrix used for creating the mask $\mathbf{M}_{[ij]}$ and they are only depending on the decay parameter $\lambda$ and the chunk size $C$. 
+with $\mathbf{L} \in \mathbb{R}^C$ and $\mathbf{\Gamma} \in \mathbb{R}^{C\times C}$ being the vector and matrix used for creating the mask $\mathbf{M}_{[ij]}$ and they are only depending on the decay parameter $\lambda$ and the chunk size $C$. For the fixed decay mask, a simpler case of the general selective mask, $\mathbf{L}^F$ and $\mathbf{L}^B$ are identical and simplify to $\mathbf{L}_i = \lambda^i$. Since the full mask follows $\mathbf{M}_{ij} = \lambda^{|i-j|}$, the chunkwise mask for $i, j$ can be written as:
+
+$$
+\mathbf{M}_{[ij]} = \mathbf{L}_{[i]} \frac{1}{\mathbf{L}_{[j]}} = \lambda^{|i-j|} \mathbf{L}_{[0]} \frac{1}{\mathbf{L}_{[0]}}.
+$$
+
+Similarly, for the upper triangular part:
+
+$$
+\mathbf{M}_{[ij]} = \lambda^{|i-j|} \frac{1}{\mathbf{L}^\top_{[0]}} \mathbf{L}_{[0]}.
+$$
+
+For diagonal chunks, the mask remains a fixed matrix $\mathbf{\Gamma} \in \mathbb{R}^{C \times C}$, where $\mathbf{\Gamma}_{ij} = \lambda^{|i-j|}$, representing a smaller version of the full fixed decay mask $\mathbf{M} \in \mathbb{R}^{L \times L}$ with $\mathbf{M}_{ij} = \lambda^{|i-j|}$.
+
 
 
 ### LION-S Chunk
