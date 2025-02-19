@@ -122,6 +122,7 @@ out&put: \mathbf{y}_i = \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i
 {: .block-tip}
 
 
+The terms $\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$ and $\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$ are subtracted to avoid double counting. This bi-directional RNN is equivalent to scaled and masked linear attention described in previous section of this blogpost.
 
 
 ## Some Important details of our RNN
@@ -318,10 +319,14 @@ Class LION_Attention(nn.Module):
 ```
 
 
-> **Question:** We can see that RNN is more efficent than attention 
+> **Question:** As seen above, the **RNN** is more efficient than the **Transformer** since it only requires storing the output for each token, resulting in a memory complexity of **\(\mathcal{O}(L d)\)**, as opposed to storing the full attention matrix, which requires **\(\mathcal{O}(L^2 d)\)**.  Can we achieve a balance between the speed of attention parallelism and the efficiency of an RNN?
+
+
+We will answer this question in our next section by introducing LION-Chunk.
 
 
 ## Next Up
 
-In the next slide 
+- In the next section of this series, we will describe how to apply a **chunkwise parallel form** for LION, allowing us to balance between the *RNN structure* and the *attention-based* formulation.
 
+- We show the numercial results and experiments on Imagenet and C4 dataset :)
