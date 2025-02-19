@@ -183,7 +183,7 @@ The answer is **yes**! For real-world bidirectional tasks such as Vision ($L=196
 
 Unlike causal language modeling, where sequences can become extremely long, bidirectional tasks in real datasets do not suffer from the same scalability challenges.  
 
-(That being said, we believe that architectures designed for causal tasks do not directly transfer to bidirectional tasks without proper modifications. ¯\_(ツ)_/¯ )
+(That being said, we believe that architectures designed for causal tasks do not directly transfer to bidirectional tasks without proper modifications. ¯\\_(ツ)_/¯ )
 
 ## Next Up  
 
