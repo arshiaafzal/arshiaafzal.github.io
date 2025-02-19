@@ -108,6 +108,12 @@ $$
 \end{cases}
 $$
 
+The matrix $\mathbf{\Gamma}$ and the matrix $\mathbf{L}$ are presented as:
+
+$$
+\mathbf{L} = \lambda^i , \quad \mathbf{\Gamma}_{ij} = \lambda^{|i-j|}
+$$
+
 with $\mathbf{L} \in \mathbb{R}^C$ and $\mathbf{\Gamma} \in \mathbb{R}^{C\times C}$ being the vector and matrix used for creating the chunked mask and they are only depending on the decay parameter $\lambda$ and the chunk size $C$. For the fixed decay mask we have  $\mathbf{L}_i = \lambda^i$. The chunkwise mask for chunk $i$ , $j$ can be written as:
 
 $$
@@ -138,13 +144,19 @@ def Casual_Mask_Decay_Partial(a_i , L,start,end):
 
 ### LION-S Chunk
 
-We first partition the SSM (semiseparable) matrix into blocks of size $\mathtt{Q} \times \mathtt{Q}$.
-Then, we use the properties of semiseparable matrices to factorize each off-diagonal block, which is low rank.
+For selective mask creation of the chunkwise mask $\mathbf{M}_{[ij]}$ should be done seperatdly for upper and lower triangular part similr to the decau chunkwise matrix $\mathbf{M}_{[ij]}$ but a bit more complecated for diagonal as well since diagonal needs the interaction of both causal and non-causal parts. But the creation of the mask since the matrices are semi separable 
 
-1. (*Orange*) Each diagonal block is a smaller semiseparable matrix; we can compute this multiplication however we like; in particular, using the quadratic (attention-like) form of SSD.
-2. (*Green*) There are only $\mathtt{T} / \mathtt{Q}$ total different green blocks because many of them are shared. These can be computed with a batched matmul.
-3. (*Yellow*) Notice that the yellow terms themselves form a 1-semiseparable matrix; in other words, this step is equivalently to an SSM scan (on some modified $A$ factors)!
-4. (*Blue*) Similar to green, these can be computed with a batched matmul.
+$$
+\mathbf{M}_{[ij]} = 
+\begin{cases} 
+\mathbf{L}^F_i \frac{1}{{\mathbf{L}^F_j}^\top} & \text{if } i > j,  \\
+\mathbf{L}^B_j \frac{1}{{\mathbf{L}^B_i}^\top} & \text{if } i < j,  \\
+\text{Tril}(\mathbf{L}^F_i \frac{1}{{\mathbf{L}^F_i}^\top}) + \text{Triu}(\mathbf{L}^B_i \frac{1}{{\mathbf{L}^B_i}^\top}) & \text{if } i=j
+\end{cases}
+$$
+
+
+
 
 ### SSD Algorithm: Chunking and State Passing
 
