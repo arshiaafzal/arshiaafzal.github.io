@@ -122,7 +122,7 @@ out&put: \mathbf{y}_i = \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i
 {: .block-tip}
 
 
-The terms $\frac{1}{2}{{\mathbf{q}_i}}^{\top} \mathbf{k}_i \mathbf{v}_i$ and $\frac{1}{2}{{\mathbf{q}_i}}^{\top} \mathbf{k}_i$ are subtracted to avoid double counting. This bi-directional RNN is equivalent to scaled and masked linear attention, represented as $\mathbf{Y}$. The RNN derived above is equivalent to the full linear attention described in the previous section of this blog post.
+
 
 ## Some Important details of our RNN
 
