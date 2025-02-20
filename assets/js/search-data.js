@@ -30,18 +30,7 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-state-space-duality-mamba-2-part-iv-the-systems",
-      
-        title: "State Space Duality (Mamba-2) Part IV - The Systems",
-      
-      description: "",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2024/mamba2-part4-systems/";
-        
-      },
-    },{id: "post-lion-part-iv-results",
+        },{id: "post-lion-part-iv-results",
       
         title: "LION 🦁 Part IV - Results",
       
