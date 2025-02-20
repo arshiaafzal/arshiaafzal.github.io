@@ -1,7 +1,7 @@
 ---
 layout: distill
 title:  LION 🦁 Part III - Chunkwise Parallel from of LION
-description: 
+description: Explaining LION-Chunk for Balancing Memory-Speed Tradeoffs During Inference
 tags:
 giscus_comments: false
 date: 2025-02-20
