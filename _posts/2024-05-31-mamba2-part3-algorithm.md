@@ -97,40 +97,8 @@ Now that this has been stated and proven, we will describe how to construct the 
 
 ### LION-D Chunk
 
-For the fixed mask, we can construct the chunkwise form of the mask $\mathbf{M}_{[ij]}$ as follows. Since the mask is a Toeplitz mask, we can decompose it as:  
 
-$$
-\mathbf{M}_{[ij]} = 
-\begin{cases} 
-\lambda^{|i-j|} (\frac{1}{\mathbf{L}} \mathbf{L}^\top) \quad  \text{if :} \quad i > j \\
-\lambda^{|i-j|} (\frac{1}{\mathbf{L}^\top} \mathbf{L}) \quad \text{if :} \quad i < j \\
-\mathbf{\Gamma} \quad \quad \quad \quad \quad \text{if :} \quad  i=j
-\end{cases}
-$$
 
-The matrix $\mathbf{\Gamma}$ and the matrix $\mathbf{L}$ are presented as:
-
-$$
-\mathbf{L} = \lambda^i , \quad \mathbf{\Gamma}_{ij} = \lambda^{|i-j|}
-$$
-
-with $\mathbf{L} \in \mathbb{R}^C$ and $\mathbf{\Gamma} \in \mathbb{R}^{C\times C}$ being the vector and matrix used for creating the chunked mask and they are only depending on the decay parameter $\lambda$ and the chunk size $C$. For the fixed decay mask we have  $\mathbf{L}_i = \lambda^i$. The chunkwise mask for chunk $i$ , $j$ can be written as:
-
-$$
-\mathbf{M}_{[ij]} = \mathbf{L}_{[i]} \frac{1}{\mathbf{L}_{[j]}} = \lambda^{|i-j|} \mathbf{L}_{[0]} \frac{1}{\mathbf{L}_{[0]}}.
-$$
-
-Similarly, for the upper triangular part:
-
-$$
-\mathbf{M}_{[ij]} = \lambda^{|i-j|} \frac{1}{\mathbf{L}^\top_{[0]}} \mathbf{L}_{[0]}.
-$$
-
-For diagonal chunks the mask is fixed an equal to 
-
-$$\mathbf{\Gamma}  = \lambda^{|i-j|} $$ 
-
-which is smaller version of the decay full mask $\mathbf{M}$. The code for chunkwise parallel form of the LION-D is simply in toch as:
 
 ``` python
 def Casual_Mask_Decay_Partial(a_i , L,start,end):
@@ -146,14 +114,6 @@ def Casual_Mask_Decay_Partial(a_i , L,start,end):
 
 
 
-$$
-\mathbf{M}_{[ij]} = 
-\begin{cases} 
-\mathbf{L}_{[j]}^\top \frac{1}{{\mathbf{L}^F_j}^\top} & \text{if } i > j,  \\
-\mathbf{L}^B_j \frac{1}{{\mathbf{L}^B_i}^\top} & \text{if } i < j,  \\
-\text{Tril}(\mathbf{L}^F_i \frac{1}{{\mathbf{L}^F_i}^\top}) + \text{Triu}(\mathbf{L}^B_i \frac{1}{{\mathbf{L}^B_i}^\top}) & \text{if } i=j
-\end{cases}
-$$
 
 
 
