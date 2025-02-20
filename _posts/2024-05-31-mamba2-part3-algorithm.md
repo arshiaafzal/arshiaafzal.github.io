@@ -4,7 +4,7 @@ title:  LION 🦁 Part III - Chunkwise Parallel from of LION
 description: 
 tags:
 giscus_comments: false
-date: 2024-05-31
+date: 2024-02-20
 featured: false
 thumbnail: assets/img/lion.jpg
 
@@ -104,7 +104,7 @@ Let's start by chunking the attention matrix $\mathbf{A}$. To better understand 
 
 {% include figure.liquid loading="eager" path="assets/img/att_chunk.png"%}
 
-As seen above, chunking simply involves computing the queries and keys for each boxed sub-matrix, as illustrated for the upper, lower, and diagonal chunks. For every attention matrix chunk \([ij]\), the computation follows the same pattern—multiplying the corresponding queries and keys $\mathbf{Q}_{[i]} , \mathbf{K}_{[i]}$  for that chunk.  
+As seen above, chunking simply involves computing the queries and keys for each boxed sub-matrix, as illustrated for the upper, lower, and diagonal chunks. For every attention matrix chunk $[ij]$, the computation follows the same pattern—multiplying the corresponding queries and keys for that chunk.  
 
 But does the same approach apply to selective and fixed masks?  
 
@@ -119,7 +119,14 @@ Let's start with the decay mask, as it is simpler and easier to visualize. For L
 
 {% include figure.liquid loading="eager" path="assets/img/maskdec_chunk.png"%}
 
-As seen, the full mask of LION-D (or full RetNet mask) is constructed simply by the submatrix of $\Gamma$, which is a Toeplitz matrix itself. Regardless of where the chunk is located, whether in the upper or lower part of the mask matrix $\mathbf{M}$, it retains the same property—it is a fraction of the Toeplitz matrix $\Gamma$ with the factor $\lambda^{|i-j|}$.
+As seen, the full mask of LION-D (or full RetNet mask) is constructed simply by the submatrix of $\Gamma$, which is a Toeplitz matrix itself. Regardless of where the chunk is located, whether in the upper or lower part of the mask matrix $\mathbf{M}$, it retains the same property of being a fraction of the Toeplitz matrix $\Gamma$ as bellow:
+
+
+$$
+\mathbf{M}_{[ij]} = \Gamma \lambda^{|i-j|}
+$$
+
+which can simply be implemented in Pytorch.
 
 ### The code for LION-D Chunk Mask
 
@@ -146,7 +153,7 @@ Let's visualize LION-S mask as well:
 {% include figure.liquid loading="eager" path="assets/img/masksel_chunk.png"%}
 
 
-As seen above, the chunk \(1,3\), for example, has only the cumulative decay factors multiplied from the beginning up to the last three sequence elements, while the chunk \(3,1\) has only the decay factors multiplied from the end up to the first three sequence elements. And this is the reason for using the matrices \(\mathbf{L}^F\) and \(\mathbf{L}^B\) to compute the cumulative products of the decay factors, progressing from the beginning to the end of the sequence and in reverse which can be created simply by `L^F = cumprod(a)` and `L^B = cumprod(Flip(a))`. 
+As seen above, the chunk 1,3, for example, has only the cumulative decay factors multiplied from the beginning up to the last three sequence elements, while the chunk 3,1 has only the decay factors multiplied from the end up to the first three sequence elements. And this is the reason for using the matrices $\mathbf{L}^F$ and $\mathbf{L}^B$ to compute the cumulative products of the decay factors, progressing from the beginning to the end of the sequence and in reverse which can be created simply by `L^F = cumprod(a)` and `L^B = cumprod(Flip(a))`. 
 
 
 
