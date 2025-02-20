@@ -41,6 +41,17 @@ ninja.data = [{
           window.location.href = "/blog/2024/mamba2-part4-systems/";
         
       },
+    },{id: "post-lion-part-iv-results",
+      
+        title: "LION 🦁 Part IV - Results",
+      
+      description: "Comprehensive results of LION on Vision, MLM and LION variants",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2024/mamba2-part4-results/";
+        
+      },
     },{id: "post-lion-part-iii-chunkwise-parallel-from-of-lion",
       
         title: "LION 🦁 Part III - Chunkwise Parallel from of LION",
