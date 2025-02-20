@@ -34,7 +34,7 @@ ninja.data = [{
       
         title: "LION 🦁 Part III - Chunkwise Parallel from of LION",
       
-      description: "",
+      description: "Explaining LION-Chunk for Balancing Memory-Speed Tradeoffs During Inference",
       section: "Posts",
       handler: () => {
         
@@ -45,7 +45,7 @@ ninja.data = [{
       
         title: "LION 🦁 Part II - Bi-directional RNN",
       
-      description: "",
+      description: "Deriving equivalent bidirectional RNN for linear Attention",
       section: "Posts",
       handler: () => {
         
