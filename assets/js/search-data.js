@@ -41,6 +41,17 @@ ninja.data = [{
           window.location.href = "/blog/2025/mamba2-part3-algorithm/";
         
       },
+    },{id: "post-lion-part-ii-bi-directional-rnn",
+      
+        title: "LION 🦁 Part II - Bi-directional RNN",
+      
+      description: "",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/mamba2-part2-theory/";
+        
+      },
     },{id: "post-lion-part-i-full-linear-attention",
       
         title: "LION 🦁 Part I - Full Linear Attention",
@@ -61,17 +72,6 @@ ninja.data = [{
       handler: () => {
         
           window.location.href = "/blog/2024/mamba2-part4-results/";
-        
-      },
-    },{id: "post-lion-part-ii-bi-directional-rnn",
-      
-        title: "LION 🦁 Part II - Bi-directional RNN",
-      
-      description: "",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2024/mamba2-part2-theory/";
         
       },
     },{id: "news-rest-was-accepted-at-icml",
