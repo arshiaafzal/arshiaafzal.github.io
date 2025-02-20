@@ -142,18 +142,18 @@ All in one we can visulaize our framework nicely like:
 
 Now that we have created our framework let's see what are the choices of the decay factor $$\lambda_i$$ and how they resemble the famous linear Transformer models. Let's set:
 
-> $\lambda_i=1$ this results in mighty simple Linear Transformer (cite) which we refrer to as <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span> which is LION-Lit resembling Linear Transformer.
+> $\lambda_i=1$ this results in mighty simple Linear Transformer <d-cite key="katharopoulos2020transformers"></d-cite> which we refrer to as <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span> which is LION-Lit resembling Linear Transformer.
 
-> $\lambda_i=\lambda$ this results in mighty RetNet (cite) which we refrer to as <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
+> $\lambda_i=\lambda$ this results in mighty RetNet <d-cite key="sun2023retentive"></d-cite> which we refrer to as <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
 
-> $\lambda_i=\sigma(\mathbf{W}\mathbf{x}_i)$ being input dependent, and bi-directional Linear Transformer inspired by selectivity of Mamba2 (cite) which we refrer to as <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
+> $\lambda_i=\sigma(\mathbf{W}\mathbf{x}_i)$ being input dependent, and bi-directional Linear Transformer inspired by selectivity of Mamba2  <d-cite key="dao2024transformers"></d-cite> which we refrer to as <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
 
 
 We evaluate all above models, extended to bidirectional sequence modeling using LION, on several bidirectional tasks. Also as all Linear Transformers use feature mapping $\phi(.)$ to queries and keys we also applied SILU shifted $\phi(x)=$ `(SILU(x)+0.5)/(norm(SILU(x)+0.5))` non-linear activation function. Let's delve deep in each of these models in LION framework.
 
 ### LION-🔥 
 
-LION-🔥 is an extension of the very first Linear Transformer (cite). Without any masking, the bidirectional parallel form can be simply written as:
+LION-🔥 is an extension of the very first Linear Transformer. Without any masking, the bidirectional parallel form can be simply written as:
 
 $$\mathbf{Y} = Scale(\mathbf{Q} \mathbf{K}^\top )\mathbf{V} $$
 
@@ -170,7 +170,7 @@ $$
 \end{align}
 $$
 
-$$\mathbf{M}$$ above is a Toeplitz mask cite(tnn) and therefore, creating the decay mask can be made even faster using simple PyTorch commands. To ensure numerical stability, we bound the parameter $$\lambda$$ using the **sigmoid function**, setting $$\lambda = \sigma(a)$$. Without this constraint, the scalar $$\lambda^L$$ could become excessively large, leading to instability. Additionally, as we all know, summation is generally more numerically stable than multiplication. Therefore, in some cases, instead of multiplying a matrix repeatedly, we can leverage summation for improved stability. However, in practice, for **RetNet-style masks** with a fixed decay, multiplication remains stable. This allows for a more straightforward implementation when generating the mask in code:
+$$\mathbf{M}$$ above is a Toeplitz mask <d-cite key="qin2023toeplitz"></d-cite> and therefore, creating the decay mask can be made even faster using simple PyTorch commands. To ensure numerical stability, we bound the parameter $$\lambda$$ using the **sigmoid function**, setting $$\lambda = \sigma(a)$$. Without this constraint, the scalar $$\lambda^L$$ could become excessively large, leading to instability. Additionally, as we all know, summation is generally more numerically stable than multiplication. Therefore, in some cases, instead of multiplying a matrix repeatedly, we can leverage summation for improved stability. However, in practice, for **RetNet-style masks** with a fixed decay, multiplication remains stable. This allows for a more straightforward implementation when generating the mask in code:
 
 ```python
 def Decay_Mask(a , L):
@@ -238,7 +238,7 @@ $$
 
 where $\sigma(.)$ is the sigmoid function. This approach ensures numerical stability by bounding $a_i$ within the interval $[0,1]$. 
 
-**Note:** It is crucial that the activation function is a **sigmoid**, as other activations do not produce stable masks and can lead to NaN values in the loss function. To maintain stability, **chunking** is required during training. This issue has been specifically highlighted in the **Mamba2** blog post.  
+**Note:** It is crucial that the activation function is a **sigmoid**, as other activations do not produce stable masks and can lead to NaN values in the loss function. To maintain stability, **chunking** is required during training. This issue has been specifically highlighted in the **Mamba2** [blog post](https://goombalab.github.io/blog/2024/mamba2-part3-algorithm/).  
 We provide a detailed explanation in the **Results** section of this blog post, where we discuss why using **full attention** is beneficial for achieving **high throughput** during training.
 
 The code for building the mask of LION-S is so simple and flexible even in Pytorch:
@@ -329,4 +329,4 @@ We will answer this question in our next section by introducing LION-Chunk.
 
 - In the next section of this series, we will describe how to apply a **chunkwise parallel form** for LION, allowing us to balance between the *RNN structure* and the *attention-based* formulation.
 
-- We show the numercial results and experiments on Imagenet and C4 dataset :)
+- We show the numercial results and experiments on [Imagenet](https://www.image-net.org/) and [C4](https://paperswithcode.com/dataset/c4) dataset :)
