@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-lion-part-i-full-linear-attention",
+        },{id: "post-lion-part-iii-chunkwise-parallel-from-of-lion",
+      
+        title: "LION 🦁 Part III - Chunkwise Parallel from of LION",
+      
+      description: "",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/mamba2-part3-algorithm/";
+        
+      },
+    },{id: "post-lion-part-i-full-linear-attention",
       
         title: "LION 🦁 Part I - Full Linear Attention",
       
@@ -61,17 +72,6 @@ ninja.data = [{
       handler: () => {
         
           window.location.href = "/blog/2024/mamba2-part2-theory/";
-        
-      },
-    },{id: "post-lion-part-iii-chunkwise-parallel-from-of-lion",
-      
-        title: "LION 🦁 Part III - Chunkwise Parallel from of LION",
-      
-      description: "",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2024/mamba2-part3-algorithm/";
         
       },
     },{id: "news-rest-was-accepted-at-icml",
