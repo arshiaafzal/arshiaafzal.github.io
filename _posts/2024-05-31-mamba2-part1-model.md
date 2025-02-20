@@ -1,7 +1,7 @@
 ---
 layout: distill
 title: LION 🦁 Part I - Full Linear Attention
-description: 
+description: Explaining the full linear attention paradigm for bi-directional sequence modeling
 tags:
 giscus_comments: false
 date: 2025-02-20
