@@ -76,7 +76,8 @@ We evaluated LION's performance, efficiency, and training times against state-of
 | $LION-S$ | 86M | $76.3$ | $\times 1.46$ |
 | $LION-S^{\natural}$ | 86M | $79.9$ | $\times 1.68$ |
 
-As shown in the table above, LION models achieve competitive performance with vision-specific SSMs like Vim, while being significantly faster during training. LION-D performs comparably to Vim and surpasses Hydra, while training approximately 7x faster than Vim. Notably, LION-🔥 demonstrates the highest training speed across all models, showing that training with full linear attention is significantly faster than chunkwise parallel training (used in Hydra) and considerably faster than the scan algorithm, even with optimized GPU kernels (as used in Vim).\(LION-S^{\natural}\) and \(LION-D^{\natural}\) modify the order of patches in an image to better capture the locality inherent in spatial patterns. By rearranging the patch sequence, these models enhance their understanding of local structures while still leveraging the efficiency of linear attention mechanisms similar to xlstm(cite).
+As shown in the table above, LION models achieve competitive performance with vision-specific SSMs like Vim, while being significantly faster during training. LION-D performs comparably to Vim and surpasses Hydra <d-cite key="hwang2025hydra"></d-cite>, while training approximately 7x faster than Vim <d-cite key="zhu2024vision"></d-cite>. Notably, LION-🔥 demonstrates the highest training speed across all models, showing that training with full linear attention is significantly faster than chunkwise parallel training (used in Hydra) and considerably faster than the scan algorithm, even with optimized GPU kernels (as used in Vim).\(LION-S^{\natural}\) and \(LION-D^{\natural}\) modify the order of patches in an image to better capture the locality inherent in spatial patterns. By rearranging the patch sequence, these models enhance their understanding of local structures while still leveraging the efficiency of linear attention mechanisms similar to xLSTM <d-cite key="alkin2024vision"></d-cite>.
+
 ### Memory Efficiency
 
 The LION family demonstrates excellent memory efficiency across both vision and language tasks. Figure below shows inference memory usage with a batch size of 64 across different image resolutions, LION models maintain reasonable memory consumption even at high resolutions up to 2496 pixels, while adding minimal training overhead in BERT-style language modeling scenarios. In contrast, baseline models like ViT and DeiT run out of memory (OOM) at much lower resolutions, highlighting LION's memory scaling capabilities regardless of the application domain.
@@ -98,13 +99,13 @@ The LION family demonstrates remarkable training efficiency across both vision a
 {: .table-caption}
 *Training Times (relative to Transformer) ↓*
 
-For vision tasks, LION-🔥 achieves remarkable speed, training 27% faster than standard Transformers. Even the more complex LION variants maintain competitive training times, with LION-retnet and LION-S training only ~1.4x slower than Transformers. This is significantly better than competing approaches like Hydra (2.51x slower) and Vim (10.86x slower).
+For vision tasks, LION-🔥 achieves remarkable speed, training 27% faster than standard vision Transformers <d-cite key="dosovitskiy2020image"></d-cite>. Even the more complex LION variants maintain competitive training times, with LION-retnet and LION-S training only ~1.4x slower than Transformers. This is significantly better than competing approaches like Hydra (2.51x slower) and Vim (10.86x slower).
 
 In MLM tasks, the efficiency gains are even more pronounced. LION-🔥 nearly matches Transformer training speed at just 0.95x, while LION-retnet adds only 10% overhead. Even LION-S remains efficient at 1.32x. All LION variants significantly outperform Hydra's 3.13x slowdown, while Vim is not applicable to MLM tasks (marked as ✗).
 
 ## MLM Results
 
-For masked language modeling (MLM) tasks, we evaluated LION models against BERT and Hydra on both MLM pretraining and GLUE benchmark finetuning. The results show that LION variants achieve competitive performance while maintaining excellent training efficiency.
+For masked language modeling (MLM) tasks, we evaluated LION models against BERT <d-cite key="devlin2018bert"></d-cite> and Hydra on both MLM pretraining and GLUE benchmark finetuning. The results show that LION variants achieve competitive performance while maintaining excellent training efficiency.
 
 | Model | MLM Acc. | GLUE | Train. time |
 |-------|----------|------|-------------|
