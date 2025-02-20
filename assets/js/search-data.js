@@ -34,7 +34,7 @@ ninja.data = [{
       
         title: "LION 🦁 Part III - Chunkwise Parallel from of LION",
       
-      description: "Explaining LION-Chunk for Balancing Memory-Speed Tradeoffs During Inference",
+      description: "",
       section: "Posts",
       handler: () => {
         
