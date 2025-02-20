@@ -9,34 +9,30 @@ featured: false
 thumbnail: assets/img/lion.jpg
 
 authors:
-  - name: Arshia Afzal
+  - name: Arshia Afzal 
     url:
     affiliations:
-      name: EPFL
+      name: Writer of blogpost
   - name: Elias Abad Rocamora
     url:
     affiliations:
-      name: EPFL
   - name: Leyla Naz Candogan
     url:
     affiliations:
-      name: EPFL
   - name: Pol Puigdemont Plana
     url:
     affiliations:
-      name: EPFL
+      name: Writer of blogpost
   - name: Francesco Tonin
     url:
     affiliations:
-      name: EPFL
   - name: Yongtao Wu
     url:
     affiliations:
-      name: EPFL
   - name : Volkan Cevher
     url:
     affiliations:
-      name: EPFL
+      name: All authors are with EPFL
 
 bibliography: albert.bib
 
