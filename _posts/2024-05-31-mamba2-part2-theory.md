@@ -52,7 +52,7 @@ toc:
 1. [Part I - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
 2. Part II - Bi-directional RNN
 3. [Part III - Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
-4. [Part IV - Results]({% post_url 2024-05-31-mamba2-part4-systems %})
+4. [Part IV - Results]({% post_url 2024-05-31-mamba2-part4-results %})
 
 
 In [Part I]({% post_url 2024-05-31-mamba2-part1-model %}) of this series, we defined full linear attention with masking and scaling.  
