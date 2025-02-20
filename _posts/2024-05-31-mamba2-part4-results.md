@@ -70,14 +70,13 @@ We evaluated LION's performance, efficiency, and training times against state-of
 | DeiT | 86M | $\underline{81.8}$ | $\times 1$ |
 | Hydra | 104M | $81.0$ | $\times 2.51$ |
 | Vim | 98M | $\mathbf{81.9}$ | $\times 10.86$ |
-| LION-lit | 86M | $74.7$ | $\mathbf{\times 0.73}$ |
+| LION-🔥 | 86M | $74.7$ | $\mathbf{\times 0.73}$ |
 | LION-D | 86M | $77.8$ | $\times \underline{1.39}$ |
 | $LION-D^{\natural}$ | 86M | $80.2$ | $\times 1.48$ |
 | $LION-S$ | 86M | $76.3$ | $\times 1.46$ |
 | $LION-S^{\natural}$ | 86M | $79.9$ | $\times 1.68$ |
 
-As shown in the table above, LION models achieve competitive performance with vision-specific SSMs like Vim, while being significantly faster during training. LION-D performs comparably to Vim and surpasses Hydra, while training approximately 7x faster than Vim. Notably, LION-lit demonstrates the highest training speed across all models, showing that training with full linear attention is significantly faster than chunkwise parallel training (used in Hydra) and considerably faster than the scan algorithm, even with optimized GPU kernels (as used in Vim).
-
+As shown in the table above, LION models achieve competitive performance with vision-specific SSMs like Vim, while being significantly faster during training. LION-D performs comparably to Vim and surpasses Hydra, while training approximately 7x faster than Vim. Notably, LION-🔥 demonstrates the highest training speed across all models, showing that training with full linear attention is significantly faster than chunkwise parallel training (used in Hydra) and considerably faster than the scan algorithm, even with optimized GPU kernels (as used in Vim).\(LION-S^{\natural}\) and \(LION-D^{\natural}\) modify the order of patches in an image to better capture the locality inherent in spatial patterns. By rearranging the patch sequence, these models enhance their understanding of local structures while still leveraging the efficiency of linear attention mechanisms similar to xlstm(cite).
 ### Memory Efficiency
 
 The LION family demonstrates excellent memory efficiency across both vision and language tasks. Figure below shows inference memory usage with a batch size of 64 across different image resolutions, LION models maintain reasonable memory consumption even at high resolutions up to 2496 pixels, while adding minimal training overhead in BERT-style language modeling scenarios. In contrast, baseline models like ViT and DeiT run out of memory (OOM) at much lower resolutions, highlighting LION's memory scaling capabilities regardless of the application domain.
@@ -92,16 +91,16 @@ The LION family demonstrates excellent memory efficiency across both vision and 
 
 The LION family demonstrates remarkable training efficiency across both vision and language tasks. As shown in the table below, LION variants add minimal training overhead compared to standard Transformers, with some variants even training faster.
 
-| Task | LION-lit | LION-retnet | LION-S | Hydra | Vim |
+| Task | <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>  |  <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>| <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span> | Hydra | Vim |
 |------|----------|-------------|---------|--------|-----|
 | Vision | $\times 0.73$ | $\times 1.39$ | $\times 1.46$ | $\times 2.51$ | $\times 10.86$ |
 | MLM | $\times 0.95$ | $\times 1.10$ | $\times 1.32$ | $\times 3.13$ | ✗ |
 {: .table-caption}
 *Training Times (relative to Transformer) ↓*
 
-For vision tasks, LION-lit achieves remarkable speed, training 27% faster than standard Transformers. Even the more complex LION variants maintain competitive training times, with LION-retnet and LION-S training only ~1.4x slower than Transformers. This is significantly better than competing approaches like Hydra (2.51x slower) and Vim (10.86x slower).
+For vision tasks, LION-🔥 achieves remarkable speed, training 27% faster than standard Transformers. Even the more complex LION variants maintain competitive training times, with LION-retnet and LION-S training only ~1.4x slower than Transformers. This is significantly better than competing approaches like Hydra (2.51x slower) and Vim (10.86x slower).
 
-In MLM tasks, the efficiency gains are even more pronounced. LION-lit nearly matches Transformer training speed at just 0.95x, while LION-retnet adds only 10% overhead. Even LION-S remains efficient at 1.32x. All LION variants significantly outperform Hydra's 3.13x slowdown, while Vim is not applicable to MLM tasks (marked as ✗).
+In MLM tasks, the efficiency gains are even more pronounced. LION-🔥 nearly matches Transformer training speed at just 0.95x, while LION-retnet adds only 10% overhead. Even LION-S remains efficient at 1.32x. All LION variants significantly outperform Hydra's 3.13x slowdown, while Vim is not applicable to MLM tasks (marked as ✗).
 
 ## MLM Results
 
@@ -111,9 +110,9 @@ For masked language modeling (MLM) tasks, we evaluated LION models against BERT 
 |-------|----------|------|-------------|
 | BERT | $\underline{69.88}$ | $\mathbf{82.95}$ | $\times 1$ |
 | Hydra | $\mathbf{71.18}$ | $\underline{81.77}$ | $\times 3.13$ |
-| LION-lit | $67.11$ | $80.76$ | $\times \mathbf{0.95}$ |
-| LION-retnet | $68.64$ | $81.34$ | $\times \underline{1.10}$ |
-| LION-S | $69.16$ | $81.58$ | $\times 1.32$ |
+| <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span> | $67.11$ | $80.76$ | $\times \mathbf{0.95}$ |
+| <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span> | $68.64$ | $81.34$ | $\times \underline{1.10}$ |
+| <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span> | $69.16$ | $81.58$ | $\times 1.32$ |
 {: .table-caption}
 *C4 MLM and GLUE results for the LARGE scale ($334$M). For each dataset, the best and second best results are highlighted with bold and underline respectively.*
 
@@ -147,10 +146,27 @@ Looking more closely at the memory-time trade-off across different LION variants
 
 ### Selective Chunking Results
 
-The final analysis examines how different chunking strategies perform across sequence lengths. This helps inform which approach is best for different scenarios - chunking tends to be optimal for LION-lit and LION-RetNet when memory allows, while RNN can be preferable for handling complex masks at high resolutions.
+The final analysis examines how different chunking strategies perform across sequence lengths. This helps inform which approach is best for different scenarios - chunking tends to be optimal for LION-🔥 and LION-RetNet when memory allows, while RNN can be preferable for handling complex masks at high resolutions.
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0">
         {% include figure.liquid loading="eager" path="assets/img/selective_chunking.svg" title="Selective Chunking Analysis" caption="Performance comparison of selective chunking approaches across different sequence lengths." class="img-fluid rounded z-depth-1" %}
     </div>
 </div>
+
+
+## Future Directions
+
+- **Expanding LION’s Potential:** Our experiments focused on three main mask choices, but LION has the potential to accelerate other Linear Transformer variants for bidirectional tasks.  
+
+- **Optimizing Chunkwise Parallelism:** The chunkwise parallel implementation during inference was done in PyTorch, with room for optimization through GPU kernel programming to reduce I/O overhead and improve speed.  
+
+- **Stabilizing Hydra and Mamba with LION:** Hydra (cite) and Mamba (cite) activations led to unstable training under full attention, suggesting LION could be used to stabilize these variants in the future.
+
+## Last Points
+
+
+We highly encourage the readers of this blog post to actually read our paper for way more details about the LION model and experimental setups.
+
+
+
