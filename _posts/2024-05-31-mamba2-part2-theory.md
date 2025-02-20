@@ -1,7 +1,7 @@
 ---
 layout: distill
 title:  LION 🦁 Part II - Bi-directional RNN
-description: 
+description: Deriving equivalent bidirectional RNN for linear Attention
 tags:
 giscus_comments: false
 date: 2025-02-20
