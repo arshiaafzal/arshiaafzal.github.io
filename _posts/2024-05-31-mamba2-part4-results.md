@@ -55,6 +55,13 @@ toc:
 
 ---
 
+1. [Part I - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
+2. [Part II - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
+3. [Part III -  Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
+4. Part IV - Results
+
+
+
 In this fourth part of our LION series, we will present and discuss a selection of experimental results across various domains, including vision tasks, masked language modeling (MLM), and different LION architectures. These results not only highlight LION's versatility and efficiency across diverse applications but also serve as a preview of the comprehensive findings detailed in the full paper.
 
 ## Image Classification Performance Overview
