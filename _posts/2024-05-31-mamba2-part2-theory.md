@@ -4,7 +4,7 @@ title:  LION 🦁 Part II - Bi-directional RNN
 description: 
 tags:
 giscus_comments: false
-date: 2024-05-31
+date: 2025-02-20
 featured: false
 thumbnail: assets/img/lion.jpg
 
