@@ -56,7 +56,7 @@ Since we have now established the LION theorem, which maps full linear attention
 
 Given that RNNs are efficient and attention is fast, can we strike a balance between them?  
 
-For causal Transformers like DeltaNet and GLA, as well as the SSD algorithm in Mamba2, a chunkwise parallel form of full linear attention could be an effective solution. Additionally, in models like Hydra, this balance is achieved by applying two SSD algorithms. However, can we derive a unified framework for chunking full linear attention, particularly for LION-S and LION-D, where the decay factor is fixed and the mask $\mathbf{M}$ follows a Toeplitz structure?  But it is important that this chunkwise form is particularly useful for **inference**, since during training, as we said, full linear attention will provide the highest throughput, especially for short sequences, which is the case for bidirectional tasks. The aim of chunking full attention in LION is to maintain a balance between efficiency and speed, particularly during inference. Since LION benefits from stable masks, it does not require chunking during training, unlike SSMs such as Hydra.
+For causal Transformers like DeltaNet and GLA, as well as the SSD algorithm in Mamba2, a chunkwise parallel form of full linear attention could be an effective solution. Additionally, in models like Hydra, this balance is achieved by applying two SSD algorithms. However, can we derive a unified framework for chunking full linear attention, particularly for LION-S and LION-D, where the decay factor is fixed and the mask $\mathbf{M}$ follows a Toeplitz structure?  But it is important that this chunkwise form is particularly useful for **inference**, since during training, as we said, full linear attention will provide the highest throughput, especially for short sequences, which is the case for bidirectional tasks. The aim of chunking full attention in LION is to maintain a balance between efficiency and speed, particularly during inference. Since LION benefits from stable masks, it does not require chunking during training, unlike SSMs such as Hydra  <d-cite key="hwang2025hydra"></d-cite>. Also, **Gated Linear Attention (GLA)**  <d-cite key="yang2024gated"></d-cite>, **DeltaNet** <d-cite key="yang2024parallelizing"></d-cite>, and the **SSD algorithm of Mamba2** <d-cite key="dao2024transformers"></d-cite> are chunking methods specifically designed for **causal models**.
 
 ## LION-Chunk
 
@@ -185,5 +185,5 @@ Now that we have all elemnts in place let's see how these models are working in 
 
 In the [final part of this series]({% post_url 2024-05-31-mamba2-part4-results %}), we present the advantages of using LION compared to other methods for training SSMs or Linear Transformers.
 
-We will present the trade-offs for different LION models and compare them with other well-known SSMs and Softmax Transformers.
+We will present the trade-offs for different LION 🦁 models and compare them with other well-known SSMs and Softmax Transformers.
 
