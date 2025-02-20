@@ -40,8 +40,8 @@ bibliography: albert.bib
 toc:
   - name: LION-Chunk
     subsections:
-      - name: LION-D Chunk
       - name: LION-S Chunk
+      - name: LION-D Chunk
 
 
 ---
@@ -104,22 +104,27 @@ Let's start by chunking the attention matrix $\mathbf{A}$. To better understand 
 
 {% include figure.liquid loading="eager" path="assets/img/att_chunk.png"%}
 
-As seen above actually the chunking is just calculating the query and keys respective for each boxed sub-matrix which we have shown three in above illustrarion for upper, lower and diagonal chunks. As seen for all the attention matrix for the chunk $ij$ is calculated the same way only by multiplying the respective queries $\mathbf{Q}_{[i]}$ and keys $\mathbf{Q}_{[j]}$ for that chunk
+As seen above, chunking simply involves computing the queries and keys for each boxed sub-matrix, as illustrated for the upper, lower, and diagonal chunks. For every attention matrix chunk \([ij]\), the computation follows the same pattern—multiplying the corresponding queries and keys $\mathbf{Q}_{[i]} , \mathbf{K}_{[i]}$  for that chunk.  
 
+But does the same approach apply to selective and fixed masks?  
 
-{% include figure.liquid loading="eager" path="assets/img/maskdec_chunk.png"%}
+In reality, chunking the attention mask is slightly different and even more critical than chunking attention itself due to its unique structure. Below, we provide a detailed explanation of how to chunk the attention mask for LION-D and LION-S.
 
-{% include figure.liquid loading="eager" path="assets/img/masksel_chunk.png"%}
-
+🚀 **Note:** Please pay close attention to this section, as the visualization and details of this part of chunking are not included in the paper.
 
 
 ### LION-D Chunk
 
+Let's start with the decay mask, as it is simpler and easier to visualize. For LION-D with a fixed mask, the final mask is a Toeplitz mask constructed using the scalar decay factor $\lambda$.  Now, let's examine how the mask is structured.
 
+{% include figure.liquid loading="eager" path="assets/img/maskdec_chunk.png"%}
 
+As seen, the full mask of LION-D (or full RetNet mask) is constructed simply by the submatrix of $\Gamma$, which is a Toeplitz matrix itself. Regardless of where the chunk is located, whether in the upper or lower part of the mask matrix $\mathbf{M}$, it retains the same property—it is a fraction of the Toeplitz matrix $\Gamma$ with the factor $\lambda^{|i-j|}$.
+
+### The code for LION-D Chunk Mask
 
 ``` python
-def Casual_Mask_Decay_Partial(a_i , L,start,end):
+def Mask_Decay_Partial(a_i , L,start,end):
     idx = torch.arange(L,device=a_i.device)
     I, J = torch.meshgrid(idx, idx[start:end], indexing='ij')
     E = (torch.abs((I-J)).float().view(1,1,L,len(idx[start:end])))
@@ -130,9 +135,48 @@ def Casual_Mask_Decay_Partial(a_i , L,start,end):
 
 ### LION-S Chunk
 
+Despite LION-D the full mask of LION-S is more tricky since the upper lower and the diagonal part of the mask are shaped differently:
+
+- The <span style="background-color: rgb(255, 248, 203); padding: 3px; color:black">Upper</span> part is influenced only by the decay factors applied from the end to the beginning of the sequence.  
+- The <span style="background-color: rgb(254, 200, 201); padding: 3px; color:black">Diagonal</span> part incorporates contributions from both directions, spanning from the start to the end and from the end to the start.  
+- The <span style="background-color: rgb(208, 243, 248); padding: 3px; color:black">Lower</span> part is influenced only by the decay factors applied from the beginning to the end of the sequence.
+
+Let's visualize LION-S mask as well:
+  
+{% include figure.liquid loading="eager" path="assets/img/masksel_chunk.png"%}
+
+
+As seen above, the chunk \(1,3\), for example, has only the cumulative decay factors multiplied from the beginning up to the last three sequence elements, while the chunk \(3,1\) has only the decay factors multiplied from the end up to the first three sequence elements. And this is the reason for using the matrices \(\mathbf{L}^F\) and \(\mathbf{L}^B\) to compute the cumulative products of the decay factors, progressing from the beginning to the end of the sequence and in reverse which can be created simply by `L^F = cumprod(a)` and `L^B = cumprod(Flip(a))`. 
+
+
+
+### The code for LION-S Chunk Mask
+
+``` python
+def mask_forward(tensor,chunk_index,chunk_len):
+    cumprod = torch.clamp(tensor.cumprod(dim=-1),1e-6)
+    A = cumprod.unsqueeze(-1) / cumprod.unsqueeze(-2)[...,chunk_index*chunk_len:(chunk_index+1)*chunk_len]
+    return torch.tril(A,diagonal = -chunk_index*chunk_len)
+
+def mask_backward(tensor,chunk_index,chunk_len):
+    cumprod = torch.clamp(tensor.cumprod(dim=-1),1e-6)
+    A = cumprod.unsqueeze(-1)[...,chunk_index*chunk_len:(chunk_index+1)*chunk_len,:] / cumprod.unsqueeze(-2)
+    return torch.triu(A.transpose(-1,-2),diagonal = -chunk_index*chunk_len)
+
+def Mask_Selective_Partial(vec,chunk_index,chunk_len):
+    B,H,L = vec.shape
+    A_for = create_matrix_from_tensor_forward(torch.cat((torch.ones_like(vec[..., :2]), vec[...,1:-1]), dim=-1),chunk_index,chunk_len)
+    A_back = create_matrix_from_tensor_backward(torch.cat((torch.ones_like(vec[..., :1]), vec[...,1:]), dim=-1),chunk_index,chunk_len)
+    I  = torch.diag_embed(torch.ones((B,H,L-chunk_index*chunk_len)),offset = -chunk_index*chunk_len)[...,:A_for.shape[-1]]
+    return A_for + A_back - I.to(A_for.device)
+```
+
+
+Now that we have all elemnts in place let's see how these models are working in practice on real-world datasets for masked language modeling and image classification.
 
 ## Next Up
 
-In the [final part of this series]({% post_url 2024-05-31-mamba2-part4-results %}), we finally show the advantages of using LION compared to other ways of training SSM or Linear Transformers 
+In the [final part of this series]({% post_url 2024-05-31-mamba2-part4-results %}), we present the advantages of using LION compared to other methods for training SSMs or Linear Transformers.
 
+We will present the trade-offs for different LION models and compare them with other well-known SSMs and Softmax Transformers.
 
