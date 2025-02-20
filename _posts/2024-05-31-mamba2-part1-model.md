@@ -57,9 +57,9 @@ toc:
 3. [Part III -  Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
 4. [Part IV - Results]({% post_url 2024-05-31-mamba2-part4-results %})
 
-Recently, Transformers with Linear Attention and State Space Models (SSMs) have gained significant popularity for causal sequence modeling due to their ability to efficiently support both parallel training and RNN-like inference. These models have demonstrated impressive accuracy in causal tasks, particularly in causal language modeling. However, their evaluation in bi-directional sequence modeling, such as image classification and masked language modeling, has been relatively limited. In contrast, SSMs, particularly Mamba, have been recently evaluated in vision tasks, including models like Vision Mamba and Hydra, which represent official extensions of Mamba for bi-directional sequence modeling.
+Recently, Transformers with Linear Attention <d-cite key="katharopoulos2020transformers"></d-cite> and State Space Models <d-cite key="gu2023mamba"></d-cite> <d-cite key="gu2022efficiently"></d-cite> <d-cite key="dao2024transformers"></d-cite> (SSMs) have gained significant popularity for causal sequence modeling due to their ability to efficiently support both parallel training and RNN-like inference. These models have demonstrated impressive accuracy in causal tasks, particularly in causal language modeling. However, their evaluation in bi-directional sequence modeling, such as image classification and masked language modeling, has been relatively limited. In contrast, SSMs, particularly Mamba <d-cite key="gu2023mamba"></d-cite>, have been recently evaluated in vision tasks, including models like Vision Mamba <d-cite key="zhu2024vision"></d-cite> and Hydra <d-cite key="hwang2025hydra"></d-cite>, which represent official extensions of Mamba for bi-directional sequence modeling. 
 
-We’re curious to explore whether Linear Attention Transformers, including the simple Linear Transformer and RetNet or simple selctive varient, can perform effectively on bi-directional sequence modeling. Or more precicley what modifications are needed to adapt them for tasks like image classification and masked language modeling? 😊
+We’re curious to explore whether Linear Attention Transformers, including the simple Linear Transformer <d-cite key="katharopoulos2020transformers"></d-cite> and RetNet <d-cite key="sun2023retentive"></d-cite> or simple selctive varient, can perform effectively on bi-directional sequence modeling. Or more precicley what modifications are needed to adapt them for tasks like image classification and masked language modeling? 😊
 
 Let’s break this down with three key questions:
 
@@ -69,11 +69,11 @@ Given that Linear Transformers can be formulated as RNNs and offer efficiency be
 
 ### Question 2 (Performance)
 
-Assuming we’ve addressed the first question, can simple Linear Transformers—such as Linear Trans (cite), RetNet (cite), or even basic linear attention with a selective decay factor—perform well on bi-directional tasks, such as image classification or masked language modeling?
+Assuming we’ve addressed the first question, can simple Linear Transformers—such as Linear Trans <d-cite key="katharopoulos2020transformers"></d-cite>, RetNet <d-cite key="sun2023retentive"></d-cite>, or even basic linear attention with a selective decay factor—perform well on bi-directional tasks, such as image classification or masked language modeling?
 
 ### Question 3 (Training Throughput)
 
-While bi-directional SSMs like Hydra and Vision Mamba show impressive performance on bi-directional sequence modeling tasks, they tend to be difficult and slow to train compared to Transformers with full attention (e.g., ViT and BERT). If we’ve answered the first two questions affirmatively, can Linear Transformers match the accuracy of deep bi-directional SSMs while maintaining the training throughput of softmax Transformers and the inference efficiency of RNNs/SSMs? Also, maybe we can achive this without need for CUDA kernel programming and simply using torch ;)
+While bi-directional SSMs like Hydra and Vision Mamba show impressive performance on bi-directional sequence modeling tasks, they tend to be difficult and slow to train compared to Transformers with full attention (e.g., ViT <d-cite key="dosovitskiy2020image"></d-cite> and BERT <d-cite key="devlin2018bert"></d-cite>). If we’ve answered the first two questions affirmatively, can Linear Transformers match the accuracy of deep bi-directional SSMs while maintaining the training throughput of softmax Transformers and the inference efficiency of RNNs/SSMs? Also, maybe we can achive this without need for CUDA kernel programming and simply using torch ;)
 
 
 ## From Causal to Full Linear Attention
@@ -92,7 +92,7 @@ Above is the RNN form of the Linear Attention which have the parallel form of:
 $$\mathbf{Y} = Scale \left(\mathbf{Q} \mathbf{K}^\top  \odot \mathbf{M}^C \right)$$
 
 
-and the mask $\mathbf{M}^C$ is a lower triangular binary matrix. Causal Linear Transformers are a class of models introduced following the development of Linear Transformers as shown above (cite). These models typically define a recurrence of the form:  
+and the mask $\mathbf{M}^C$ is a lower triangular binary matrix. Causal Linear Transformers are a class of models introduced following the development of Linear Transformers as shown above <d-cite key="katharopoulos2020transformers"></d-cite>. These models typically define a recurrence of the form:  
 
 $$
 \begin{aligned} 
