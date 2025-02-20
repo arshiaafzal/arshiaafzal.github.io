@@ -144,7 +144,7 @@ $$
 
 To recap, the full output of full LInear Attention can be presented as:
 
-<span style="font-size: 0.75em;">
+<span style="font-size: 0.7em;">
 $$
 \mathbf{Y} = Scale
     \left(
