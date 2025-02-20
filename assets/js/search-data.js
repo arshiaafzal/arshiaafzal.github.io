@@ -56,7 +56,7 @@ ninja.data = [{
       
         title: "LION 🦁 Part I - Full Linear Attention",
       
-      description: "",
+      description: "Explaining the full linear attention paradigm for bi-directional sequence modeling",
       section: "Posts",
       handler: () => {
         
