@@ -30,9 +30,9 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-lion-part-iii-chunkwise-parallel-from-of-lion",
+        },{id: "post-lion-part-3-chunkwise-parallel-from-of-lion",
       
-        title: "LION 🦁 Part III - Chunkwise Parallel from of LION",
+        title: "LION 🦁 Part 3 - Chunkwise Parallel from of LION",
       
       description: "Explaining LION-Chunk for Balancing Memory-Speed Tradeoffs During Inference",
       section: "Posts",
@@ -63,9 +63,9 @@ ninja.data = [{
           window.location.href = "/blog/2025/mamba2-part1-model/";
         
       },
-    },{id: "post-lion-part-iv-results",
+    },{id: "post-lion-part-4-results",
       
-        title: "LION 🦁 Part IV - Results",
+        title: "LION 🦁 Part 4 - Results",
       
       description: "Comprehensive results of LION on Vision, MLM and LION variants",
       section: "Posts",
