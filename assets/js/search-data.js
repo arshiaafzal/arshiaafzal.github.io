@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-lion-part-3-chunkwise-parallel-from-of-lion",
+        },{id: "post-lion-part-4-results",
+      
+        title: "LION 🦁 Part 4 - Results",
+      
+      description: "Comprehensive results of LION on Vision, MLM and LION variants",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/mamba2-part4-results/";
+        
+      },
+    },{id: "post-lion-part-3-chunkwise-parallel-from-of-lion",
       
         title: "LION 🦁 Part 3 - Chunkwise Parallel from of LION",
       
@@ -61,17 +72,6 @@ ninja.data = [{
       handler: () => {
         
           window.location.href = "/blog/2025/mamba2-part1-model/";
-        
-      },
-    },{id: "post-lion-part-iv-results",
-      
-        title: "LION 🦁 Part IV - Results",
-      
-      description: "Comprehensive results of LION on Vision, MLM and LION variants",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2024/mamba2-part4-results/";
         
       },
     },{id: "news-rest-was-accepted-at-icml",
