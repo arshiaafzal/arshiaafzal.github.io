@@ -1,6 +1,6 @@
 ---
 layout: distill
-title: LION 🦁 Part IV - Results
+title: LION 🦁 Part 4 - Results
 description: Comprehensive results of LION on Vision, MLM and LION variants
 tags: math ai
 giscus_comments: false
@@ -51,10 +51,10 @@ toc:
 
 ---
 
-1. [Part I - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
-2. [Part II - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
-3. [Part III -  Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
-4. Part IV - Results
+1. [Part 1 - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
+2. [Part 2 - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
+3. [Part 3 -  Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
+4. Part 4 - Results
 
 
 
