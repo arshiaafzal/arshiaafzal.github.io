@@ -1,6 +1,6 @@
 ---
 layout: distill
-title: LION 🦁 Part I - Full Linear Attention
+title: LION 🦁 Part 1 - Full Linear Attention
 description: Explaining the full linear attention paradigm for bi-directional sequence modeling
 tags:
 giscus_comments: false
@@ -52,10 +52,10 @@ toc:
 
 **We sincerely appreciate Albert Gu and Tri Dao for their insightful blog posts, which have been invaluable in shaping our own!**
 
-1. Part I - Full Linear Attention
-2. [Part II - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
-3. [Part III -  Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
-4. [Part IV - Results]({% post_url 2024-05-31-mamba2-part4-results %})
+1. Part 1 - Full Linear Attention
+2. [Part 2 - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
+3. [Part 3 -  Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
+4. [Part 4 - Results]({% post_url 2024-05-31-mamba2-part4-results %})
 
 Recently, Transformers with Linear Attention <d-cite key="katharopoulos2020transformers"></d-cite> and State Space Models <d-cite key="gu2023mamba"></d-cite> <d-cite key="gu2022efficiently"></d-cite> <d-cite key="dao2024transformers"></d-cite> (SSMs) have gained significant popularity for causal sequence modeling due to their ability to efficiently support both parallel training and RNN-like inference. These models have demonstrated impressive accuracy in causal tasks, particularly in causal language modeling. However, their evaluation in bi-directional sequence modeling, such as image classification and masked language modeling, has been relatively limited. In contrast, SSMs, particularly Mamba <d-cite key="gu2023mamba"></d-cite>, have been recently evaluated in vision tasks, including models like Vision Mamba <d-cite key="zhu2024vision"></d-cite> and Hydra <d-cite key="hwang2025hydra"></d-cite>, which represent official extensions of Mamba for bi-directional sequence modeling. 
 
