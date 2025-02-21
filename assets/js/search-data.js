@@ -63,9 +63,9 @@ ninja.data = [{
           window.location.href = "/blog/2025/mamba2-part1-model/";
         
       },
-    },{id: "post-lion-part-4-results",
+    },{id: "post-lion-part-iv-results",
       
-        title: "LION 🦁 Part 4 - Results",
+        title: "LION 🦁 Part IV - Results",
       
       description: "Comprehensive results of LION on Vision, MLM and LION variants",
       section: "Posts",
