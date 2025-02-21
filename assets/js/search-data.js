@@ -52,9 +52,9 @@ ninja.data = [{
           window.location.href = "/blog/2025/mamba2-part2-theory/";
         
       },
-    },{id: "post-lion-part-i-full-linear-attention",
+    },{id: "post-lion-part-1-full-linear-attention",
       
-        title: "LION 🦁 Part I - Full Linear Attention",
+        title: "LION 🦁 Part 1 - Full Linear Attention",
       
       description: "Explaining the full linear attention paradigm for bi-directional sequence modeling",
       section: "Posts",
