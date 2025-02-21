@@ -41,9 +41,9 @@ ninja.data = [{
           window.location.href = "/blog/2025/mamba2-part3-algorithm/";
         
       },
-    },{id: "post-lion-part-ii-bi-directional-rnn",
+    },{id: "post-lion-part-2-bi-directional-rnn",
       
-        title: "LION 🦁 Part II - Bi-directional RNN",
+        title: "LION 🦁 Part 2 - Bi-directional RNN",
       
       description: "Deriving equivalent bidirectional RNN for linear Attention",
       section: "Posts",
