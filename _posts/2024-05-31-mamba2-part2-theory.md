@@ -131,12 +131,12 @@ The terms $\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$ and $\mathbf{k}_i}{2}$ ar
 
 > Forward and backward recurrences run independently, completing in $$L$$ time steps with $$L$$ memory units, compared to $$2L$$ in the naive approach. 
 
-{% include figure.liquid loading="eager" path="assets/img/memory.png" title="Memory Allocation of LION in RNN form" caption="Memory allocation in LION during Forward and Backward recurrences." %}
+{% include figure.liquid loading="eager" path="assets/img/memory.svg" title="Memory Allocation of LION in RNN form" caption="Memory allocation in LION during Forward and Backward recurrences." %}
 
 
 All in one we can visulaize our framework nicely like:
 
-{% include figure.liquid loading="eager" path="assets/img/frlion.png" title="LION" caption="LION 🦁: Our framework for training in parallel using Full Linear Attention which also supports the efficient bi-directional RNN format." %}
+{% include figure.liquid loading="eager" path="assets/img/frlion.svg" title="LION" caption="LION 🦁: Our framework for training in parallel using Full Linear Attention which also supports the efficient bi-directional RNN format." %}
 
 ## Different Masks of LION
 
