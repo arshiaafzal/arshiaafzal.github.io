@@ -1,6 +1,6 @@
 ---
 layout: distill
-title:  LION 🦁 Part III - Chunkwise Parallel from of LION
+title:  LION 🦁 Part 3 - Chunkwise Parallel from of LION
 description: Explaining LION-Chunk for Balancing Memory-Speed Tradeoffs During Inference
 tags:
 giscus_comments: false
@@ -46,13 +46,13 @@ toc:
 
 ---
 
-1. [Part I - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
-2. [Part II - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
-3. Part III - Chunkwise Parallel from of LION
-4. [Part IV - Results]({% post_url 2024-05-31-mamba2-part4-results %})
+1. [Part 1 - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
+2. [Part 2 - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
+3. Part 3 - Chunkwise Parallel from of LION
+4. [Part 4 - Results]({% post_url 2024-05-31-mamba2-part4-results %})
 
 
-Since we have now established the LION theorem, which maps full linear attention into a bidirectional RNN in [Part II]({% post_url 2024-05-31-mamba2-part2-theory %}) of this series, a key question arises:  
+Since we have now established the LION theorem, which maps full linear attention into a bidirectional RNN in [Part 2]({% post_url 2024-05-31-mamba2-part2-theory %}) of this series, a key question arises:  
 
 Given that RNNs are efficient and attention is fast, can we strike a balance between them?  
 
