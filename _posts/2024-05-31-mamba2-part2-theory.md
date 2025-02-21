@@ -1,6 +1,6 @@
 ---
 layout: distill
-title:  LION 🦁 Part II - Bi-directional RNN
+title:  LION 🦁 Part 2 - Bi-directional RNN
 description: Deriving equivalent bidirectional RNN for linear Attention
 tags:
 giscus_comments: false
@@ -49,13 +49,13 @@ toc:
 
 ---
 
-1. [Part I - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
-2. Part II - Bi-directional RNN
-3. [Part III - Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
-4. [Part IV - Results]({% post_url 2024-05-31-mamba2-part4-results %})
+1. [Part 1 - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
+2. Part 2 - Bi-directional RNN
+3. [Part 3 - Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
+4. [Part 4 - Results]({% post_url 2024-05-31-mamba2-part4-results %})
 
 
-In [Part I]({% post_url 2024-05-31-mamba2-part1-model %}) of this series, we defined full linear attention with masking and scaling.  
+In [Part 1]({% post_url 2024-05-31-mamba2-part1-model %}) of this series, we defined full linear attention with masking and scaling.  
 Similar to all linear transformers designed for causal sequence modeling, we aim to derive an RNN form for efficiency during inference.  
 In this section, we establish and theoretically demonstrate the equivalent bidirectional RNN for the Linear Transformer.
 
