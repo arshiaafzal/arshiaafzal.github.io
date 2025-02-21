@@ -47,7 +47,7 @@ toc:
 
 
 [[Paper](https://arxiv.org/abs/2405.21060)]
-[[Code](https://github.com/state-spaces/mamba)]
+Code Coming soon ... (but most important parts are included in this blogpost :))
 
 
 **We sincerely appreciate Albert Gu and Tri Dao for their insightful blog posts, which have been invaluable in shaping our own!**
