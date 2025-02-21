@@ -2,7 +2,7 @@
 layout: distill
 title: LION 🦁 Part 4 - Results
 description: Comprehensive results of LION on Vision, MLM and LION variants
-tags: math ai
+tags: 
 giscus_comments: false
 date: 2025-02-20
 featured: false
