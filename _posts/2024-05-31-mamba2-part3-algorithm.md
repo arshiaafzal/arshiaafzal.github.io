@@ -1,6 +1,6 @@
 ---
 layout: distill
-title:  LION 🦁 Part III - Chunkwise Parallel from of LION
+title:  LION 🦁 Part 3 - Chunkwise Parallel from of LION
 description: Explaining LION-Chunk for Balancing Memory-Speed Tradeoffs During Inference
 tags:
 giscus_comments: false
@@ -46,13 +46,13 @@ toc:
 
 ---
 
-1. [Part I - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
-2. [Part II - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
-3. Part III - Chunkwise Parallel from of LION
-4. [Part IV - Results]({% post_url 2024-05-31-mamba2-part4-results %})
+1. [Part 1 - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
+2. [Part 2 - Bi-directional RNN]({% post_url 2024-05-31-mamba2-part2-theory %})
+3. Part 3 - Chunkwise Parallel from of LION
+4. [Part 4 - Results]({% post_url 2024-05-31-mamba2-part4-results %})
 
 
-Since we have now established the LION theorem, which maps full linear attention into a bidirectional RNN in [Part II]({% post_url 2024-05-31-mamba2-part2-theory %}) of this series, a key question arises:  
+Since we have now established the LION theorem, which maps full linear attention into a bidirectional RNN in [Part 2]({% post_url 2024-05-31-mamba2-part2-theory %}) of this series, a key question arises:  
 
 Given that RNNs are efficient and attention is fast, can we strike a balance between them?  
 
@@ -102,7 +102,7 @@ Don't be intimidated by the above formulation—it is actually quite intuitive w
 Let's start by chunking the attention matrix $\mathbf{A}$. To better understand this, let's examine the full attention for a sequence of $L=9$ with $C=3$ chunk size in detail below:
 
 
-{% include figure.liquid loading="eager" path="assets/img/att_chunk.png"%}
+{% include figure.liquid loading="eager" path="assets/img/att_chunk.svg"%}
 
 As seen above, chunking simply involves computing the queries and keys for each boxed sub-matrix, as illustrated for the upper, lower, and diagonal chunks. For every attention matrix chunk $[ij]$, the computation follows the same pattern—multiplying the corresponding queries and keys for that chunk.  
 
@@ -117,7 +117,7 @@ In reality, chunking the attention mask is slightly different and even more crit
 
 Let's start with the decay mask, as it is simpler and easier to visualize. For LION-D with a fixed mask, the final mask is a Toeplitz mask constructed using the scalar decay factor $\lambda$.  Now, let's examine how the mask is structured.
 
-{% include figure.liquid loading="eager" path="assets/img/maskdec_chunk.png"%}
+{% include figure.liquid loading="eager" path="assets/img/maskdec_chunk.svg"%}
 
 As seen, the full mask of LION-D (or full RetNet mask) is constructed simply by the submatrix of $\Gamma$, which is a Toeplitz matrix itself. Regardless of where the chunk is located, whether in the upper or lower part of the mask matrix $\mathbf{M}$, it retains the same property of being a fraction of the Toeplitz matrix $\Gamma$ as bellow:
 
@@ -150,7 +150,7 @@ Despite LION-D the full mask of LION-S is more tricky since the upper lower and 
 
 Let's visualize LION-S mask as well:
   
-{% include figure.liquid loading="eager" path="assets/img/masksel_chunk.png"%}
+{% include figure.liquid loading="eager" path="assets/img/masksel_chunk.svg"%}
 
 
 As seen above, the chunk 1,3, for example, has only the cumulative decay factors multiplied from the beginning up to the last three sequence elements, while the chunk 3,1 has only the decay factors multiplied from the end up to the first three sequence elements. And this is the reason for using the matrices $\mathbf{L}^F$ and $\mathbf{L}^B$ to compute the cumulative products of the decay factors, progressing from the beginning to the end of the sequence and in reverse which can be created simply by `L^F = cumprod(a)` and `L^B = cumprod(Flip(a))`. 

@@ -1,6 +1,6 @@
 ---
 layout: distill
-title:  LION 🦁 Part II - Bi-directional RNN
+title:  LION 🦁 Part 2 - Bi-directional RNN
 description: Deriving equivalent bidirectional RNN for linear Attention
 tags:
 giscus_comments: false
@@ -49,13 +49,13 @@ toc:
 
 ---
 
-1. [Part I - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
-2. Part II - Bi-directional RNN
-3. [Part III - Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
-4. [Part IV - Results]({% post_url 2024-05-31-mamba2-part4-results %})
+1. [Part 1 - Full Linear Attention]({% post_url 2024-05-31-mamba2-part1-model %})
+2. Part 2 - Bi-directional RNN
+3. [Part 3 - Chunkwise Parallel from of LION]({% post_url 2024-05-31-mamba2-part3-algorithm %})
+4. [Part 4 - Results]({% post_url 2024-05-31-mamba2-part4-results %})
 
 
-In [Part I]({% post_url 2024-05-31-mamba2-part1-model %}) of this series, we defined full linear attention with masking and scaling.  
+In [Part 1]({% post_url 2024-05-31-mamba2-part1-model %}) of this series, we defined full linear attention with masking and scaling.  
 Similar to all linear transformers designed for causal sequence modeling, we aim to derive an RNN form for efficiency during inference.  
 In this section, we establish and theoretically demonstrate the equivalent bidirectional RNN for the Linear Transformer.
 
@@ -122,7 +122,7 @@ out&put: \mathbf{y}_i = \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i
 {: .block-tip}
 
 
-The terms $\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$ and $\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$ are subtracted to avoid double counting. This bi-directional RNN is equivalent to scaled and masked linear attention described in previous section of this blogpost.
+The terms $\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$ and $\frac{\mathbf{k}_i}{2}$ are subtracted to avoid double counting. This bi-directional RNN is equivalent to scaled and masked linear attention described in previous section of this blogpost.
 
 
 ## Some Important details of our RNN
@@ -131,12 +131,12 @@ The terms $\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$ and $\frac{\mathbf{q}_i^{
 
 > Forward and backward recurrences run independently, completing in $$L$$ time steps with $$L$$ memory units, compared to $$2L$$ in the naive approach. 
 
-{% include figure.liquid loading="eager" path="assets/img/memory.png" title="Memory Allocation of LION in RNN form" caption="Memory allocation in LION during Forward and Backward recurrences." %}
+{% include figure.liquid loading="eager" path="assets/img/memory.svg" title="Memory Allocation of LION in RNN form" caption="Memory allocation in LION during Forward and Backward recurrences." %}
 
 
 All in one we can visulaize our framework nicely like:
 
-{% include figure.liquid loading="eager" path="assets/img/frlion.png" title="LION" caption="LION 🦁: Our framework for training in parallel using Full Linear Attention which also supports the efficient bi-directional RNN format." %}
+{% include figure.liquid loading="eager" path="assets/img/frlion.svg" title="LION" caption="LION 🦁: Our framework for training in parallel using Full Linear Attention which also supports the efficient bi-directional RNN format." %}
 
 ## Different Masks of LION
 
