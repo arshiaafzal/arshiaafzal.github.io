@@ -30,7 +30,51 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-lion-part-4-results",
+        },{id: "post-lion-part-iv-results",
+      
+        title: "LION 🦁 Part IV - Results",
+      
+      description: "Comprehensive results on Vision, MLM and more LION variants",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/lion-part4-results/";
+        
+      },
+    },{id: "post-lion-part-iii-chunkwise-parallel-from-of-lion",
+      
+        title: "LION 🦁 Part III - Chunkwise Parallel from of LION",
+      
+      description: "Explaining LION-Chunk for Balancing Memory-Speed Tradeoffs During Inference",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/lion-part3-chunk/";
+        
+      },
+    },{id: "post-lion-part-ii-bi-directional-rnn",
+      
+        title: "LION 🦁 Part II - Bi-directional RNN",
+      
+      description: "Deriving equivalent bi-directional RNN for Linear Attention",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/lion-part2-theory/";
+        
+      },
+    },{id: "post-lion-part-i-full-linear-attention",
+      
+        title: "LION 🦁 Part I - Full Linear Attention",
+      
+      description: "Explaining the Full Linear Attention paradigm for bi-directional sequence modeling",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/lion-part1-model/";
+        
+      },
+    },{id: "post-lion-part-4-results",
       
         title: "LION 🦁 Part 4 - Results",
       
