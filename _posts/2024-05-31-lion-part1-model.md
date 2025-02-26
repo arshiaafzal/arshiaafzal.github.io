@@ -65,27 +65,70 @@ toc:
 # TL;DR
 
 
-Transformers with linear attention enable fast and parallel training. Moreover, they can be formulated as Recurrent Neural Networks (RNNs), for efficient linear-time inference. While extensively evaluated in causal sequence modeling, they have yet to be extended to the bidirectional setting. We introduces the **LION** framework, establishing new theoretical foundations for linear transformers in bidirectional sequence modeling. **LION** constructs a bidirectional RNN equivalent to full **Linear Attention**. This extends the benefits of linear transformers: parallel training, and efficient inference, into the bidirectional setting.
+Transformers with Linear Attention enable fast and parallel training. Moreover, they can be formulated as Recurrent Neural Networks (RNNs), for efficient linear-time inference. While extensively evaluated in causal sequence modeling, they have yet to be extended to the bi-directional setting. We introduce the **LION** framework, establishing new theoretical foundations for Linear Transformers in bi-directional sequence modeling. **LION** constructs a bi-directional RNN equivalent to full **Linear Attention**. This extends the benefits of Linear Transformers: parallel training and efficient inference into the bi-directional setting.
 
 
-<div style="display: flex; align-items: center;">
-  <div style="flex: 1;">
-    <p>
-      Existing memory-efficient bidirectional models employ more than ×2 the training time of a Transformer. Our linear attention framework benefits from memory-efficient inference while maintaining the transformer training speed. 🦁 represents the RNN format across all counterparts of the framework.
-    </p>
+<div style="display: flex; align-items: flex-start;">
+  
+  <!-- Left Side: Text & Table -->
+  <div style="flex: 1; padding-right: 10px;">
+
+  <p>
+  Existing memory-efficient bi-directional models employ more than 2x the training time of a Transformer. Our Linear Attention framework benefits from memory-efficient inference while maintaining the Transformer training speed.
+  </p>
+
+
+<table>
+    <tr>
+      <th>Task</th>
+      <th><span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">🦁-🔥 </span></th>
+      <th><span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">🦁-D </span></th>
+      <th><span style="background-color: rgb(255, 233, 211); padding: 3px; color:black">🦁-S </span></th>
+      <th>Hydra</th>
+      <th>Vim</th>
+    </tr>
+    <tr>
+      <td>Vision</td>
+      <td>$\times 0.73$</td>
+      <td>$\times 1.39$</td>
+      <td>$\times 1.46$</td>
+      <td>$\times 2.51$</td>
+      <td>$\times 10.86$</td>
+    </tr>
+    <tr>
+      <td>MLM </td>
+      <td>$\times 0.95$</td>
+      <td>$\times 1.10$</td>
+      <td>$\times 1.32$</td>
+      <td>$\times 3.13$</td>
+      <td>✗</td>
+    </tr>
+</table>
+
+<div class="caption" style="color: #666666; margin-top: 1px;">
+    Training time (↓) relative to Transformer of the same scale
+</div>
+  
   </div>
+
+  <!-- Right Side: Figure -->
   <div style="flex: 0 0 50%;">
     {% include figure.liquid loading="eager" path="assets/img/fig1_plot.svg" %}
   </div>
+
 </div>
 
-Using **LION**, we cast three linear transformers to their bidirectional form:  
-- **LION-️‍🔥**, the bidirectional variant corresponding to [LinearTransformer](https://arxiv.org/abs/2006.16236)  
-- **LION-D**, extending [RetNet](https://arxiv.org/abs/2307.08621)  
-- **LION-S**, a linear transformer with a stable selective mask inspired by selectivity of SSMs like [Mamba🐍](https://arxiv.org/abs/2405.21060)  
 
-Replacing the attention block with **LION (-LIT, -D, -S)** achieves performance on bidirectional tasks that approaches that of Transformers and State-Space Models (SSMs), while delivering significant improvements in training speed. 
 
+
+
+
+Using **LION**, we cast three Linear Transformers to their bi-directional form:  
+- **LION-️‍🔥**, the bi-directional variant corresponding to [LinearTransformer](https://arxiv.org/abs/2006.16236).
+- **LION-D**, extending [RetNet](https://arxiv.org/abs/2307.08621).
+- **LION-S**, a Linear Transformer with a stable selective mask inspired by selectivity of SSMs like [Mamba🐍](https://arxiv.org/abs/2405.21060).
+
+By replacing the attention block with **LION (-️‍🔥, -D, -S)**, we achieve performance on bi-directional tasks that is comparable to Transformers and State-Space Models (SSMs) while improving training speed.
 
 
 ----------------
@@ -103,11 +146,11 @@ Given that Linear Transformers can be formulated as RNNs, offering efficiency be
 
 ### Question 2 (Performance)
 
-Assuming we have addressed the first question, can simple Linear Transformers—like Linear Transformer <d-cite key="katharopoulos2020transformers"></d-cite> or RetNet <d-cite key="sun2023retentive"></d-cite>-perform well on bi-directional tasks, such as image classification or masked language modeling?
+Can simple Linear Transformers, like Linear Transformer <d-cite key="katharopoulos2020transformers"></d-cite> or RetNet <d-cite key="sun2023retentive"></d-cite>, perform well on bi-directional tasks such as image classification or masked language modeling?
 
 ### Question 3 (Training Throughput)
 
-While bi-directional SSMs are performant, they tend to be difficult and slow to train compared to Transformers with Full Attention (e.g., ViT <d-cite key="dosovitskiy2020image"></d-cite> and BERT <d-cite key="devlin2018bert"></d-cite>). If we have answered the first two questions affirmatively, can Linear Transformers match the accuracy of deep bi-directional SSMs while maintaining the training throughput of Softmax Transformers and the inference efficiency of RNNs/SSMs?
+While bi-directional SSMs are performant, they tend to be difficult and slow to train compared to Transformers with Full Attention (e.g., ViT <d-cite key="dosovitskiy2020image"></d-cite> and BERT <d-cite key="devlin2018bert"></d-cite>). Can Linear Transformers match the accuracy and efficiency of bi-directional SSMs while maintaining the training throughput of Softmax Transformers?
 
 
 ## From Causal to Full Linear Attention
@@ -135,7 +178,7 @@ Scaled: y_i = \frac{q^\top_i S_i}{q^\top_i z_i}, \quad Non-Scaled: y_i  = q^\top
 \end{aligned}
 $$
 
-Here, $$\boldsymbol{\Lambda_i}$$ and $$\gamma_i$$ are decay factors introduced after the Linear Transformer to enhance the performance and $$\star$$ denotes an associative operator which depends on the specific model. (Spoiler alert ⚠️: the family of Linear Transformers has strong connections to SSMs, as explored in works like Deltanet <d-cite key="yang2024parallelizing"></d-cite> and Mamba2 <d-cite key="dao2024transformers"></d-cite> through state space duality (SSD) 😉). Many models apply a non-linear activation to queries and keys, such that $$\mathbf{k}_i = \phi(\mathbf{k}_i)$$ and $$\mathbf{q}_i = \phi(\mathbf{q}_i)$$. To avoid notation clutter, we omit explicitly writing $$\phi(.)$$ everywhere. By default, we assume that queries and keys are already non-linearized. For simplicity, we consider $$\boldsymbol{\Lambda_i} = \lambda_i$$ as a scalar and $$\gamma_i = 1$$ in this study. We now present the general Scaled Linear Attention in the following form:
+Here, $$\boldsymbol{\Lambda_i}$$ and $$\gamma_i$$ are decay factors introduced after the Linear Transformer to enhance the performance and $$\star$$ denotes an associative operator which depends on the specific model. (Spoiler alert ⚠️: the family of Linear Transformers has strong connections to SSMs, as explored in works like Deltanet <d-cite key="yang2024parallelizing"></d-cite> and Mamba2 <d-cite key="dao2024transformers"></d-cite> through state space duality (SSD) 😉). Many models apply a non-linear activation to queries and keys, such that $$\mathbf{k}_i = \phi(\mathbf{k}_i)$$ and $$\mathbf{q}_i = \phi(\mathbf{q}_i)$$. To avoid notation clutter, we omit explicitly writing $$\phi(.)$$ everywhere assuming by default that queries and keys are already non-linearized. For simplicity, we consider $$\boldsymbol{\Lambda_i} = \lambda_i$$ as a scalar and $$\gamma_i = 1$$. We now present the general Scaled Linear Attention in the following form:
 
 $$
 \begin{aligned} 
@@ -164,7 +207,7 @@ The first step is quite simple: the Masked and Scaled Attention can naturally ta
 
 The important part is how to well define the matrix $$\mathbf{M}$$.
 A natural choice is to extend the causal mask $$\mathbf{M^C}$$, where the causal mask between tokens $$i,j$$ is given by $$\mathbf{M}^C_{ij} = \lambda_{j+1} \lambda_{j+2} \dots \lambda_i$$, representing the product of all selective scalers between $$i$$ and $$j$$.
-In the bi-directional case, the full mask should preserve this desirable property. One can interpret the mask entries as a form of relative positional encoding between two tokens taking the following form:
+In the bi-directional case, the full mask should preserve this desirable property. One can interpret the mask entries as a relative positional encoding between two tokens taking the following form:
 
 $$
 \begin{aligned}
@@ -213,7 +256,7 @@ The equation above represents the Full **Linear** Attention in parallel form. No
 
 ### **An Important Question:**
 
-> **Question:** Is it worth training with Full Attention on bi-directional tasks considering it is quadratic with sequence length $$L$$?
+> **Question:** Is it worth training with Full Attention on bi-directional tasks considering it has quadratic complexity with sequence length $$O(L^2)$$?
 
 The answer is **yes**! Unlike causal language modeling, for bi-directional tasks such as Vision ($L=196$) and Masked Language Modeling (MLM) ($L=128$), sequence lengths used in practice are relatively short. This means that we can usually fit Full Attention in memory enalbing higher throughput without a significant trade-off in complexity.
 
@@ -229,7 +272,6 @@ We believe that architectures designed for causal tasks can really benefit from 
 
 - Finally, we introduce a **chunkwise parallel** variant of LION to balance recurrence and parallelism 🙂.
 
-*Acknowledgement:* We appreciate [Albert Gu](https://goombalab.github.io/) and [Tri Dao](https://tridao.me/blog/) for their insightful blog posts, which have been helpful in shaping our own.
-
 [Continue reading to Part II - Bi-directional RNN]({% post_url 2024-05-31-lion-part2-theory %})
 
+*Acknowledgement:* We appreciate [Albert Gu](https://goombalab.github.io/) and [Tri Dao](https://tridao.me/blog/) for their insightful blog posts, which have been helpful in shaping our own.

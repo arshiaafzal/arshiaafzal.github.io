@@ -65,7 +65,7 @@ toc:
 
 
 
-In this fourth part of our LION series, we will present and discuss a selection of experimental results across various domains, including vision tasks, masked language modeling (MLM), and different LION architectures. These results not only highlight LION's versatility and efficiency across diverse applications but also serve as a preview of the comprehensive findings detailed in the full paper.
+In the final part of our LION series, we will present and discuss a selection of experimental results across various domains, including vision tasks, masked language modeling (MLM), and different LION architectures. These results not only highlight LION's versatility and efficiency across diverse applications but also serve as a preview of the comprehensive findings detailed in the full paper.
 
 ## Image Classification Performance Overview
 ### Model Comparisons
@@ -91,7 +91,7 @@ As shown in the table above, LION models achieve competitive performance with vi
 
 ### Memory Efficiency
 
-The LION family demonstrates excellent memory efficiency across both vision and language tasks. Figure below shows inference memory usage with a batch size of 64 across different image resolutions, LION models (RNN form) maintain reasonable memory consumption even at high resolutions up to 2496 pixels, while adding minimal training overhead in BERT-style language modeling scenarios. In contrast, baseline models like ViT and DeiT run out of memory (OOM) at much lower resolutions, highlighting LION's memory scaling capabilities regardless of the application domain.
+The LION family demonstrates excellent memory efficiency across both vision and language tasks. Figure below shows inference memory usage with a batch size of 64 across different image resolutions, LION models (RNN form) maintain reasonable memory consumption even at high resolutions up to 2496 pixels, while adding minimal training overhead in BERT-style language modeling scenarios. In contrast, baseline models like ViT and DeiT run out of memory (OOM) at much lower resolutions.
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0">
@@ -101,7 +101,7 @@ The LION family demonstrates excellent memory efficiency across both vision and 
 
 ### Training Time Analysis
 
-The LION family demonstrates remarkable training efficiency across both vision and language tasks. As shown in the table below, LION variants add minimal training overhead compared to standard Transformers, with some variants even training faster.
+The LION family demonstrates remarkable training efficiency across both vision and language tasks. As shown in the table below, LION variants add minimal training overhead compared to SSMs.
 
 | Task | <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span>  |  <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>| <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span> | Hydra | Vim |
 |------|----------|-------------|---------|--------|-----|
@@ -118,7 +118,7 @@ In MLM tasks, the efficiency gains are even more pronounced. LION-🔥 nearly ma
 
 ## MLM Results
 
-For masked language modeling (MLM) tasks, we evaluated LION models against BERT <d-cite key="devlin2018bert"></d-cite> and Hydra on both MLM pretraining and GLUE benchmark finetuning. The results show that LION variants achieve competitive performance while maintaining excellent training efficiency.
+For masked language modeling (MLM) tasks, we evaluated LION models against BERT <d-cite key="devlin2018bert"></d-cite> and Hydra on both MLM pretraining and GLUE benchmark finetuning. The results show that LION variants achieve competitive performance while maintaining good training efficiency.
 
 | Model | MLM Acc. | GLUE | Train. time |
 |-------|----------|------|-------------|
@@ -136,13 +136,13 @@ For masked language modeling (MLM) tasks, we evaluated LION models against BERT 
 
 Let's explore how different LION variants handle the trade-off between memory usage and inference speed. We will look at three key approaches:
 
-1. Full Linear Attention - The standard approach using the Full Attention matrix
-2. Bidirectional RNN - Our memory-efficient RNN formulation 
-3. LION Chunk - A balanced approach using chunked computation
+1. Full Linear Attention - The standard approach using the Full Attention matrix.
+2. Bidirectional RNN - Our memory-efficient RNN formulation.
+3. LION Chunk - A balanced approach using chunked computation.
 
 ### Memory vs Speed Trade-offs
 
-The first plot below shows how these approaches compare in terms of memory efficiency and inference speed. The RNN approach proves to be the most memory-efficient, while Full Attention uses the most memory. LION Chunk provides a nice middle ground - it uses less memory than Full Attention while actually achieving faster inference speeds than both alternatives. This makes it particularly attractive when you need to balance performance with resource constraints.
+The first plot below shows how these approaches compare in terms of memory efficiency and inference speed in LION-D. The RNN approach proves to be the most memory-efficient, while Full Attention uses the most memory. LION Chunk provides a nice middle ground - it uses less memory than Full Attention while actually achieving faster inference speeds than both alternatives. This makes it particularly attractive when you need to balance performance with resource constraints.
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0">
@@ -150,9 +150,7 @@ The first plot below shows how these approaches compare in terms of memory effic
     </div>
 </div>
 
-### Detailed Performance Analysis
-
-Looking more closely at the memory-time trade-off across different LION variants, we can see some interesting patterns. While RNN remains the most memory-efficient across all models, both chunking and Full Attention hit memory limits much sooner. The chunking approach matches or beats Full Attention's inference speed for simpler variants like LION-D. However, with more complex variants like LION-S, chunking is only faster at lower resolutions - at higher resolutions, the overhead from mask calculations starts to slow it down.
+For LION-🔥, we see a similar pattern, but the chunking approach is even more pronounced.
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0">
@@ -160,9 +158,7 @@ Looking more closely at the memory-time trade-off across different LION variants
     </div>
 </div>
 
-### Selective Chunking Results
-
-The final analysis examines how different chunking strategies perform across sequence lengths. This helps inform which approach is best for different scenarios - chunking tends to be optimal for LION-🔥 and LION-D when memory allows, while RNN can be preferable for handling complex masks at high resolutions.
+Lastly for LION-S, we see that the chunking approach is only faster at lower resolutions - at higher resolutions, the overhead from mask calculations starts to slow it down.
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0">
@@ -181,7 +177,7 @@ The final analysis examines how different chunking strategies perform across seq
 
 # Last Points
 
-We encourage the readers of this blog post to actually read our [paper](https://www.arxiv.org/abs/2502.16249) for way more details about the LION model and experimental setups. Additionally, you can find the implementation details in our [code repository](https://github.com/LIONS-EPFL/LION).
+We encourage the readers of this blog post to read the full [paper](https://www.arxiv.org/abs/2502.16249) for more details about the LION framework and experimental setups. The implementation details are available in the [code repository](https://github.com/LIONS-EPFL/LION).
 
 If you use this work, please consider citing the paper:
 

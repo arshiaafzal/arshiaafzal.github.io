@@ -63,25 +63,25 @@ toc:
 
 In [Part I]({% post_url 2024-05-31-lion-part1-model %}) of this series, we defined Full Linear Attention with Masking and Scaling.
 Similar to all Linear Transformers designed for Causal Sequence Modeling, we aim to derive an RNN form for efficiency during inference.
-In this section, we establish and theoretically demonstrate the equivalent bi-directional RNN for the Full Linear Transformer.
+In this section, we theoretically demonstrate the equivalent bi-directional RNN for the Full Linear Transformer.
 
 ## Finding Bi-directional RNN Equal to Full Linear Attention
 
-Ideally, we aim to construct an RNN that is equivalent to the Masked and Scaled Linear Attention. The idea of a bi-directional RNN is to process the sequence in both the forward order (from first to last) and the reverse order (from last to first), these naturally correspond to the upper and lower parts of the Attention matrix and mask.
+We aim to construct an RNN that is equivalent to the Masked and Scaled Linear Attention. The idea of a bi-directional RNN is to process the sequence in both the forward order (from first to last) and the reverse order (from last to first), these naturally correspond to the upper and lower parts of the Attention matrix and mask.
 
 {% include figure.liquid loading="eager" path="assets/img/att_mask_color.svg"%}
 
-**Note:** We made a strong effort to maintain a consistent color coding for this section of the blog post and throughout our paper 😊.  
+**Note:** We use a consistent color coding for this section of the blog post and throughout our [paper](https://www.arxiv.org/abs/2502.16249) 😊.
 
-- Wherever you see a <span style="background-color: rgb(255, 248, 203); padding: 3px; color:black">Yellow</span> color, it indicates the **upper part of the matrix (non-causal)**.  
-- Whenever you see a <span style="background-color: rgb(254, 200, 201); padding: 3px; color:black">Red</span> color, it represents the **diagonal elements**.  
-- Whenever you see a <span style="background-color: rgb(208, 243, 248); padding: 3px; color:black">Blue</span> color, it corresponds to the **lower triangular (causal) part**.  
+- <span style="background-color: rgb(255, 248, 203); padding: 3px; color:black">Yellow</span> color indicates the **upper part of the matrix (non-causal)**.  
+- <span style="background-color: rgb(254, 200, 201); padding: 3px; color:black">Red</span> color represents the **diagonal elements**.  
+- <span style="background-color: rgb(208, 243, 248); padding: 3px; color:black">Blue</span> color corresponds to the **lower triangular (causal) part**.  
 
 Let's seperate the Attention into upper and lower parts:
 
 {% include figure.liquid loading="eager" path="assets/img/att_sep.svg"%}
 
-This formulation represents both the Causal and Non-causal forms of Attention. We would like to model each triangular part using an RNN. Similarly, we can also separate the mask in the same way:
+This formulation represents both the causal and non-causal forms of Attention. We would like to model each triangular part using an RNN. Similarly, we can also separate the mask in the same way:
 
 {% include figure.liquid loading="eager" path="assets/img/mask_sep.svg"%}
 
@@ -104,7 +104,7 @@ $$
 \end{aligned} 
 $$
 
-Now we replace tha bove scaling matrix $\mathbf{C}$ in the output of the Attention form of $\mathbf{Y} = \text{Scale}(\mathbf{Q} \mathbf{K}^\top \odot \mathbf{M} ) \mathbf{V}$ .Interestingly, many terms naturally cancel out with each other.
+Now we replace the above scaling matrix $\mathbf{C}$ in the output of the Attention form of $\mathbf{Y} = \text{Scale}(\mathbf{Q} \mathbf{K}^\top \odot \mathbf{M} ) \mathbf{V}$ . Interestingly, many terms naturally cancel out with each other.
 
 {% include figure.liquid loading="eager" path="assets/img/proofC.svg"%}
 
@@ -124,7 +124,7 @@ out&put: \mathbf{y}_i = \frac{\mathbf{y}^{F}_i + \mathbf{y}^{B}_i}{c^F_i + c^B_i
 {: .block-tip}
 
 
-The terms $$\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$$ and $$\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$$ are subtracted to avoid double counting. This bi-directional RNN is equivalent to Scaled and Masked Linear Attention described in previous section of this blogpost.
+The terms $$\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$$ and $$\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2} \mathbf{v}_i$$ are subtracted to avoid double counting. This bi-directional RNN is equivalent to Scaled and Masked Linear Attention described in previous section of this blogpost.
 
 
 ## Some Important details of our RNN
@@ -136,31 +136,30 @@ The terms $$\frac{\mathbf{q}_i^{\top} \mathbf{k}_i}{2}$$ and $$\frac{\mathbf{q}_
 {% include figure.liquid loading="eager" path="assets/img/memory.svg" title="Memory Allocation of LION in RNN form" caption="Memory allocation in LION during Forward and Backward recurrences." %}
 
 
-All in one, we can visualize our framework nicely like:
+All in one, we can visualize our framework:
 
 {% include figure.liquid loading="eager" path="assets/img/frlion.svg" title="LION" caption="LION 🦁: Our framework for training in parallel using Full Linear Attention which also supports the efficient bi-directional RNN format." %}
 
 ## Different Masks of LION
 
-Now that we have created our framework let's see what are the choices of the decay factor $$\lambda_i$$ and how they resemble the famous Linear Transformer models. Let's set:
+Now that we have created our framework let's see what are the choices of the decay factor $$\lambda_i$$ and how they resemble known Linear Transformer models. Let's set:
 
-> $\lambda_i=1$ this results in simple Linear Transformer <d-cite key="katharopoulos2020transformers"></d-cite> which we refrer to as <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span> which is LION-Lit resembling Linear Transformer.
+> $\lambda_i=1$ resembles the bi-directional version of the vanilla Linear Transformer <d-cite key="katharopoulos2020transformers"></d-cite> which we refer to as <span style="background-color: rgb(230, 255, 230); padding: 3px; color:black">LION-🔥 </span> (-LIT in [the paper](https://www.arxiv.org/abs/2502.16249)).
 
-> $\lambda_i=\lambda$ this results in RetNet <d-cite key="sun2023retentive"></d-cite> which we refrer to as <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>
+> $\lambda_i=\lambda$ resembles the bi-directional version of RetNet <d-cite key="sun2023retentive"></d-cite> which we refer to as <span style="background-color: rgb(229, 204, 230); padding: 3px; color:black">LION-D </span>.
 
-> $\lambda_i=\sigma(\mathbf{W}\mathbf{x}_i)$ being input dependent, and bi-directional Linear Transformer inspired by selectivity of Mamba2  <d-cite key="dao2024transformers"></d-cite> which we refrer to as <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>
+> $\lambda_i=\sigma(\mathbf{W}\mathbf{x}_i)$ (input dependent) resembles a bi-directional selective Linear Transformer inspired by Mamba2  <d-cite key="dao2024transformers"></d-cite> which we refer to as <span style="background-color: rgb(255, 233, 211) ; padding: 3px; color:black">LION-S </span>.
 
 
-We evaluate all above models, extended to bi-directional sequence modeling using LION, on several bi-directional tasks. Also as all Linear Transformers use feature mapping $\phi(.)$ to queries and keys we also applied normalized shifted SILU $\phi(x)=$ `(SILU(x)+0.5)/(norm(SILU(x)+0.5))` non-linear activation function. Let's dive deep in each of these models in LION framework.
+We evaluate all models on several bi-directional tasks. Also inspired by Linear Transformers applying a feature mapping $\phi(.)$ to queries and keys we apply normalized shifted SILU $\phi(x)=$ `(SILU(x)+0.5)/(norm(SILU(x)+0.5))` as a non-linear activation function. Let's dive deep in each of these models in LION framework.
 
 ### LION-🔥 
 
-LION-🔥 is an extension of the very first Linear Transformer. Without any masking, the bi-directional parallel form can be simply written as:
+LION-🔥 is an extension of the original Linear Transformer <d-cite key="katharopoulos2020transformers"></d-cite>. Without any masking, the bi-directional parallel form can be simply written as:
 
 $$\mathbf{Y} = Scale(\mathbf{Q} \mathbf{K}^\top )\mathbf{V} $$
 
-and the RNN form of the above parallel Full Linear Attention is simply the RNN form mentioned above in this section in green box just by simply not using any mask.
-
+the RNN form is the one introduced the previous green box "LION: Reccurence form" with $$\lambda_i=1$$.
 
 ### LION-D
 
@@ -172,7 +171,7 @@ $$
 \end{align}
 $$
 
-$$\mathbf{M}$$ above is a Toeplitz mask <d-cite key="qin2023toeplitz"></d-cite> and therefore, creating the decay mask can be made even faster using simple PyTorch commands. To ensure numerical stability, we bound the parameter $$\lambda$$ using the **sigmoid function**, setting $$\lambda = \sigma(a)$$. Without this constraint, the scalar $$\lambda^L$$ could become excessively large, leading to instability. Additionally, as we all know, summation is generally more numerically stable than multiplication. Therefore, in some cases, instead of multiplying a matrix repeatedly, we can leverage summation for improved stability. However, in practice, for **RetNet-style masks** with a fixed decay, multiplication remains stable. This allows for a more straightforward implementation when generating the mask in code:
+$$\mathbf{M}$$ above is a Toeplitz mask <d-cite key="qin2023toeplitz"></d-cite>, we can efficiently create a decay mask with such structure using simple PyTorch functions. To ensure numerical stability, we bound the parameter $$\lambda$$ with a **sigmoid**, setting $$\lambda = \sigma(a)$$. Without this constraint, the scalar $$\lambda^L$$ could become excessively large, leading to instability. In practice, for **RetNet-style mask** with a fixed decay, multiplication remains stable. Such mask can be implemented as follows:
 
 ```python
 def decay_mask(a, length):
@@ -194,13 +193,13 @@ $$
 \mathbf{L}^F = cumprod(\lambda^F) = \prod_{k=0}^{i} \lambda^F_k
 $$
 
-is used to generate the lower triangular mask \(\mathbf{M}^F\). For the upper triangular mask $\mathbf{M}^B$, the input sequence is flipped, and the decay factors are computed as  
+is used to generate the lower triangular mask $$\mathbf{M}^F$$. For the upper triangular mask $$\mathbf{M}^B$$, the input sequence is flipped, and the decay factors are computed as  
 
 $$
 \boldsymbol{\lambda}^B = \text{Flip}(\boldsymbol{\lambda}^F), \quad \mathbf{L}^B = cumprod(\boldsymbol{\lambda}^B).
 $$
 
-The masks are then constructed as,  $\mathbf{M}^F =$ `tril(LF@inv(LF)^T)` for the forward part and  $\mathbf{M}^B =$ `triu(LB@inv(LB)^T)` for the backward part. Where `tril(.)` and `triu(.)` extract the lower and upper triangular parts of the input matrix respectively and `inv(.)` is a element wise inverse. The full mask is then obtained as  
+The masks are then constructed as,  $$\mathbf{M}^F =$$ `tril(LF@inv(LF)^T)` for the forward part and  $$\mathbf{M}^B =$$ `triu(LB@inv(LB)^T)` for the backward part. Where `tril(.)` and `triu(.)` extract the lower and upper triangular parts of the input matrix respectively and `inv(.)` is a element wise inverse. The full mask is then obtained as  
 
 $$
 \mathbf{M} = \mathbf{M}^F + \mathbf{M}^B - \mathbf{I}.
@@ -237,11 +236,11 @@ $$
 a_i = \log(\sigma(\mathbf{W}_{a}^\top\mathbf{x}_i + b)),
 $$
 
-where $\sigma(.)$ is the sigmoid function. This approach ensures numerical stability by bounding $a_i$ within the interval $[0,1]$. 
+where $\sigma(.)$ is the sigmoid function. By bounding $a_i$ within the interval $[0,1]$ we get numerical stability. 
 
-**Note:** In practise, it is important that the activation function is bounded, unbounded activationscan lead to unstable masks causing NaN values in the loss function. To maintain stability, **Chunking** is required during training in Mamba and Hydra models when using the full sequence. This issue has been specifically highlighted in the **Mamba2** [blog post](https://goombalab.github.io/blog/2024/mamba2-part3-chunk/) and can be attributed to the softplus activation being unbounded. Since LION models use sigmoid activation, chunking is not required for training. In the **Results** section of this blog post, we provide a detailed explanation where we discuss why using **Full Attention** is beneficial for achieving **high throughput** during training.
+**Note:** We find using bounded activation functions to be important in practise since unbounded activations could cause NaN values in the loss function. To maintain stability, **Chunking** is required during training in Mamba and Hydra models when using the full sequence. This issue has been specifically highlighted in the **Mamba2** [blog post](https://goombalab.github.io/blog/2024/mamba2-part3-chunk/) and can, again, be attributed to the softplus activation being unbounded. Since LION models use sigmoid activation, chunking is not required for training. In the **Results** section of this blog post, we explore why using **Full Attention** is beneficial for achieving **high throughput** during training.
 
-The code for building the mask of LION-S is simple and flexible, a Pytorch implementation is provided below:
+The code for building the mask of LION-S is simple, a Pytorch implementation is provided below:
 
 ```python
 def create_causal_mask_lions(tensor):
@@ -274,7 +273,7 @@ def selective_mask(vec):
 
 ## LION Attention Block
 
-We can formulate the parallel Attention form of LION as shown below, supporting all three extensions of our main experiments:
+We can formulate the parallel Attention form of LION supporting all three extensions of our main experiments:
 
 ```python
 class LIONAttention(nn.Module):
