@@ -82,7 +82,7 @@ Transformers with linear attention enable fast and parallel training. Moreover, 
 Using **LION**, we cast three linear transformers to their bidirectional form:  
 - **LION-️‍🔥**, the bidirectional variant corresponding to [LinearTransformer](https://arxiv.org/abs/2006.16236)  
 - **LION-D**, extending [RetNet](https://arxiv.org/abs/2307.08621)  
-- **LION-S**, a linear transformer with a stable selective mask inspired by selectivity of SSMs like [Mamba🐍](https://arxiv.org/abs/2401.10282)  
+- **LION-S**, a linear transformer with a stable selective mask inspired by selectivity of SSMs like [Mamba🐍](https://arxiv.org/abs/2405.21060)  
 
 Replacing the attention block with **LION (-LIT, -D, -S)** achieves performance on bidirectional tasks that approaches that of Transformers and State-Space Models (SSMs), while delivering significant improvements in training speed. 
 
