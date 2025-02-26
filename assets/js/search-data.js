@@ -74,50 +74,6 @@ ninja.data = [{
           window.location.href = "/blog/2025/lion-part1-model/";
         
       },
-    },{id: "post-lion-part-4-results",
-      
-        title: "LION 🦁 Part 4 - Results",
-      
-      description: "Comprehensive results of LION on Vision, MLM and LION variants",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2025/mamba2-part4-results/";
-        
-      },
-    },{id: "post-lion-part-3-chunkwise-parallel-from-of-lion",
-      
-        title: "LION 🦁 Part 3 - Chunkwise Parallel from of LION",
-      
-      description: "Explaining LION-Chunk for Balancing Memory-Speed Tradeoffs During Inference",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2025/mamba2-part3-algorithm/";
-        
-      },
-    },{id: "post-lion-part-2-bi-directional-rnn",
-      
-        title: "LION 🦁 Part 2 - Bi-directional RNN",
-      
-      description: "Deriving equivalent bidirectional RNN for linear Attention",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2025/mamba2-part2-theory/";
-        
-      },
-    },{id: "post-lion-part-1-full-linear-attention",
-      
-        title: "LION 🦁 Part 1 - Full Linear Attention",
-      
-      description: "Explaining the full linear attention paradigm for bi-directional sequence modeling",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2025/mamba2-part1-model/";
-        
-      },
     },{id: "news-rest-was-accepted-at-icml",
           title: 'REST was accepted at ICML! 🤩',
           description: "",
