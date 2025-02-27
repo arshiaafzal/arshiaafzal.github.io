@@ -6,7 +6,7 @@ permalink: /
 
 profile:
   align: right
-  image: prof_pic.jpg
+  image: IMG_6499.jpeg
   image_circular: false # crops the image to make it circular
   more_info: >
      <p>EPFL STI IEM LIONS</p>
