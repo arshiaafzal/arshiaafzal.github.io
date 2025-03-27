@@ -120,7 +120,7 @@ In reality, chunking the Attention mask is slightly different and even more crit
 
 Let's start with the decay mask, as it is simpler and easier to visualize. For LION-D, the final mask is a Toeplitz mask constructed using the scalar decay factor $\lambda$.  We can visualize how the mask is structured.
 
-{% include figure.liquid loading="eager" path="assets/img/maskdec_chunk.svg"%}
+{% include figure.liquid loading="eager" path="assets/img/mascdecchunk.svg"%}   
 
 The full mask of LION-D (or full RetNet mask) is constructed simply by the submatrix of $\Gamma$, which is a [Toeplitz matrix](https://en.wikipedia.org/wiki/Toeplitz_matrix) itself. Regardless of where the chunk is located, whether in the upper or lower part of the mask matrix $\mathbf{M}$, it retains the same property of being a fraction of the Toeplitz matrix $\Gamma$ as bellow:
 
