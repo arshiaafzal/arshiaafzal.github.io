@@ -41,9 +41,9 @@ ninja.data = [{
           window.location.href = "/blog/2025/lion-part4-results/";
         
       },
-    },{id: "post-lion-part-iii-chunkwise-parallel-from-of-lion",
+    },{id: "post-lion-part-iii-chunkwise-parallel-form-of-lion",
       
-        title: "LION 🦁 Part III - Chunkwise Parallel from of LION",
+        title: "LION 🦁 Part III - Chunkwise Parallel Form of LION",
       
       description: "Explaining LION-Chunk for Balancing Memory-Speed Tradeoffs During Inference",
       section: "Posts",
