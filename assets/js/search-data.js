@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-lion-part-iv-results",
+        },{id: "post-legacy-of-linear-transformers-as-position-embedding",
+      
+        title: "Legacy of Linear Transformers as Position Embedding 📍",
+      
+      description: "Duality of Forget Gates and Position Embeddings in Sequence Modeling",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2026/pe/";
+        
+      },
+    },{id: "post-lion-part-iv-results",
       
         title: "LION 🦁 Part IV - Results",
       
