@@ -30,9 +30,9 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-legacy-of-linear-transformers-as-position-embedding",
+        },{id: "post-on-the-legacy-of-linear-transformers-in-positional-embeddings",
       
-        title: "Legacy of Linear Transformers as Position Embedding 📍",
+        title: "On the Legacy of Linear Transformers in Positional Embeddings 📍",
       
       description: "Duality of Forget Gates and Position Embeddings in Sequence Modeling",
       section: "Posts",
