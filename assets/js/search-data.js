@@ -110,7 +110,7 @@ ninja.data = [{
           title: '✍️ New blog post: On the Legacy of Linear Transformers as Positional Embeddings...',
           description: "",
           section: "News",},{id: "news-m-excited-to-join-mistral-ai-as-a-research-intern",
-          title: 'M Excited to join Mistral AI as a research intern! 🚀',
+          title: 'M Excited to join Mistral AI as a research intern!',
           description: "",
           section: "News",},{id: "projects-project-1",
           title: 'project 1',
