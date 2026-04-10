@@ -5,7 +5,8 @@ description: An interactive guide to modern sequence models — explore architec
 tags: attention linear-attention SSM transformer
 giscus_comments: false
 date: 2026-04-06
-featured: true
+featured: false
+hidden: true
 permalink: /SSM_Story/
 thumbnail: assets/img/attention-zoo/gla-custom.png
 
