@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-on-the-legacy-of-linear-transformers-in-positional-embeddings",
+        },{id: "post-the-attention-zoo-linear-amp-softmax-models-unified",
+      
+        title: "The Attention Zoo: Linear &amp; Softmax Models Unified",
+      
+      description: "An interactive guide to modern sequence models — explore architectures and recurrences across the linear-softmax landscape.",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2026/attention-zoo/";
+        
+      },
+    },{id: "post-on-the-legacy-of-linear-transformers-in-positional-embeddings",
       
         title: "On the Legacy of Linear Transformers in Positional Embeddings 📍",
       

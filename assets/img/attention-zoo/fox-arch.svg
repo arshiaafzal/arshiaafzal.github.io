@@ -1,0 +1,159 @@
+<svg viewBox="0 0 380 560" xmlns="http://www.w3.org/2000/svg" font-family="'Inter',system-ui,sans-serif">
+<defs>
+  <marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+    <path d="M1,1 L7,4 L1,7 Z" fill="#6b7280"/>
+  </marker>
+  <marker id="darr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+    <path d="M1,1 L7,4 L1,7 Z" fill="#94a3b8"/>
+  </marker>
+</defs>
+
+<!-- ╔════════════════════════╗ -->
+<!-- ║  LEFT: FoX BLOCK       ║ -->
+<!-- ╚════════════════════════╝ -->
+
+<text x="80" y="18" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">Output</text>
+<line x1="80" y1="24" x2="80" y2="38" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ⊕ add -->
+<circle cx="80" cy="48" r="11" fill="#f8fafc" stroke="#6b7280" stroke-width="1.5"/>
+<text x="80" y="52.5" text-anchor="middle" font-size="13" fill="#374151">⊕</text>
+
+<line x1="80" y1="59" x2="80" y2="73" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- SwiGLU MLP rect -->
+<rect x="28" y="73" width="104" height="28" rx="4" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="1.5"/>
+<text x="80" y="91" text-anchor="middle" font-size="11" font-weight="600" fill="#0c4a6e">SwiGLU MLP</text>
+
+<line x1="80" y1="101" x2="80" y2="115" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- RMSNorm rect -->
+<rect x="28" y="115" width="104" height="28" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="80" y="133" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">RMSNorm</text>
+
+<line x1="80" y1="143" x2="80" y2="157" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ⊕ add -->
+<circle cx="80" cy="167" r="11" fill="#f8fafc" stroke="#6b7280" stroke-width="1.5"/>
+<text x="80" y="171.5" text-anchor="middle" font-size="13" fill="#374151">⊕</text>
+
+<line x1="80" y1="178" x2="80" y2="192" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- FoX Layer attention rect -->
+<rect x="22" y="192" width="116" height="30" rx="5" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+<text x="80" y="211" text-anchor="middle" font-size="11" font-weight="700" fill="#78350f">FoX Layer</text>
+
+<!-- dashed arrow to detail -->
+<line x1="138" y1="207" x2="182" y2="207" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#darr)"/>
+
+<line x1="80" y1="222" x2="80" y2="236" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- RMSNorm rect -->
+<rect x="28" y="236" width="104" height="28" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="80" y="254" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">RMSNorm</text>
+
+<line x1="80" y1="264" x2="80" y2="290" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<text x="80" y="308" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">Input</text>
+
+<!-- residual skips -->
+<path d="M26,288 Q10,288 10,167" stroke="#94a3b8" stroke-width="1.2" fill="none" stroke-dasharray="3,2"/>
+<line x1="10" y1="167" x2="68" y2="167" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#darr)"/>
+<path d="M26,290 Q4,290 4,48" stroke="#94a3b8" stroke-width="1.2" fill="none" stroke-dasharray="3,2"/>
+<line x1="4" y1="48" x2="68" y2="48" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#darr)"/>
+
+<!-- ╔════════════════════════════════════╗ -->
+<!-- ║  RIGHT: FOX LAYER DETAIL           ║ -->
+<!-- ╚════════════════════════════════════╝ -->
+
+<rect x="186" y="46" width="185" height="436" rx="8" fill="#fffbf5" stroke="#e2e8f0" stroke-width="1.2"/>
+<text x="278" y="62" text-anchor="middle" font-size="9.5" fill="#94a3b8" font-style="italic">FoX layer detail</text>
+
+<!-- output -->
+<text x="278" y="78" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">output ↑</text>
+<line x1="278" y1="84" x2="278" y2="98" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Linear output trap -->
+<polygon points="238,98 318,98 328,126 228,126" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="278" y="116" text-anchor="middle" font-size="10.5" font-weight="600" fill="#065f46">Linear</text>
+
+<line x1="278" y1="126" x2="278" y2="140" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ⊗ gate multiply -->
+<circle cx="278" cy="150" r="11" fill="#f8fafc" stroke="#6b7280" stroke-width="1.5"/>
+<text x="278" y="154.5" text-anchor="middle" font-size="13" fill="#374151">⊗</text>
+
+<line x1="278" y1="161" x2="278" y2="175" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- RMSNorm rect -->
+<rect x="238" y="175" width="80" height="26" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="278" y="192" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1e40af">RMSNorm</text>
+
+<line x1="278" y1="201" x2="278" y2="215" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Forgetting Attention wide rect -->
+<rect x="196" y="215" width="164" height="32" rx="5" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+<text x="278" y="235" text-anchor="middle" font-size="10.5" font-weight="700" fill="#78350f">Forgetting Attention</text>
+
+<!-- 5 branches: q=216, k=240, v=264, f=292, gate=348 -->
+<!-- Column centers for 5 inputs, evenly spaced from x=210 to x=348 -->
+<!-- q=214, k=240, v=266, f=306, gate=348 -->
+
+<!-- q branch x=214 -->
+<line x1="214" y1="247" x2="214" y2="263" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<rect x="192" y="263" width="44" height="22" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="214" y="278" text-anchor="middle" font-size="9" font-weight="600" fill="#1e40af">RMSNorm</text>
+<line x1="214" y1="285" x2="214" y2="299" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<polygon points="192,299 236,299 240,323 188,323" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="214" y="315" text-anchor="middle" font-size="9" font-weight="600" fill="#065f46">Linear</text>
+<text x="214" y="340" text-anchor="middle" font-size="9" fill="#6b7280" font-weight="700">q</text>
+
+<!-- k branch x=244 -->
+<line x1="244" y1="247" x2="244" y2="263" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<rect x="222" y="263" width="44" height="22" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="244" y="278" text-anchor="middle" font-size="9" font-weight="600" fill="#1e40af">RMSNorm</text>
+<line x1="244" y1="285" x2="244" y2="299" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<polygon points="222,299 266,299 270,323 218,323" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="244" y="315" text-anchor="middle" font-size="9" font-weight="600" fill="#065f46">ShiftLin</text>
+<text x="244" y="340" text-anchor="middle" font-size="9" fill="#6b7280" font-weight="700">k</text>
+
+<!-- v branch x=278 -->
+<line x1="278" y1="247" x2="278" y2="293" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<polygon points="256,293 300,293 304,317 252,317" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="278" y="309" text-anchor="middle" font-size="9" font-weight="600" fill="#065f46">ShiftLin</text>
+<text x="278" y="334" text-anchor="middle" font-size="9" fill="#6b7280" font-weight="700">v</text>
+
+<!-- f branch x=312 (forget gate — orange highlight) -->
+<line x1="312" y1="247" x2="312" y2="265" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<circle cx="312" cy="276" r="10" fill="#f8fafc" stroke="#d97706" stroke-width="1.5"/>
+<text x="312" y="280" text-anchor="middle" font-size="10.5" fill="#d97706">σ</text>
+<line x1="312" y1="286" x2="312" y2="300" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<polygon points="290,300 334,300 338,324 286,324" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+<text x="312" y="316" text-anchor="middle" font-size="9" font-weight="600" fill="#78350f">Linear</text>
+<text x="312" y="341" text-anchor="middle" font-size="9" fill="#d97706" font-weight="700">f_t</text>
+
+<!-- gate branch x=348 -->
+<line x1="348" y1="247" x2="348" y2="265" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<circle cx="348" cy="276" r="10" fill="#f8fafc" stroke="#6b7280" stroke-width="1.5"/>
+<text x="348" y="280" text-anchor="middle" font-size="10.5" fill="#374151">σ</text>
+<line x1="348" y1="286" x2="348" y2="300" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<polygon points="326,300 362,300 366,324 322,324" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="344" y="316" text-anchor="middle" font-size="9" font-weight="600" fill="#065f46">Linear</text>
+<text x="348" y="341" text-anchor="middle" font-size="9" fill="#6b7280" font-weight="700">gate</text>
+
+<!-- merge 5 branches -->
+<line x1="214" y1="347" x2="214" y2="363" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="244" y1="347" x2="244" y2="363" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="278" y1="341" x2="278" y2="363" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="312" y1="348" x2="312" y2="363" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="348" y1="348" x2="348" y2="363" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="214" y1="363" x2="348" y2="363" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="281" y1="363" x2="281" y2="383" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<text x="278" y="400" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">input x ↓</text>
+
+<!-- gate path to ⊗ -->
+<path d="M362,370 Q370,370 370,150" stroke="#94a3b8" stroke-width="1.2" fill="none" stroke-dasharray="3,2"/>
+<line x1="370" y1="150" x2="290" y2="150" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#darr)"/>
+
+</svg>

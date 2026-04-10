@@ -1,0 +1,156 @@
+<svg viewBox="0 0 380 560" xmlns="http://www.w3.org/2000/svg" font-family="'Inter',system-ui,sans-serif">
+<defs>
+  <marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+    <path d="M1,1 L7,4 L1,7 Z" fill="#6b7280"/>
+  </marker>
+  <marker id="darr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+    <path d="M1,1 L7,4 L1,7 Z" fill="#94a3b8"/>
+  </marker>
+</defs>
+
+<!-- ╔═══════════════════════════════╗ -->
+<!-- ║   LEFT: BACKBONE (N× loop)   ║ -->
+<!-- ╚═══════════════════════════════╝ -->
+
+<!-- Outputs label (top) -->
+<text x="90" y="18" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">Outputs</text>
+<!-- arrow up from Linear to Outputs label -->
+<line x1="90" y1="24" x2="90" y2="38" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Linear output — TRAPEZOID (wider at bottom) -->
+<polygon points="48,38 132,38 144,66 36,66" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="90" y="56" text-anchor="middle" font-size="11" font-weight="600" fill="#065f46">Linear</text>
+
+<!-- arrow up -->
+<line x1="90" y1="66" x2="90" y2="80" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Norm — RECTANGLE -->
+<rect x="40" y="80" width="100" height="28" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="90" y="98" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">Norm</text>
+
+<!-- arrow up -->
+<line x1="90" y1="108" x2="90" y2="122" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ⊕ add circle -->
+<circle cx="90" cy="132" r="11" fill="#f8fafc" stroke="#6b7280" stroke-width="1.5"/>
+<text x="90" y="137" text-anchor="middle" font-size="13" fill="#374151">⊕</text>
+
+<!-- N× loop box -->
+<rect x="14" y="148" width="152" height="330" rx="8" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="6,3"/>
+<text x="7" y="314" text-anchor="middle" font-size="11" fill="#94a3b8" font-style="italic" transform="rotate(-90,7,314)">N ×</text>
+
+<!-- arrow down into loop -->
+<line x1="90" y1="143" x2="90" y2="157" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- GLU — RECTANGLE -->
+<rect x="40" y="157" width="100" height="28" rx="4" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="1.5"/>
+<text x="90" y="175" text-anchor="middle" font-size="11" font-weight="600" fill="#0c4a6e">GLU</text>
+
+<!-- arrow up -->
+<line x1="90" y1="185" x2="90" y2="199" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Norm -->
+<rect x="40" y="199" width="100" height="28" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="90" y="217" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">Norm</text>
+
+<!-- arrow up -->
+<line x1="90" y1="227" x2="90" y2="241" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ⊕ add circle -->
+<circle cx="90" cy="251" r="11" fill="#f8fafc" stroke="#6b7280" stroke-width="1.5"/>
+<text x="90" y="256" text-anchor="middle" font-size="13" fill="#374151">⊕</text>
+
+<!-- arrow up -->
+<line x1="90" y1="262" x2="90" y2="278" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- GSA — RECTANGLE (orange, attention) -->
+<rect x="32" y="278" width="116" height="32" rx="5" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+<text x="90" y="298" text-anchor="middle" font-size="11" font-weight="700" fill="#78350f">GSA Block</text>
+
+<!-- dashed arrow pointing RIGHT to detail -->
+<line x1="148" y1="294" x2="192" y2="294" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#darr)"/>
+
+<!-- arrow up -->
+<line x1="90" y1="310" x2="90" y2="324" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Norm -->
+<rect x="40" y="324" width="100" height="28" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="90" y="342" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">Norm</text>
+
+<!-- arrow down to Inputs -->
+<line x1="90" y1="352" x2="90" y2="378" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Inputs label (bottom) -->
+<text x="90" y="395" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">Inputs</text>
+
+<!-- residual skip: GLU bypass -->
+<path d="M22,350 Q6,350 6,251" stroke="#94a3b8" stroke-width="1.2" fill="none" stroke-dasharray="3,2"/>
+<line x1="6" y1="251" x2="78" y2="251" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#darr)"/>
+
+<!-- residual skip: attn bypass -->
+<path d="M22,478 Q0,478 0,132" stroke="#94a3b8" stroke-width="1.2" fill="none" stroke-dasharray="3,2"/>
+<line x1="0" y1="132" x2="78" y2="132" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#darr)"/>
+
+
+<!-- ╔════════════════════════════════╗ -->
+<!-- ║   RIGHT: GSA DETAIL           ║ -->
+<!-- ╚════════════════════════════════╝ -->
+
+<rect x="196" y="80" width="174" height="380" rx="8" fill="#fefce8" stroke="#e2e8f0" stroke-width="1.2"/>
+<text x="283" y="96" text-anchor="middle" font-size="9.5" fill="#94a3b8" font-style="italic">GSA detail</text>
+
+<!-- output label -->
+<text x="283" y="112" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">output ↑</text>
+<line x1="283" y1="118" x2="283" y2="132" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Linear output trap -->
+<polygon points="243,132 323,132 333,160 233,160" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="283" y="150" text-anchor="middle" font-size="10.5" font-weight="600" fill="#065f46">Linear</text>
+
+<line x1="283" y1="160" x2="283" y2="174" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Norm rect -->
+<rect x="243" y="174" width="80" height="26" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="283" y="191" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1e40af">Norm</text>
+
+<line x1="283" y1="200" x2="283" y2="214" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- θ circle -->
+<circle cx="283" cy="224" r="11" fill="#f8fafc" stroke="#6b7280" stroke-width="1.5"/>
+<text x="283" y="228.5" text-anchor="middle" font-size="11" fill="#374151" font-style="italic">θ</text>
+
+<line x1="283" y1="235" x2="283" y2="249" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Gated Slot Attention rect -->
+<rect x="210" y="249" width="146" height="30" rx="5" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+<text x="283" y="268" text-anchor="middle" font-size="10" font-weight="700" fill="#78350f">Gated Slot Attention</text>
+
+<!-- two branch arrows down from attn -->
+<line x1="258" y1="279" x2="258" y2="295" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<line x1="308" y1="279" x2="308" y2="295" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- θ circle left, σ circle right -->
+<circle cx="258" cy="306" r="11" fill="#f8fafc" stroke="#6b7280" stroke-width="1.5"/>
+<text x="258" y="310.5" text-anchor="middle" font-size="10.5" fill="#374151" font-style="italic">θ</text>
+<circle cx="308" cy="306" r="11" fill="#f8fafc" stroke="#6b7280" stroke-width="1.5"/>
+<text x="308" y="310.5" text-anchor="middle" font-size="10.5" fill="#374151">σ</text>
+
+<line x1="258" y1="317" x2="258" y2="333" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<line x1="308" y1="317" x2="308" y2="333" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Linear left — TRAPEZOID -->
+<polygon points="214,333 278,333 286,359 206,359" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="246" y="350" text-anchor="middle" font-size="10" font-weight="600" fill="#065f46">Linear</text>
+
+<!-- Linear right — TRAPEZOID -->
+<polygon points="282,333 346,333 354,359 274,359" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<text x="318" y="350" text-anchor="middle" font-size="10" font-weight="600" fill="#065f46">Linear</text>
+
+<!-- merge to single input -->
+<line x1="246" y1="359" x2="246" y2="375" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="318" y1="359" x2="318" y2="375" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="246" y1="375" x2="318" y2="375" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="283" y1="375" x2="283" y2="395" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="283" y="412" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">input x ↓</text>
+
+</svg>
