@@ -6,6 +6,7 @@ tags: attention linear-attention SSM transformer
 giscus_comments: false
 date: 2026-04-06
 featured: true
+permalink: /SSM_Story/
 thumbnail: assets/img/attention-zoo/gla-custom.png
 
 authors:
