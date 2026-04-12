@@ -30,7 +30,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-the-attention-zoo-linear-amp-softmax-models-unified",
+        },{id: "post-raven-part-2",
+      
+        title: "Raven (Part-2)",
+      
+      description: "Architecture and Results",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2026/raven-part2/";
+        
+      },
+    },{id: "post-raven-part-1",
+      
+        title: "Raven (Part-1)",
+      
+      description: "Memory as a set of Slots",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2026/raven-part1/";
+        
+      },
+    },{id: "post-the-attention-zoo-linear-amp-softmax-models-unified",
       
         title: "The Attention Zoo: Linear &amp; Softmax Models Unified",
       
