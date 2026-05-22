@@ -52,9 +52,9 @@ ninja.data = [{
           window.location.href = "/blog/2026/raven-part1/";
         
       },
-    },{id: "post-the-attention-zoo-linear-amp-softmax-models-unified",
+    },{id: "post-the-attention-zoo-linear-amp-softmax-models-unified-fuck",
       
-        title: "The Attention Zoo: Linear &amp; Softmax Models Unified",
+        title: "The Attention Zoo: Linear &amp; Softmax Models Unified FUCK",
       
       description: "An interactive guide to modern sequence models — explore architectures and recurrences across the linear-softmax landscape.",
       section: "Posts",
