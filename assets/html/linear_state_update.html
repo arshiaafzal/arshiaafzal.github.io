@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recurrence</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { background:#fff; margin:0; overflow:hidden; font-family:system-ui,sans-serif; }
+
+        /* Equation bars */
+        .eq {
+            font-size:.78rem; font-family:'Courier New',monospace; color:#64748b;
+            text-align:center; padding:.28rem .5rem .06rem;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+
+        /* Separator between recurrence and readout */
+        .sep { height:1px; background:#e2e8f0; margin:.18rem .5rem .12rem; }
+
+        /* Main row */
+        .row {
+            display:flex; flex-direction:row; align-items:flex-start;
+            justify-content:center; gap:5px; padding:.04rem .3rem .25rem;
+        }
+
+        /* Column wrapper: label on top, fixed-height cbox below */
+        .col { display:flex; flex-direction:column; align-items:center; gap:3px; flex-shrink:0; }
+        .lbl {
+            height:18px; font-size:.68rem; font-weight:700;
+            font-family:'Courier New',monospace; color:#64748b;
+            white-space:nowrap; display:flex; align-items:flex-end; line-height:1;
+        }
+        .cbox { display:flex; align-items:center; justify-content:center; }
+
+        /* Operator glyph */
+        .opm { font-size:1.5rem; font-weight:300; color:#c8d5e4; }
+
+        /* Card: default white; forget-gate cards get light-rose override via JS */
+        .card {
+            background:#fff; border-radius:7px; border:1.5px solid #e2e8f0;
+            box-shadow:0 2px 8px rgba(0,0,0,.06); padding:5px;
+            display:inline-flex; align-items:center; justify-content:center;
+        }
+
+        /* 8×8 main matrices (state / write) — 12 px cells */
+        .g-st {
+            display:grid;
+            grid-template-columns:repeat(8,12px);
+            grid-template-rows:   repeat(8,12px);
+            gap:1px;
+        }
+        /* 8×8 operator matrices (Diag, Erase, small RoPE) — 7 px cells */
+        .g-op {
+            display:grid;
+            grid-template-columns:repeat(8,7px);
+            grid-template-rows:   repeat(8,7px);
+            gap:1px;
+        }
+
+        /* Scalar (α) box */
+        .sc { display:flex; align-items:center; justify-content:center;
+              border-radius:6px; width:40px; height:40px; }
+        .sc-t { font-size:1rem; font-weight:900;
+                font-family:'Courier New',monospace; color:#fff; }
+
+        /* v-column inside outer-product write */
+        .vcol { display:flex; flex-direction:column; gap:1px; }
+
+        /* Readout single-column vectors */
+        .g-vec { display:flex; flex-direction:column; gap:1px; }
+    </style>
+</head>
+<body>
+<div class="eq" id="eq"></div>
+<div class="row" id="row"></div>
+<div class="sep" id="sep" style="display:none"></div>
+<div class="eq"  id="eq2" style="display:none"></div>
+<div class="row" id="readout" style="display:none"></div>
+
+<script>
+// ── URL params ──────────────────────────────────────────────────────────────
+const P     = new URLSearchParams(location.search);
+const DECAY = P.get('decay') || 'none';
+const COLOR = '#' + (P.get('color') || '6366f1');
+const NAME  = P.get('name')  || '';
+const IS_M3   = NAME === 'Mamba-3';
+const IS_GDN2 = NAME === 'GDN-2';
+const N     = 8;
+
+// Main card: 8×12 + 7×1 = 103 content + 10 pad + 3 border = 116 px tall
+const CARD_H = 116;
+// Readout card: 8×10 + 7×1 = 87 content + 10 pad + 3 border = 100 px tall
+const READ_H = 100;
+
+// Light rose background for all forget/decay gate cards
+const GATE_BG = '#fef2f2';
+
+// ── Deterministic "random" (sin-based, no Math.random) ─────────────────────
+const det = (i, off) => 0.2 + 0.72 * Math.abs(Math.sin(i * 1.737 + off));
+const nm  = a => { const m = Math.max(...a); return a.map(v => v / m); };
+
+const diagV = Array.from({length:N}, (_,i) => 0.30 + 0.60 * Math.abs(Math.sin(i*2.1+0.7)));
+const kE    = Array.from({length:N}, (_,i) => 0.20 + 0.75 * Math.abs(Math.sin(i*2.5+1.3)));
+const kEN   = (() => { const s = Math.sqrt(kE.reduce((a,v)=>a+v*v,0)); return kE.map(v=>v/s); })();
+const vWN   = nm(Array.from({length:N}, (_,i) => det(i, 0.5)));
+const kWN   = nm(Array.from({length:N}, (_,i) => det(i, 1.8)));
+const vPN   = nm(Array.from({length:N}, (_,i) => det(i, 3.1)));
+const kPN   = nm(Array.from({length:N}, (_,i) => det(i, 4.4)));
+const qVec  = nm(Array.from({length:N}, (_,i) => det(i, 6.0)));
+// o_t ≈ S_t q_t  using the same det pattern as the state grid
+const oVec  = (() => {
+    const o = Array.from({length:N}, (_,r) => {
+        let s = 0; for (let c=0; c<N; c++) s += det(r*N+c, 0.4) * qVec[c]; return s;
+    });
+    return nm(o);
+})();
+const rTh = [0.12, 0.38, 0.71, 1.08];  // RoPE block angles
+
+// ── Equation bars ───────────────────────────────────────────────────────────
+const EQ = {
+    'none':         'S\u209c = S\u209c\u208b\u2081 + v\u209c k\u209c\u1d40',
+    'scalar':       'S\u209c = \u03b1 \u00b7 S\u209c\u208b\u2081 + v\u209c k\u209c\u1d40',
+    'diagonal':     'S\u209c = S\u209c\u208b\u2081 \u00b7 Diag(\u03b1\u209c) + v\u209c k\u209c\u1d40',
+    'delta':        'S\u209c = S\u209c\u208b\u2081 \u00b7 (I \u2212 \u03b2kk\u1d40) + \u03b2 v\u209c k\u209c\u1d40',
+    'scalar-delta': 'S\u209c = \u03b1 \u00b7 S\u209c\u208b\u2081 \u00b7 (I \u2212 \u03b2kk\u1d40) + \u03b2 v\u209c k\u209c\u1d40',
+    'diag-delta':   'S\u209c = S\u209c\u208b\u2081 \u00b7 Diag(\u03b1\u209c) \u00b7 (I \u2212 kk\u1d40) + v\u209c k\u209c\u1d40',
+};
+document.getElementById('eq').textContent = IS_M3
+    ? 'S\u209c = e^(\u03b4A+i\u03b4\u03a9) S\u209c\u208b\u2081 + \u03b2 v\u209c\u208b\u2081(Rk\u209c\u208b\u2081)\u1d40 + \u03b3 v\u209c(Rk\u209c)\u1d40'
+    : IS_GDN2
+    ? 'S\u209c = (I \u2212 k\u209c(b\u209c\u2299k\u209c)\u1d40)\u00b7Diag(\u03b1\u209c)\u00b7S\u209c\u208b\u2081 + k\u209c(w\u209c\u2299v\u209c)\u1d40'
+    : (EQ[DECAY] || '');
+
+if (IS_M3) {
+    ['sep','eq2','readout'].forEach(id => document.getElementById(id).style.display = '');
+    document.getElementById('eq2').textContent = 'o\u209c = S\u209c (R\u209c q\u209c)';
+}
+
+// ── DOM helpers ─────────────────────────────────────────────────────────────
+function mk(css, html) {
+    const d = document.createElement('div');
+    if (css)  d.style.cssText = css;
+    if (html) d.innerHTML = html;
+    return d;
+}
+function px(w, h, bg, op) {
+    return mk(`width:${w}px;height:${h}px;background:${bg};${op!=null&&op<1?'opacity:'+op+';':''}border-radius:1px;`);
+}
+
+// ── Grid builders ───────────────────────────────────────────────────────────
+
+function stateGrid(hue) {         // 12 px cells — main recurrence state
+    const g = mk(); g.className = 'g-st';
+    for (let r=0; r<N; r++) for (let c=0; c<N; c++) {
+        const v = det(r*N+c, 0.4);
+        g.appendChild(px(12, 12, `hsl(${hue},50%,${44+v*26}%)`));
+    }
+    return g;
+}
+
+function stateGridRd(hue) {       // 10 px cells — readout S_t
+    const g = mk();
+    g.style.cssText = 'display:grid;grid-template-columns:repeat(8,10px);grid-template-rows:repeat(8,10px);gap:1px;';
+    for (let r=0; r<N; r++) for (let c=0; c<N; c++) {
+        const v = det(r*N+c, 0.4);
+        g.appendChild(px(10, 10, `hsl(${hue},50%,${44+v*26}%)`));
+    }
+    return g;
+}
+
+function diagGrid() {
+    const g = mk(); g.className = 'g-op';
+    for (let r=0; r<N; r++) for (let c=0; c<N; c++)
+        g.appendChild(r===c ? px(7,7,COLOR,diagV[r]) : px(7,7,'#f1f5f9'));
+    return g;
+}
+
+function eraseGrid() {
+    const g = mk(); g.className = 'g-op';
+    for (let r=0; r<N; r++) for (let c=0; c<N; c++) {
+        const m = kEN[r]*kEN[c];
+        g.appendChild(r===c
+            ? px(7, 7, `hsl(210,8%,${Math.round(92-m*38)}%)`)
+            : px(7, 7, COLOR, Math.min(m*5, .80)));
+    }
+    return g;
+}
+
+// RoPE: 4×(2×2) block-diagonal rotation.
+//   sz = cell size in px (7 for operator matrices, 10 for readout)
+function ropeGrid(sz) {
+    const s = sz || 7;
+    const g = mk();
+    g.style.cssText = `display:grid;grid-template-columns:repeat(8,${s}px);grid-template-rows:repeat(8,${s}px);gap:1px;`;
+    for (let r=0; r<N; r++) for (let c=0; c<N; c++) {
+        const bi = r>>1, bj = c>>1;
+        if (bi === bj) {
+            const cv = Math.abs(Math.cos(rTh[bi])), sv = Math.abs(Math.sin(rTh[bi]));
+            const ri = r&1, ci = c&1;
+            if      (ri===ci) g.appendChild(px(s, s, COLOR, cv));
+            else if (ri===0)  g.appendChild(px(s, s, '#f43f5e', sv));
+            else              g.appendChild(px(s, s, COLOR, sv*.70));
+        } else g.appendChild(px(s, s, '#f1f5f9'));
+    }
+    return g;
+}
+
+function scalarEl() {
+    const b = mk(); b.className = 'sc';
+    b.style.background = COLOR; b.style.opacity = '0.85';
+    const t = mk(); t.className = 'sc-t'; t.textContent = '\u03b1';
+    b.appendChild(t); return b;
+}
+
+// Outer-product write: v-column (12×12 cells) + 8×8 rank-1 matrix (12×12 cells)
+function writeEl(vn, kn, hue, opa) {
+    const wrap = mk('display:flex;align-items:flex-start;gap:2px;');
+    if (opa != null && opa < 1) wrap.style.opacity = opa;
+    // v vector column — same cell size as the matrix rows
+    const vcol = mk(); vcol.className = 'vcol';
+    vn.forEach(v => vcol.appendChild(mk(`width:12px;height:12px;border-radius:2px;background:hsl(${hue},56%,${38+v*28}%);`)));
+    wrap.appendChild(vcol);
+    // outer-product matrix
+    const g = mk(); g.className = 'g-st';
+    for (let r=0; r<N; r++) for (let c=0; c<N; c++) {
+        const t = vn[r]*kn[c];
+        g.appendChild(px(12, 12, `hsl(${hue},${52+t*20}%,${36+t*34}%)`));
+    }
+    wrap.appendChild(g); return wrap;
+}
+
+// Single-column vector for readout q_t / o_t  (14×10 px cells → 87 px tall = READ_H content)
+function vecEl(values, hue, sat) {
+    const g = mk(); g.className = 'g-vec';
+    values.forEach(v => g.appendChild(px(14, 10, `hsl(${hue},${sat||50}%,${38+v*30}%)`)));
+    return g;
+}
+
+// ── Column / operator builders ──────────────────────────────────────────────
+
+// cardH: height of the cbox (default CARD_H); cardBg: optional card background
+function mkCol(labelHTML, content, cardH, cardBg) {
+    const h = cardH != null ? cardH : CARD_H;
+    const col = mk(); col.className = 'col';
+    const lbl = mk(); lbl.className = 'lbl'; lbl.innerHTML = labelHTML;
+    const cbox = mk(`height:${h}px;`); cbox.className = 'cbox';
+    const card = mk(); card.className = 'card';
+    if (cardBg) card.style.background = cardBg;
+    card.appendChild(content); cbox.appendChild(card);
+    col.appendChild(lbl); col.appendChild(cbox); return col;
+}
+
+function opCol(sym, cardH) {
+    const h = cardH != null ? cardH : CARD_H;
+    const col = mk(); col.className = 'col';
+    const lbl = mk(); lbl.className = 'lbl'; lbl.innerHTML = '&nbsp;';
+    const cbox = mk(`height:${h}px;`); cbox.className = 'cbox';
+    const s = mk(); s.className = 'opm'; s.textContent = sym;
+    cbox.appendChild(s); col.appendChild(lbl); col.appendChild(cbox); return col;
+}
+
+// ── Accent hue (from model hex color) ──────────────────────────────────────
+function hexHue(hex) {
+    const r=parseInt(hex.slice(1,3),16)/255, g=parseInt(hex.slice(3,5),16)/255, b=parseInt(hex.slice(5,7),16)/255;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
+    if (d===0) return 210;
+    let h;
+    if      (mx===r) h=(g-b)/d+(g<b?6:0);
+    else if (mx===g) h=(b-r)/d+2;
+    else             h=(r-g)/d+4;
+    return h*60;
+}
+const accentHue = hexHue(COLOR);
+
+// ── Assemble recurrence row ─────────────────────────────────────────────────
+const row     = document.getElementById('row');
+const hasSc   = !IS_M3 && (DECAY==='scalar'||DECAY==='scalar-delta');
+const hasDiag = !IS_M3 && (DECAY==='diagonal'||DECAY==='diag-delta');
+const hasDelta = !IS_M3 && DECAY.includes('delta');
+
+// Left decay operator (scalar α or Mamba-3 RoPE rotation)
+if (IS_M3) {
+    row.appendChild(mkCol('e<sup>\u03b4A+i\u03b4\u03a9</sup>', ropeGrid(7), CARD_H, GATE_BG));
+    row.appendChild(opCol('\u00d7'));
+} else if (hasSc) {
+    row.appendChild(mkCol('\u03b1', scalarEl(), CARD_H, GATE_BG));
+    row.appendChild(opCol('\u00b7'));
+}
+
+// Hidden state S_{t-1}  (purple)
+row.appendChild(mkCol('S<sub>t\u22121</sub>', stateGrid(265)));
+
+// Right decay operators (gate matrices — light rose background)
+if (hasDiag) {
+    row.appendChild(opCol('\u00b7'));
+    row.appendChild(mkCol('Diag(\u03b1<sub>t</sub>)', diagGrid(), CARD_H, GATE_BG));
+}
+if (hasDelta) {
+    row.appendChild(opCol('\u00b7'));
+    row.appendChild(mkCol('I\u2212\u03b2kk<sup>T</sup>', eraseGrid(), CARD_H, GATE_BG));
+}
+
+// Write term(s)
+row.appendChild(opCol('+'));
+
+if (IS_M3) {
+    row.appendChild(mkCol('v<sub>t\u22121</sub>(Rk<sub>t\u22121</sub>)<sup>T</sup>', writeEl(vPN, kPN, 245, .60)));
+    row.appendChild(opCol('+'));
+    row.appendChild(mkCol('v<sub>t</sub>(Rk<sub>t</sub>)<sup>T</sup>', writeEl(vWN, kWN, 205)));
+} else {
+    row.appendChild(mkCol(
+        IS_GDN2 ? 'k<sub>t</sub>(w<sub>t</sub>\u2299v<sub>t</sub>)<sup>T</sup>' : 'v<sub>t</sub>k<sub>t</sub><sup>T</sup>',
+        writeEl(vWN, kWN, 210)
+    ));
+}
+
+// Result S_t  (model accent color)
+row.appendChild(opCol('='));
+row.appendChild(mkCol('S<sub>t</sub>', stateGrid(accentHue)));
+
+// ── Readout row (Mamba-3 only) — S_t · R_t · q_t = o_t ────────────────────
+if (IS_M3) {
+    const readout = document.getElementById('readout');
+    readout.appendChild(mkCol('S<sub>t</sub>',  stateGridRd(accentHue), READ_H));
+    readout.appendChild(opCol('\u00b7', READ_H));
+    readout.appendChild(mkCol('R<sub>t</sub>',  ropeGrid(10), READ_H, GATE_BG));
+    readout.appendChild(opCol('\u00b7', READ_H));
+    readout.appendChild(mkCol('q<sub>t</sub>',  vecEl(qVec, 220, 40), READ_H));
+    readout.appendChild(opCol('=', READ_H));
+    readout.appendChild(mkCol('o<sub>t</sub>',  vecEl(oVec, accentHue, 65), READ_H));
+}
+</script>
+</body>
+</html>

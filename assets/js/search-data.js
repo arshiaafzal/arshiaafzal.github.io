@@ -52,11 +52,11 @@ ninja.data = [{
           window.location.href = "/blog/2026/raven-part1/";
         
       },
-    },{id: "post-the-attention-zoo-linear-amp-softmax-models-unified-fuck",
+    },{id: "post-attention-zoo-summary-of-ssms-and-transformers",
       
-        title: "The Attention Zoo: Linear &amp; Softmax Models Unified FUCK",
+        title: "Attention Zoo: Summary of SSMs and Transformers",
       
-      description: "An interactive guide to modern sequence models — explore architectures and recurrences across the linear-softmax landscape.",
+      description: "An interactive guide to modern sequence models, explore architectures and recurrences across the linear-softmax landscape.",
       section: "Posts",
       handler: () => {
         
