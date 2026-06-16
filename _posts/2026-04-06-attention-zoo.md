@@ -1,6 +1,6 @@
 ---
 layout: distill
-title: "Attention Zoo: Summary of SSMs and Softmax Transformers"
+title: "Attention Zoo: Summary of SSMs and Transformers"
 description: An interactive guide to modern sequence models, explore architectures and recurrences across the linear-softmax landscape.
 tags: attention linear-attention SSM transformer
 giscus_comments: false
