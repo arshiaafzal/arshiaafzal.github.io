@@ -60,7 +60,7 @@ ninja.data = [{
       section: "Posts",
       handler: () => {
         
-          window.location.href = "/SSM_Story/";
+          window.location.href = "/blog/2026/attention-zoo/";
         
       },
     },{id: "post-on-the-legacy-of-linear-transformers-in-positional-embeddings",
