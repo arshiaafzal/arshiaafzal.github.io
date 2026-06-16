@@ -1,7 +1,7 @@
 ---
 layout: distill
-title: "The Attention Zoo: Linear & Softmax Models Unified FUCK"
-description: An interactive guide to modern sequence models — explore architectures and recurrences across the linear-softmax landscape.
+title: "Attention Zoo: Summary of SSMs and Softmax Transformers"
+description: An interactive guide to modern sequence models, explore architectures and recurrences across the linear-softmax landscape.
 tags: attention linear-attention SSM transformer
 giscus_comments: false
 date: 2026-04-06
@@ -18,8 +18,18 @@ authors:
 
 toc:
   - name: Introduction
-  - name: Interactive Explorer
+  - name: Notation
+  - name: The ZOO
 ---
+
+<script>
+(function(){
+  var lnk = document.querySelector("link[rel~='icon']") || document.createElement('link');
+  lnk.rel = 'icon';
+  lnk.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎪</text></svg>";
+  document.head.appendChild(lnk);
+})();
+</script>
 
 <style>
 /* ── Reset inside zoo ──────────────────────────────── */
@@ -38,6 +48,8 @@ toc:
   --c-delta:   #059669;
   --c-diag:    #7c3aed;
   --c-scalar:  #dc2626;
+  --c-rope:    #b45309;
+  --c-window:  #0369a1;
   --c-none:    #475569;
   --radius:    12px;
   --trans:     0.25s cubic-bezier(.4,0,.2,1);
@@ -80,6 +92,8 @@ toc:
 [data-decay="delta"]   { --pill-c: var(--c-delta); }
 [data-decay="diagonal"]{ --pill-c: var(--c-diag); }
 [data-decay="scalar"]  { --pill-c: var(--c-scalar); }
+[data-decay="rope"]    { --pill-c: var(--c-rope); }
+[data-decay="window"]  { --pill-c: var(--c-window); }
 [data-decay="none"]    { --pill-c: var(--c-none); }
 [data-type="all"],[data-decay="all"]{ --pill-c: #334155; }
 
@@ -136,6 +150,8 @@ toc:
 .b-delta    { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
 .b-diagonal { background:#f5f3ff; color:#5b21b6; border:1px solid #ddd6fe; }
 .b-scalar   { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+.b-rope     { background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
+.b-window   { background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; }
 .b-none     { background:#f8fafc; color:#334155; border:1px solid #cbd5e1; }
 
 /* Card body layout */
@@ -178,8 +194,10 @@ toc:
   flex: 1; min-width: 260px;
   padding: .7rem 1.3rem;
   border-right: 1px solid var(--c-border);
+  overflow: hidden;
 }
 .az-eq-cell:last-child { border-right: none; }
+.az-eq-row > .az-eq-cell:first-child { flex: 2; }
 .az-eq-lbl {
   font-size: .62rem; font-weight: 700; letter-spacing: .1em;
   text-transform: uppercase; color: var(--c-muted);
@@ -201,6 +219,69 @@ toc:
 .az-aside-lbl { display: inline-block; font-weight: 700; font-size: .62rem; letter-spacing: .08em;
   text-transform: uppercase; color: #94a3b8; margin-bottom: .25rem; }
 
+/* Causal mask visualization */
+.az-mask-section {
+  border-top: 1px solid var(--c-border);
+  background: linear-gradient(to bottom, #f8fafc, #eef2f7);
+  display: grid; grid-template-columns: 60% 40%;
+}
+.az-mask-eq-panel {
+  display: flex; flex-direction: column; justify-content: flex-start; gap: .65rem;
+  padding: .9rem 1.4rem .85rem; border-right: 1px solid var(--c-border);
+}
+.az-mask-eq-block { }
+.az-mask-eq-block .az-eq-lbl { margin-bottom: .2rem; }
+.az-mask-grid-panel { padding: .75rem 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.az-mask-lbl {
+  font-size: .62rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--c-muted);
+  display: flex; align-items: center; gap: .35rem; margin-bottom: .4rem;
+}
+.az-mask-lbl::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--mask-dot-c, #c084fc); flex-shrink: 0; display: inline-block;
+}
+.az-mask-col-row { display: grid; grid-template-columns: 16px repeat(8, 16px); gap: 1px; margin-bottom: 1px; }
+.az-mask-cl { text-align: center; font-size: .46rem; color: #334155; font-style: italic; line-height: 16px; }
+.az-mask-row { display: grid; grid-template-columns: 16px repeat(8, 16px); gap: 1px; margin-bottom: 1px; }
+.az-mask-rl { font-size: .46rem; color: #94a3b8; font-style: italic;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 2px; line-height: 16px; }
+.az-mask-cell { width: 16px; height: 16px; aspect-ratio: 1; border-radius: 2px;
+  transition: transform .12s ease; cursor: default; }
+.az-mask-cell:hover { transform: scale(1.3); position: relative; z-index: 2; }
+.az-mask-on  { background: #c084fc; }
+.az-mask-off { background: #faf5ff; }
+.az-mask-legend { display: flex; gap: .55rem; margin-top: .55rem; align-items: center; flex-wrap: wrap; }
+.rmcell { position: relative; cursor: default; }
+.rmcell::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%; transform: translateX(-50%);
+  background: #1c1917; color: #fef3c7;
+  font-size: .65rem; font-family: monospace;
+  white-space: nowrap; padding: .2rem .5rem;
+  border-radius: 4px; pointer-events: none;
+  opacity: 0; transition: opacity .15s; z-index: 200;
+}
+.rmcell:hover::after { opacity: 1; }
+.az-mask-cell[data-tip] { position: relative; }
+.az-mask-cell[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%; transform: translateX(-50%);
+  background: #1c1917; color: #fef3c7;
+  font-size: .62rem; font-family: monospace;
+  white-space: nowrap; padding: .2rem .5rem;
+  border-radius: 4px; pointer-events: none;
+  opacity: 0; transition: opacity .15s; z-index: 200;
+}
+.az-mask-cell[data-tip]:hover::after { opacity: 1; }
+.az-mask-li { display: flex; align-items: center; gap: .28rem; font-size: .58rem; color: #64748b; }
+.az-mask-sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+.az-anim-iframe { zoom: 0.82; }
+
 /* Empty state */
 #az-empty {
   text-align:center; padding:3rem 1rem;
@@ -210,32 +291,240 @@ toc:
 
 ---
 
+<img src="/assets/img/attention-zoo/zoo_new.png" alt="Attention Zoo teaser" style="width:100%;border-radius:10px;margin-bottom:1.25rem;box-shadow:0 2px 16px rgba(0,0,0,.1);">
+
 ## Intro
 
-Modern sequence models share a deep mathematical skeleton: a **key-value memory** written to at each step and read by a query. The differences lie in *how* that memory decays — and this page makes those differences interactive and visual.
+When I first started learning about SSMs and linear transformers, I was overwhelmed. From simple linear attention models to Mamba, Kimi Linear, Qwen's hybrid architectures, Mamba-3, Raven, and many others, it was hard to understand how everything connected and where to even begin.
+
+This blog is the guide I wish I had. Its goal is to provide an intuitive overview of linear transformers, SSMs, and the ideas behind modern hybrid architectures without diving too deeply into the math. If you want the technical details, I've linked the relevant papers throughout the blog ;)!
+
+I hope this helps make the rapidly evolving world of SSMs and linear models easier to navigate. If there's a model you'd like to see added or you have suggestions, feel free to reach out — I'll keep updating this guide as the field evolves.
+
+Modern sequence models share a deep mathematical skeleton: a **key-value memory** written to at each step and read by a query. The differences lie in *how* that memory decays, and this page makes those differences interactive and visual.
 
 Filter by **attention kernel** and **memory decay type** below. Each model card shows the architecture diagram for that model.
 
+## 📓 Notation
+
+Throughout this post, vectors are lowercase and matrices are uppercase. The query, key, and value vectors at a single timestep and their full-sequence stacks are:
+
+$$q_t,\, k_t,\, v_t \in \mathbb{R}^d \qquad Q,\, K,\, V \in \mathbb{R}^{T \times d}$$
+
+The attention weight matrix and the SSM hidden state are:
+
+$$A \in \mathbb{R}^{T \times T} \qquad S_t \in \mathbb{R}^{d \times d}$$
+
+<div id="az-ls" style="margin:1.8rem 0 2.4rem;">
+<style>
+#az-ls,#az-ls *{box-sizing:border-box;}
+#az-ls{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+#az-ls .az2-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 2px 24px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04);}
+#az-ls .az2-hdr{padding:14px 20px;background:linear-gradient(135deg,#f8fafc 0%,#eef2ff 100%);border-bottom:1px solid #e2e8f0;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+#az-ls .az2-ht{font-size:15px;font-weight:800;color:#0f172a;letter-spacing:-.02em;}
+#az-ls .az2-hs{font-size:10px;color:#64748b;margin-top:3px;}
+#az-ls .az2-leg{display:flex;gap:7px;flex-shrink:0;margin-top:2px;}
+#az-ls .az2-lp{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:#475569;padding:3px 9px;border:1.5px solid #e2e8f0;border-radius:100px;background:#fff;}
+#az-ls .az2-ld{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+#az-ls .az2-scr{overflow-x:auto;overflow-y:visible;background-color:#f9fafb;background-image:radial-gradient(circle,#dde3ed 1px,transparent 1px);background-size:22px 22px;}
+#az-ls .az2-stg{position:relative;width:980px;height:300px;overflow:visible;}
+#az-ls .az2-bs{position:absolute;top:0;left:0;right:0;height:150px;background:linear-gradient(180deg,rgba(217,119,6,.06) 0%,rgba(217,119,6,0) 100%);pointer-events:none;}
+#az-ls .az2-bl{position:absolute;top:150px;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(99,102,241,0) 0%,rgba(99,102,241,.06) 100%);pointer-events:none;}
+#az-ls .az2-div{position:absolute;left:50px;right:0;top:150px;height:1px;background:linear-gradient(90deg,#e2e8f0 0%,#a5b4fc 25%,#a5b4fc 75%,#e2e8f0 100%);pointer-events:none;}
+#az-ls .az2-tlbl{position:absolute;left:8px;font-size:8px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;}
+#az-ls .az2-yr{position:absolute;bottom:6px;transform:translateX(-50%);font-size:8.5px;color:#94a3b8;font-weight:500;letter-spacing:.02em;}
+#az-ls .az2-tk{position:absolute;top:150px;width:1px;height:7px;background:#d1d5db;}
+#az-ls .az2-nd{
+  position:absolute;display:inline-flex;align-items:center;gap:3px;
+  padding:5px 11px 5px 9px;border-radius:100px;
+  border:1.5px solid var(--nc);background:#fff;color:var(--nc);
+  font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;
+  z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.07);
+  transition:background .16s ease,color .16s ease,transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .16s ease;
+}
+#az-ls .az2-nd:hover{
+  background:var(--nc);color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.2);
+  box-shadow:0 4px 18px color-mix(in srgb,var(--nc) 40%,transparent);
+  transform:translateY(-3px) scale(1.08);z-index:10;
+}
+#az-ls .az2-mrk{position:absolute;font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transform:translateX(-50%);opacity:.55;}
+@keyframes az2fi{from{opacity:0}to{opacity:1}}
+#az-ls .az2-ft{padding:8px 20px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;font-size:9.5px;color:#94a3b8;flex-wrap:wrap;gap:4px;}
+</style>
+
+<div class="az2-card">
+<div class="az2-hdr">
+  <div><div class="az2-ht">The Evolution of Attention Mechanisms</div><div class="az2-hs">Hover any model for details &middot; 2020&ndash;2026</div></div>
+  <div class="az2-leg">
+    <div class="az2-lp"><div class="az2-ld" style="background:#d97706;"></div>Softmax</div>
+    <div class="az2-lp"><div class="az2-ld" style="background:#6366f1;"></div>Linear</div>
+  </div>
+</div>
+<div class="az2-scr"><div class="az2-stg" id="az2-stg">
+  <div class="az2-bs"></div><div class="az2-bl"></div><div class="az2-div"></div>
+  <div class="az2-tlbl" style="top:46px;color:#b45309;">Softmax</div>
+  <div class="az2-tlbl" style="top:212px;color:#4f46e5;">Linear</div>
+  <svg id="az2-svg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible;"></svg>
+</div></div>
+<div class="az2-ft">
+  <span>Solid lines&nbsp;= direct lineage &nbsp;&middot;&nbsp; Dashed&nbsp;= architectural influence</span>
+  <span>20 models &middot; 2020&ndash;2026</span>
+</div>
+</div>
+
+<div id="az2-tp" style="position:fixed;display:none;z-index:99999;pointer-events:none;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:240px;min-width:160px;">
+  <div style="background:#1e293b;border-radius:10px;padding:11px 14px;box-shadow:0 8px 32px rgba(0,0,0,.32);">
+    <div id="az2-tyr" style="font-size:9px;color:#64748b;font-weight:500;margin-bottom:2px;letter-spacing:.04em;"></div>
+    <div id="az2-tnm" style="font-size:13px;font-weight:800;color:#fff;margin-bottom:5px;"></div>
+    <div id="az2-ttx" style="font-size:10.5px;color:#94a3b8;line-height:1.55;"></div>
+    <div id="az2-tbd" style="display:inline-block;font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:2px 8px;margin-top:7px;border:1px solid rgba(255,255,255,.15);"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var M=[
+  {id:'la', nm:'LinAtt',      em:'',   yr:2020,c:'#64748b',t:'L',x:90, y:222,tip:'Replaces softmax with a kernel function. Causal form is a pure RNN: S_t = S_{t-1} + v_t k_t^T with no decay.',dec:'No decay'},
+  {id:'rn', nm:'RetNet',      em:'',   yr:2023,c:'#0369a1',t:'L',x:450,y:225,tip:'Scalar \u03b3 < 1 prevents memory explosion. The RetNet decay mask is exactly the ALiBi bias inside softmax.',dec:'Scalar \u03b1'},
+  {id:'gla',nm:'GLA',         em:'',   yr:2023,c:'#7c3aed',t:'L',x:474,y:183,tip:'Input-dependent diagonal decay \u03b1_t. First linear model to train as fast as softmax transformers via chunk-wise parallelism.',dec:'Diagonal'},
+  {id:'mb', nm:'Mamba',       em:'\uD83D\uDC0D',yr:2023,c:'#0f766e',t:'L',x:510,y:263,tip:'First SSM to match transformers on language modeling. Selective diagonal decay via zero-order hold discretization.',dec:'Diagonal'},
+  {id:'dn', nm:'DeltaNet',    em:'',   yr:2024,c:'#059669',t:'L',x:570,y:183,tip:'Delta rule: precisely overwrites stale entries. Non-diagonal transition matrix \u2192 can solve state-tracking tasks.',dec:'Delta rule'},
+  {id:'m2', nm:'Mamba-2',     em:'\uD83D\uDC0D',yr:2024,c:'#0891b2',t:'L',x:606,y:225,tip:'State Space Duality (SSD): scalar decay + matrix-multiply training. Bridges Mamba and linear attention.',dec:'Scalar (SSD)'},
+  {id:'gdn',nm:'GDN',         em:'',   yr:2024,c:'#d97706',t:'L',x:642,y:263,tip:'Scalar forget gate \u03b1_t \xd7 delta rule: bulk forgetting of stale context + surgical per-entry rewrites.',dec:'\u03b1 \xb7 Delta'},
+  {id:'km', nm:'Kimi Linear', em:'',   yr:2025,c:'#0891b2',t:'L',x:690,y:200,tip:'Channel-wise diagonal decay \xd7 delta rule. Used in the KimiLinear hybrid model trained at scale.',dec:'Diag \xb7 Delta'},
+  {id:'m3', nm:'Mamba-3',     em:'\uD83D\uDC0D',yr:2026,c:'#0f766e',t:'L',x:810,y:182,tip:'Trapezoidal discretization subsumes causal convolutions. Complex RoPE decay enables state tracking.',dec:'Scalar + RoPE'},
+  {id:'g2', nm:'GDN-2',       em:'',   yr:2026,c:'#0e7490',t:'L',x:846,y:228,tip:'Decouples erase gate b_t from write gate w_t. Unifies GDN and Kimi Linear into one expressive framework.',dec:'Diag \xb7 Delta'},
+  {id:'swa',nm:'SWA',         em:'',   yr:2020,c:'#475569',t:'S',x:115,y:78, tip:'Sliding window: O(W) KV cache with exact recurrent form. First to bound attention to local context.',dec:'Window'},
+  {id:'ab', nm:'ALiBi',       em:'',   yr:2021,c:'#dc2626',t:'S',x:216,y:38, tip:'Fixed linear distance penalty M_ij = \u2212m|i\u2212j| added to attention logits. Extrapolates naturally to longer sequences.',dec:'Scalar bias'},
+  {id:'rp', nm:'RoPE',        em:'',   yr:2021,c:'#b45309',t:'S',x:288,y:78, tip:'Rotates Q and K by absolute position so their dot product encodes relative offset. Now the de facto LLM standard.',dec:'Rotary PE'},
+  {id:'abc',nm:'ABC',         em:'',   yr:2021,c:'#4f46e5',t:'S',x:372,y:118,tip:'Replaces SWA\'s FIFO eviction with a learned write gate r_t=softmax(W_r x_t). Allows content-based slot routing in a bounded memory.',dec:'Window (learned)'},
+  {id:'np', nm:'NoPE',        em:'\uD83E\uDD16',yr:2023,c:'#475569',t:'S',x:458,y:38, tip:'No positional encoding at all. The causal triangular mask alone provides a sufficient implicit positional signal.',dec:'None'},
+  {id:'gsa',nm:'GSA',         em:'',   yr:2024,c:'#be185d',t:'S',x:556,y:78, tip:'Adds a sigmoid forget gate \u03c3(Wx_t)^\u03c4 per slot before absorbing new content. Prevents memory saturation in bounded windows.',dec:'Window + gate'},
+  {id:'fx', nm:'FoX',         em:'\uD83E\uDD8A',yr:2025,c:'#d97706',t:'S',x:664,y:38, tip:'Input-dependent scalar decay bias f_t \u2208 (0,1) added to softmax logits. Data-driven, input-dependent forgetting.',dec:'Scalar gate'},
+  {id:'path',nm:'PaTH',       em:'\uD83D\uDEE3\uFE0F',yr:2025,c:'#1d4ed8',t:'S',x:706,y:78, tip:'Derives position encoding by unrolling DeltaNet: a product of Householder transforms P_{j\u2192t} replaces the dot product k_j^T q_i, giving data-dependent PE.',dec:'Delta (PE)'},
+  {id:'wl', nm:'Wall',        em:'\uD83E\uDDF1',yr:2026,c:'#0891b2',t:'S',x:814,y:118,tip:'GLA diagonal gate lifted into softmax via induced-action principle. Per-channel decay. Extrapolates to 160k tokens.',dec:'Diagonal'},
+  {id:'raven',nm:'Raven',     em:'\uD83D\uDC26\u200D\u2B1B',yr:2026,c:'#0f172a',t:'S',x:862,y:38, tip:'Sparse router r_t selects which slots to write; per-slot decay a_t controls forgetting. Extrapolates to 16\xd7 training length.',dec:'Window + sparse'},
+];
+var E=[
+  ['la','rn','S'],['la','gla','S'],['la','dn','D'],
+  ['rn','mb','S'],['rn','m2','S'],
+  ['gla','km','S'],
+  ['dn','gdn','S'],['dn','km','S'],
+  ['m2','m3','S'],
+  ['gdn','g2','S'],['km','g2','S'],
+  ['swa','abc','S'],['abc','gsa','S'],['gsa','raven','S'],
+  ['rp','np','D'],['rp','fx','D'],['fx','wl','S'],
+  ['dn','path','D'],['path','wl','D'],
+  ['gla','wl','D'],
+];
+var mm={};M.forEach(function(m){mm[m.id]=m;});
+var idMap={la:'la',rn:'retnet',gla:'gla',mb:'mamba',dn:'deltanet',m2:'mamba2',gdn:'gated-deltanet',km:'kimi-linear',m3:'mamba3',g2:'gdn2',swa:'swa',ab:'alibi',rp:'rope-attn',abc:'abc',np:'nope',gsa:'gsa',fx:'fox',path:'path',wl:'wall',raven:'raven'};
+var stg=document.getElementById('az2-stg');
+var svgEl=document.getElementById('az2-svg');
+var tp=document.getElementById('az2-tp');
+var tpYr=document.getElementById('az2-tyr');
+var tpNm=document.getElementById('az2-tnm');
+var tpTx=document.getElementById('az2-ttx');
+var tpBd=document.getElementById('az2-tbd');
+
+[2020,2021,2022,2023,2024,2025,2026].forEach(function(yr){
+  var x=90+(yr-2020)*120;
+  var lbl=document.createElement('div');lbl.className='az2-yr';lbl.style.left=x+'px';lbl.textContent=yr;stg.appendChild(lbl);
+  var tk=document.createElement('div');tk.className='az2-tk';tk.style.left=(x-0.5)+'px';stg.appendChild(tk);
+});
+
+var mkr1=document.createElement('div');mkr1.className='az2-mrk';mkr1.style.cssText='top:238px;left:90px;color:#64748b;';mkr1.textContent='Origin';stg.appendChild(mkr1);
+
+var delay=80;
+M.forEach(function(m){
+  var el=document.createElement('div');el.className='az2-nd';el.id='az2n-'+m.id;
+  el.style.cssText='left:'+(m.x-44)+'px;top:'+(m.y-13)+'px;--nc:'+m.c+';animation:az2fi 0.5s ease '+delay+'ms both;';
+  el.textContent=(m.em?m.em+'\u202f':'')+m.nm;
+  delay+=52;
+  el.addEventListener('mouseenter',function(e){
+    tpYr.textContent=m.yr;
+    tpNm.textContent=(m.em?m.em+' ':'')+m.nm;
+    tpTx.textContent=m.tip;
+    tpBd.textContent=m.dec;
+    tpBd.style.cssText='display:inline-block;font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:2px 8px;margin-top:7px;background:'+m.c+'25;border:1px solid '+m.c+'50;color:'+m.c+';';
+    tp.style.display='block';mvTp(e);hlE(m.id,true);
+  });
+  el.addEventListener('mousemove',mvTp);
+  el.addEventListener('mouseleave',function(){tp.style.display='none';hlE(null,false);});
+  el.addEventListener('click',function(){
+    var cid=idMap[m.id];if(!cid)return;
+    activeAttn='all';activeDecays=new Set(['all']);
+    document.querySelectorAll('#az-attn .az-pill').forEach(function(p){p.classList.toggle('active',p.dataset.type==='all');});
+    document.querySelectorAll('#az-decay .az-pill').forEach(function(p){p.classList.toggle('active',p.dataset.decay==='all');});
+    updateGrid();
+    setTimeout(function(){var c=document.getElementById('az-card-'+cid);if(c)c.scrollIntoView({behavior:'smooth',block:'center'});},80);
+  });
+  stg.appendChild(el);
+});
+
+function mvTp(e){
+  var lx=e.clientX+18,ly=e.clientY-16;
+  if(lx+252>window.innerWidth)lx=e.clientX-260;
+  if(ly+150>window.innerHeight)ly=e.clientY-160;
+  tp.style.left=lx+'px';tp.style.top=ly+'px';
+}
+
+svgEl.setAttribute('viewBox','0 0 980 300');
+svgEl.setAttribute('preserveAspectRatio','none');
+var defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+defs.innerHTML='<filter id="az2glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+svgEl.appendChild(defs);
+
+E.forEach(function(e){
+  var src=mm[e[0]],tgt=mm[e[1]],style=e[2];
+  if(!src||!tgt)return;
+  var x1=src.x,y1=src.y,x2=tgt.x,y2=tgt.y,dx=x2-x1;
+  var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d','M'+x1+' '+y1+' C'+(x1+dx*.44)+' '+y1+' '+(x2-dx*.44)+' '+y2+' '+x2+' '+y2);
+  p.setAttribute('stroke',tgt.c);p.setAttribute('stroke-width','1.5');p.setAttribute('fill','none');
+  p.setAttribute('stroke-opacity','0.17');p.setAttribute('stroke-linecap','round');
+  if(style==='D')p.setAttribute('stroke-dasharray','5,4');
+  p.dataset.f=e[0];p.dataset.t=e[1];
+  svgEl.appendChild(p);
+});
+
+function hlE(nodeId,on){
+  svgEl.querySelectorAll('path').forEach(function(p){
+    var active=on&&(p.dataset.f===nodeId||p.dataset.t===nodeId);
+    p.setAttribute('stroke-opacity',active?'0.85':'0.17');
+    p.setAttribute('stroke-width',active?'2.5':'1.5');
+    if(active)p.setAttribute('filter','url(#az2glow)');else p.removeAttribute('filter');
+  });
+}
+})();
+</script>
+
+</div>
+
 ---
 
-## Interactive Explorer
+## The ZOO
 
 <div id="az-root">
 
-  <div class="az-label">Attention Type</div>
+  <div class="az-label">Readout</div>
   <div class="az-pills" id="az-attn">
     <button class="az-pill active" data-type="all">All</button>
     <button class="az-pill" data-type="linear">Linear</button>
     <button class="az-pill" data-type="softmax">Softmax</button>
   </div>
 
-  <div class="az-label">Decay Type <span style="font-weight:400;font-size:.65rem;letter-spacing:0;text-transform:none;margin-left:.25rem">(exact match — selects unique models)</span></div>
+  <div class="az-label">Decay Type <span style="font-weight:400;font-size:.65rem;letter-spacing:0;text-transform:none;margin-left:.25rem">(exact match, selects unique models)</span></div>
   <div class="az-pills" id="az-decay">
     <button class="az-pill active" data-decay="all">All</button>
     <button class="az-pill" data-decay="none">None</button>
     <button class="az-pill" data-decay="delta">Delta-Rule</button>
     <button class="az-pill" data-decay="diagonal">Diagonal</button>
     <button class="az-pill" data-decay="scalar">Scalar</button>
+    <button class="az-pill" data-decay="rope">RoPE</button>
+    <button class="az-pill" data-decay="window">Window</button>
   </div>
 
   <div class="az-hr"></div>
@@ -249,6 +538,7 @@ Filter by **attention kernel** and **memory decay type** below. Each model card 
 </div>
 
 <script>
+const AZ_HTML_BASE = "{{ '/assets/html' | relative_url }}";
 const MODELS = [
   {
     id:'la', name:'LinAtt', full:'Linear Attention',
@@ -257,11 +547,12 @@ const MODELS = [
     paper:'https://arxiv.org/pdf/2006.16236',
     attn:'linear', decays:['none'], accent:'#64748b',
     imgRef:'la-custom',
-    desc:`<p><strong>LinAtt</strong> makes attention cheaper by removing the softmax. Standard attention computes \\(\\operatorname{Softmax}(QK^\\top)V\\); dropping the softmax gives \\((QK^\\top)V\\), which can be reordered to \\(Q(K^\\top V)\\). The key insight is that \\(K^\\top V\\) is a small \\(d \\times d\\) matrix — you compute it once, then multiply each query into it, so cost no longer grows with sequence length. A simple nonlinearity \\(\\phi(x) = \\operatorname{elu}(x)+1\\) is applied to queries and keys to keep all values positive.</p><p>For left-to-right (causal) generation, this is equivalent to running an RNN: at each step you add the new key–value pair to a memory matrix \\(S_t\\), then read the answer out with the query: $$S_t = S_{t-1} + v_t k_t^\\top, \\quad o_t = S_t q_t$$ To stop outputs from growing too large, a running sum \\(z_t\\) of past keys is kept and used to divide the output: $$S_t = S_{t-1} + v_t k_t^\\top, \\quad z_t = z_{t-1} + k_t, \\quad o_t = \\frac{S_t q_t}{z_t^\\top q_t}$$</p><p>The feature map \\(\\phi\\) was adopted by many models that followed. From here on we absorb it into the definitions of \\(q\\) and \\(k\\) to keep the notation clean.</p>`,
+    desc:`<p><strong>LinAtt</strong> makes attention cheaper by removing the softmax. Standard attention computes \\(\\operatorname{Softmax}(QK^\\top)V\\); dropping the softmax gives \\((QK^\\top)V\\), which can be reordered to \\(Q(K^\\top V)\\). The key insight is that \\(K^\\top V\\) is a small \\(d \\times d\\) matrix, you compute it once, then multiply each query into it, so cost no longer grows with sequence length. A simple nonlinearity \\(\\phi(x) = \\operatorname{elu}(x)+1\\) is applied to queries and keys to keep all values positive.</p><p>For left-to-right (causal) generation, this is equivalent to running an RNN: at each step you add the new key–value pair to a memory matrix \\(S_t\\), then read the answer out with the query: $$S_t = S_{t-1} + v_t k_t^\\top, \\quad o_t = S_t q_t$$ To stop outputs from growing too large, a running sum \\(z_t\\) of past keys is kept and used to divide the output: $$S_t = S_{t-1} + v_t k_t^\\top, \\quad z_t = z_{t-1} + k_t, \\quad o_t = \\frac{S_t q_t}{z_t^\\top q_t}$$</p><p>The feature map \\(\\phi\\) was adopted by many models that followed. From here on we absorb it into the definitions of \\(q\\) and \\(k\\) to keep the notation clean.</p>`,
     mathR:'S_t = S_{t-1} + v_t k_t^\\top',
     mathRExtra:'z_t = z_{t-1} + k_t',
     mathO:'o_t = S_t q_t',
     mathOExtra:'o_t = S_t q_t \\,/\\, (z_t^\\top q_t)',
+    stateViz:{decay:'none', color:'64748b', name:'LinAtt'},
   },
   {
     id:'retnet', name:'RetNet', full:'Retentive Network',
@@ -270,9 +561,10 @@ const MODELS = [
     paper:'https://arxiv.org/pdf/2307.08621',
     attn:'linear', decays:['scalar'], accent:'#0369a1',
     imgRef:'retnet-custom',
-    desc:`<p><strong>RetNet</strong> was introduced shortly after LinAtt to fix one of its core problems: because LinAtt never forgets, the hidden state gets overwhelmed with accumulated context over time. RetNet's fix is simple — multiply the previous state by a fixed scalar \\(\\gamma \\in (0,1)\\) at every step, so older information fades out: $$S_t = \\gamma S_{t-1} + v_t k_t^\\top, \\quad o_t = S_t q_t$$ Keeping \\(\\gamma < 1\\) also prevents the state from exploding during training.</p><p>For parallel training, the decay is folded into a mask matrix \\(M \\in \\mathbb{R}^{T \\times T}\\) applied element-wise to the attention scores: $$O = (QK^\\top \\odot M)V, \\qquad M_{ij} = \\begin{cases} \\gamma^{i-j} & i \\geq j \\\\ 0 & i < j \\end{cases}$$ This recovers the efficiency of standard attention during training while keeping exact recurrent inference at test time.</p>`,
+    desc:`<p><strong>RetNet</strong> was introduced shortly after LinAtt to fix one of its core problems: because LinAtt never forgets, the hidden state gets overwhelmed with accumulated context over time. RetNet's fix is simple, multiply the previous state by a fixed scalar \\(\\gamma \\in (0,1)\\) at every step, so older information fades out: $$S_t = \\gamma S_{t-1} + v_t k_t^\\top, \\quad o_t = S_t q_t$$ Keeping \\(\\gamma < 1\\) also prevents the state from exploding during training.</p><p>For parallel training, the decay is folded into a mask matrix \\(M \\in \\mathbb{R}^{T \\times T}\\) applied element-wise to the attention scores: $$O = (QK^\\top \\odot M)V, \\qquad M_{ij} = \\begin{cases} \\gamma^{i-j} & i \\geq j \\\\ 0 & i < j \\end{cases}$$ This recovers the efficiency of standard attention during training while keeping exact recurrent inference at test time.</p>`,
     mathR:'S_t = \\gamma S_{t-1} + v_t k_t^\\top',
     mathO:'o_t = S_t q_t',
+    stateViz:{decay:'scalar', color:'0369a1', name:'RetNet'},
   },
   {
     id:'gla', name:'GLA', full:'Gated Linear Attention',
@@ -281,21 +573,23 @@ const MODELS = [
     paper:'https://arxiv.org/pdf/2312.06635',
     attn:'linear', decays:['diagonal'], accent:'#7c3aed',
     imgRef:'gla-custom',
-    desc:`<p><strong>GLA</strong> addresses a key bottleneck of linear models that rely on <strong>parallel scan</strong> for training: scan-based methods are slow compared to the matrix-multiply-based parallel form of softmax attention. GLA's solution is <strong>chunk-wise training</strong> — unrolling the recurrence over fixed-length chunks and applying a fast parallel form within each chunk, in the same spirit as <a href="https://arxiv.org/pdf/2205.14135" target="_blank">FlashAttention</a>. This is implemented in <a href="https://github.com/sustcsonglin/flash-linear-attention" target="_blank">flash-linear-attention</a>, a hardware-efficient training library for linear transformers.</p><p>The decay is <strong>diagonal and input-dependent</strong>, defined as \\(\\alpha_t = \\operatorname{sigmoid}(w x_t^\\top)^\\tau\\), where \\(\\tau\\) is a temperature parameter controlling how smooth the decay is — a smoother decay helps the model cover a wider context range. The recurrence is: $$S_t = S_{t-1}\\operatorname{Diag}(\\alpha_t) + v_t k_t^\\top, \\quad o_t = S_t q_t$$ Since \\(\\alpha_t < 1\\) for numerical stability, the parallel form is always applied chunk-by-chunk. GLA significantly closes the training-speed gap with Mamba, a goal also addressed concurrently by Mamba-2.</p>`,
+    desc:`<p><strong>GLA</strong> addresses a key bottleneck of linear models that rely on <strong>parallel scan</strong> for training: scan-based methods are slow compared to the matrix-multiply-based parallel form of softmax attention. GLA's solution is <strong>chunk-wise training</strong>, unrolling the recurrence over fixed-length chunks and applying a fast parallel form within each chunk, in the same spirit as <a href="https://arxiv.org/pdf/2205.14135" target="_blank">FlashAttention</a>. This is implemented in <a href="https://github.com/sustcsonglin/flash-linear-attention" target="_blank">flash-linear-attention</a>, a hardware-efficient training library for linear transformers.</p><p>The decay is <strong>diagonal and input-dependent</strong>, defined as \\(\\alpha_t = \\operatorname{sigmoid}(w x_t^\\top)^\\tau\\), where \\(\\tau\\) is a temperature parameter controlling how smooth the decay is, a smoother decay helps the model cover a wider context range. The recurrence is: $$S_t = S_{t-1}\\operatorname{Diag}(\\alpha_t) + v_t k_t^\\top, \\quad o_t = S_t q_t$$ Since \\(\\alpha_t < 1\\) for numerical stability, the parallel form is always applied chunk-by-chunk. GLA significantly closes the training-speed gap with Mamba, a goal also addressed concurrently by Mamba-2.</p>`,
     mathR:'S_t = S_{t-1}\\operatorname{Diag}(\\boldsymbol{\\alpha}_t) + v_t k_t^\\top',
     mathO:'o_t = S_t q_t',
+    stateViz:{decay:'diagonal', color:'7c3aed', name:'GLA'},
   },
   {
-    id:'mamba', name:'Mamba', full:'Mamba',
+    id:'mamba', name:'🐍 Mamba', full:'Mamba',
     paperTitle:'Mamba: Linear-Time Sequence Modeling with Selective State Spaces',
     paperAuthors:'Albert Gu*, Tri Dao* &nbsp;(*equal contribution)',
     paper:'https://arxiv.org/pdf/2312.00752',
     attn:'linear', decays:['diagonal'], accent:'#0f766e',
     imgRef:'mamba-custom',
-    desc:`<p><strong>Mamba</strong> belongs to the family of <strong>state space models (SSMs)</strong>, following prior work such as <a href="https://arxiv.org/abs/2111.00396" target="_blank">S4</a> that model sequences as discretized linear dynamical systems — hence the name. It was the first such model to succeed at language modelling tasks, and its release brought wide attention back to recurrent architectures. The key step over RetNet is replacing the fixed scalar decay with an <strong>input-dependent diagonal decay</strong>: at each step the model decides how much of the past to keep based on the current input. The full recurrence is: $$\\begin{aligned} S_t &= S_{t-1} \\odot \\exp\\bigl(-(\\alpha_t \\mathbf{1}^\\top) \\odot \\exp(A)\\bigr) + (\\alpha_t \\odot v_t) k_t^\\top \\\\ o_t &= S_t q_t + d \\odot v_t \\end{aligned}$$ Here \\(A\\) and \\(d\\) are learnable parameters; \\(A\\) is diagonal so the decay acts independently on each feature dimension. The specific form of the decay — \\(\\exp(-\\alpha_t \\odot \\exp(A))\\) — comes from <a href="https://en.wikipedia.org/wiki/Zero-order_hold" target="_blank">zero-order-hold discretization</a> of a continuous-time SSM.</p><p>Mamba is trained using <a href="https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-39-parallel-prefix-sum-scan-cuda" target="_blank">parallel scan</a> rather than the matrix-multiply-based parallel form of softmax attention, which is slower on current hardware. Despite this, it achieves comparable accuracy to transformers while being much faster at inference time.</p><div class="az-aside"><div class="az-aside-lbl">Historical notation</div>SSMs like S4 and Mamba write the recurrence using the classical control-theory variables \\(A_t, B_t, C_t\\): $$h_t = A_t h_{t-1} + B_t x_t, \\quad y_t = C_t h_t + D x_t$$ where \\(h_t\\) is the hidden state, \\(x_t\\) is the input token, and \\(D\\) is a skip connection. This is exactly the same update written in different letters — the correspondence to the attention view used throughout this page is: \\(h_t \\leftrightarrow S_t\\) (hidden state), \\(B_t x_t \\leftrightarrow (\\alpha_t \\odot v_t)k_t^\\top\\) (write / value×key), \\(C_t \\leftrightarrow q_t\\) (read / query), \\(D \\leftrightarrow d\\) (skip). The \\(q, k, v\\) view makes the connection to attention explicit and is used by most recent work.</div>`,
+    desc:`<p><strong>Mamba</strong> belongs to the family of <strong>state space models (SSMs)</strong>, following prior work such as <a href="https://arxiv.org/abs/2111.00396" target="_blank">S4</a> that model sequences as discretized linear dynamical systems, hence the name. It was the first such model to succeed at language modelling tasks, and its release brought wide attention back to recurrent architectures. The key step over RetNet is replacing the fixed scalar decay with an <strong>input-dependent diagonal decay</strong>: at each step the model decides how much of the past to keep based on the current input. The full recurrence is: $$\\begin{aligned} S_t &= S_{t-1} \\odot \\exp\\bigl(-(\\alpha_t \\mathbf{1}^\\top) \\odot \\exp(A)\\bigr) + (\\alpha_t \\odot v_t) k_t^\\top \\\\ o_t &= S_t q_t + d \\odot v_t \\end{aligned}$$ Here \\(A\\) and \\(d\\) are learnable parameters; \\(A\\) is diagonal so the decay acts independently on each feature dimension. The specific form of the decay, \\(\\exp(-\\alpha_t \\odot \\exp(A))\\), comes from <a href="https://en.wikipedia.org/wiki/Zero-order_hold" target="_blank">zero-order-hold discretization</a> of a continuous-time SSM.</p><p>Mamba is trained using <a href="https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-39-parallel-prefix-sum-scan-cuda" target="_blank">parallel scan</a> rather than the matrix-multiply-based parallel form of softmax attention, which is slower on current hardware. Despite this, it achieves comparable accuracy to transformers while being much faster at inference time.</p><div class="az-aside"><div class="az-aside-lbl">Historical notation</div>SSMs like S4 and Mamba write the recurrence using the classical control-theory variables \\(A_t, B_t, C_t\\): $$h_t = A_t h_{t-1} + B_t x_t, \\quad y_t = C_t h_t + D x_t$$ where \\(h_t\\) is the hidden state, \\(x_t\\) is the input token, and \\(D\\) is a skip connection. This is exactly the same update written in different letters, the correspondence to the attention view used throughout this page is: \\(h_t \\leftrightarrow S_t\\) (hidden state), \\(B_t x_t \\leftrightarrow (\\alpha_t \\odot v_t)k_t^\\top\\) (write / value×key), \\(C_t \\leftrightarrow q_t\\) (read / query), \\(D \\leftrightarrow d\\) (skip). The \\(q, k, v\\) view makes the connection to attention explicit and is used by most recent work.</div>`,
     mathDisplay: true,
     mathR:'\\begin{aligned} S_t &= S_{t-1} \\odot \\exp\\bigl(-(\\alpha_t \\mathbf{1}^\\top) \\odot \\exp(A)\\bigr) \\\\ &\\quad + (\\alpha_t \\odot v_t) k_t^\\top \\end{aligned}',
     mathO:'o_t = S_t q_t + d \\odot v_t',
+    stateViz:{decay:'diagonal', color:'0f766e', name:'Mamba'},
   },
   {
     id:'deltanet', name:'DeltaNet', full:'DeltaNetworks',
@@ -304,20 +598,22 @@ const MODELS = [
     paper:'https://arxiv.org/pdf/2406.06484',
     attn:'linear', decays:['delta'], accent:'#059669',
     imgRef:'deltanet-custom',
-    desc:`<p><strong>DeltaNet</strong> replaces the simple outer-product write of linear attention with the <strong>delta rule</strong>, <a href="https://arxiv.org/abs/2102.11174" target="_blank">first introduced</a> as a biologically-inspired weight update for online learning. At each step, the model reads its current estimate for key \\(k_t\\) from memory — \\(\\hat{v}_t = S_{t-1} k_t\\) — then writes back only the <strong>prediction error</strong> \\(\\beta_t(v_t - \\hat{v}_t)\\), scaled by a per-token learning rate \\(\\beta_t\\): $$\\begin{aligned} S_t &= S_{t-1} + \\beta_t(v_t - S_{t-1}k_t)k_t^\\top \\\\ &= S_{t-1}(\\mathbf{I} - \\beta_t k_t k_t^\\top) + \\beta_t v_t k_t^\\top \\end{aligned}$$ This self-correcting mechanism lets the model <strong>precisely overwrite stale associations</strong> rather than merely accumulating new ones on top. DeltaNet makes this update <strong>efficient and fast to train</strong> by deriving a hardware-friendly chunkwise-parallel form.</p><p>A crucial property of the delta rule update is that the transition matrix \\(\\mathbf{I} - \\beta_t k_t k_t^\\top\\) is <strong>non-diagonal</strong> — it couples feature dimensions together. This is fundamentally different from diagonal SSMs like Mamba or GLA, and it matters: <strong>diagonal state transitions cannot solve state-tracking problems</strong> (such as permutation composition or string transduction), whereas DeltaNet's non-diagonal decay can. Keys are L2-normalised to keep the memory state bounded.</p>`,
+    desc:`<p><strong>DeltaNet</strong> replaces the simple outer-product write of linear attention with the <strong>delta rule</strong>, <a href="https://arxiv.org/abs/2102.11174" target="_blank">first introduced</a> as a biologically-inspired weight update for online learning. At each step, the model reads its current estimate for key \\(k_t\\) from memory, \\(\\hat{v}_t = S_{t-1} k_t\\), then writes back only the <strong>prediction error</strong> \\(\\beta_t(v_t - \\hat{v}_t)\\), scaled by a per-token learning rate \\(\\beta_t\\): $$\\begin{aligned} S_t &= S_{t-1} + \\beta_t(v_t - S_{t-1}k_t)k_t^\\top \\\\ &= S_{t-1}(\\mathbf{I} - \\beta_t k_t k_t^\\top) + \\beta_t v_t k_t^\\top \\end{aligned}$$ This self-correcting mechanism lets the model <strong>precisely overwrite stale associations</strong> rather than merely accumulating new ones on top. DeltaNet makes this update <strong>efficient and fast to train</strong> by deriving a hardware-friendly chunkwise-parallel form.</p><p>A crucial property of the delta rule update is that the transition matrix \\(\\mathbf{I} - \\beta_t k_t k_t^\\top\\) is <strong>non-diagonal</strong>, it couples feature dimensions together. This is fundamentally different from diagonal SSMs like Mamba or GLA, and it matters: <strong>diagonal state transitions cannot solve state-tracking problems</strong> (such as permutation composition or string transduction), whereas DeltaNet's non-diagonal decay can. Keys are L2-normalised to keep the memory state bounded.</p>`,
     mathR:'S_t = S_{t-1}(\\mathbf{I} - \\beta_t k_t k_t^\\top) + \\beta_t v_t k_t^\\top',
     mathO:'o_t = S_t q_t',
+    stateViz:{decay:'delta', color:'059669', name:'DeltaNet'},
   },
   {
     id:'gated-deltanet', name:'GDN', full:'Gated DeltaNetworks',
-    paperTitle:'Gated Delta Networks: Improving Mamba2 with Delta Rule',
-    paperAuthors:'Songlin Yang, Jan Kautz, Ali Hatamizadeh',
+    paperTitle:'Gated Delta Networks: Improving Mamba-2 with Delta Rule',
+    paperAuthors:'Songlin Yang*, Jan Kautz, Ali Hatamizadeh* &nbsp;(*equal contribution)',
     paper:'https://arxiv.org/pdf/2412.06464',
     attn:'linear', decays:['delta','scalar'], accent:'#d97706',
     imgRef:'gated-deltanet-custom',
-    desc:`<p><strong>Gated DeltaNet (GDN)</strong> extends DeltaNet by adding a <strong>scalar input-dependent forget gate \\(\\alpha_t \\in (0,1)\\)</strong>. Before the corrective delta-rule write, the entire memory is scaled down by \\(\\alpha_t\\), cleanly separating two concerns: how much of the past to retain and how precisely to overwrite specific associations. The recurrence is: $$\\begin{aligned} S_t &= \\alpha_t S_{t-1}(\\mathbf{I} - \\beta_t k_t k_t^\\top) + \\beta_t v_t k_t^\\top \\end{aligned}$$ This gives the model two complementary tools — <strong>rapid bulk forgetting</strong> when context shifts, and <strong>surgical delta-rule rewrites</strong> for fine-grained edits.</p><p>GDN specifically outperforms both <strong>Mamba-2 and DeltaNet on recall-intensive tasks</strong> such as associative recall and multi-query associative recall, where the ability to both forget stale context and precisely overwrite specific memory slots matters most. It preserves the chunkwise-parallel training efficiency of the base DeltaNet.</p>`,
+    desc:`<p><strong>Gated DeltaNet (GDN)</strong> extends DeltaNet by adding a <strong>scalar input-dependent forget gate \\(\\alpha_t \\in (0,1)\\)</strong>. Before the corrective delta-rule write, the entire memory is scaled down by \\(\\alpha_t\\), cleanly separating two concerns: how much of the past to retain and how precisely to overwrite specific associations. The recurrence is: $$\\begin{aligned} S_t &= \\alpha_t S_{t-1}(\\mathbf{I} - \\beta_t k_t k_t^\\top) + \\beta_t v_t k_t^\\top \\end{aligned}$$ This gives the model two complementary tools, <strong>rapid bulk forgetting</strong> when context shifts, and <strong>surgical delta-rule rewrites</strong> for fine-grained edits.</p><p>GDN specifically outperforms both <strong>Mamba-2 and DeltaNet on recall-intensive tasks</strong> such as associative recall and multi-query associative recall, where the ability to both forget stale context and precisely overwrite specific memory slots matters most. It preserves the chunkwise-parallel training efficiency of the base DeltaNet. Like all models on this page, GDN applies <strong>short-range convolutions on queries and keys</strong> and shares the same overall block design. It also demonstrates <strong>strong performance in hybrid architectures</strong> that alternate linear and softmax attention layers, making it a practical building block for mixed models.</p>`,
     mathR:'S_t = \\alpha_t S_{t-1}(\\mathbf{I} - \\beta_t k_t k_t^\\top) + \\beta_t v_t k_t^\\top',
     mathO:'o_t = S_t q_t',
+    stateViz:{decay:'scalar-delta', color:'d97706', name:'GDN'},
   },
   {
     id:'kimi-linear', name:'Kimi Linear', full:'Kimi Delta Attention (KDA)',
@@ -326,42 +622,192 @@ const MODELS = [
     paper:'https://arxiv.org/pdf/2510.26692',
     attn:'linear', decays:['delta','diagonal'], accent:'#0891b2',
     imgRef:'kimi-linear-custom',
-    desc:`<p><strong>Kimi Linear</strong> (KDA) combines the corrective delta-rule update of DeltaNet with a <strong>per-feature diagonal forget gate Λ<sub>t</sub></strong>, giving each memory dimension its own independent retention rate. This is the richest decay structure in the delta-rule family, allowing the model to forget slowly in some feature subspaces while aggressively refreshing others.</p><p>In the deployed Moonshot AI architecture, N KDA layers (each with linear attention and a MoE FFN) are capped by a single MLA softmax layer — achieving near-O(1) inference for 99% of the network while retaining full attention expressivity at the top. The diagonal gate manages long-horizon forgetting; the delta term handles precise short-term overwriting.</p>`,
-    mathR:'S_t = S_{t-1}\\operatorname{Diag}(\\boldsymbol{\\alpha}_t)(\\mathbf{I} - \\beta_t k_t k_t^\\top) + \\beta_t v_t k_t^\\top',
+    desc:`<p><strong>Kimi Delta Attention (KDA)</strong> enhances GDN's scalar forget gate with a <strong>diagonal one</strong> for finer granularity, giving each feature dimension its own independent decay rate. The resulting recurrence is: $$S_t = S_{t-1}\\operatorname{Diag}(\\boldsymbol{\\alpha}_t)(\\mathbf{I} - k_t k_t^\\top) + v_t k_t^\\top$$ This produces a <strong>channel-wise decay</strong> rather than all channels sharing the same forgetting rate, giving the model more expressive control over what it retains.</p><p>KDA is used in the KimiLinear model in a <strong>hybrid setting</strong>: after every 3 KDA layers, one softmax attention layer using <a href="https://arxiv.org/pdf/2405.04434" target="_blank">Multi-head Latent Attention (MLA)</a> is inserted. Channel mixing uses <strong>MoE (Mixture of Experts) FFNs</strong> instead of standard FFNs, with one MoE placed after every sequence mixer (KDA or MLA). The figure on the right shows KDA in a plain FFN setting and as the only linear model, for consistency with the rest of this page.</p>`,
+    mathR:'S_t = S_{t-1}\\operatorname{Diag}(\\boldsymbol{\\alpha}_t)(\\mathbf{I} - k_t k_t^\\top) + v_t k_t^\\top',
     mathO:'o_t = S_t q_t',
+    stateViz:{decay:'diag-delta', color:'0891b2', name:'KDA'},
   },
   {
-    id:'mamba2', name:'Mamba2', full:'Mamba2',
+    id:'gdn2', name:'GDN-2', full:'Gated DeltaNet-2',
+    paperTitle:'Gated DeltaNet-2: Decoupling Erase and Write in Linear Attention',
+    paperAuthors:'Ali Hatamizadeh, Yejin Choi, Jan Kautz',
+    paper:'https://arxiv.org/abs/2605.22791',
+    attn:'linear', decays:['delta','diagonal'], accent:'#0e7490',
+    imgRef:'gdn2-custom',
+    desc:`<p>GDN-2 extends the delta rule by <strong>decoupling the erase and write operations</strong> into two independent channel-wise gates. In DeltaNet and GDN a single scalar \\(\\beta_t\\) ties both operations together — whatever is erased is exactly replaced by the new content. GDN-2 breaks this coupling with a <strong>channel-wise erase gate \\(b_t\\)</strong> and a separate <strong>channel-wise write gate \\(w_t\\)</strong>, allowing the model to control how much old content is removed independently of how much new content is written. Combined with a diagonal per-channel decay \\(\\operatorname{Diag}(\\boldsymbol{\\alpha}_t)\\) inherited from KDA, the full update is: $$S_t = \\bigl(\\mathbf{I} - k_t(b_t\\odot k_t)^\\top\\bigr)\\operatorname{Diag}(\\boldsymbol{\\alpha}_t)\\,S_{t-1} + k_t(w_t\\odot v_t)^\\top$$ This subsumes both GDN (set \\(b_t = w_t = \\beta_t\\mathbf{1}\\), scalar \\(\\alpha\\)) and KDA (set \\(b_t = w_t = \\mathbf{1}\\), diagonal \\(\\alpha_t\\)), unifying them into a single expressive recurrence. The result is finer-grained control over memory retention and stronger performance on long-context retrieval tasks.</p>`,
+    mathR:'S_t = \\bigl(\\mathbf{I} - k_t(b_t\\odot k_t)^\\top\\bigr)\\operatorname{Diag}(\\boldsymbol{\\alpha}_t)\\,S_{t-1} + k_t(w_t\\odot v_t)^\\top',
+    mathO:'o_t = S_t q_t',
+    stateViz:{decay:'diag-delta', color:'0e7490', name:'GDN-2'},
+  },
+  {
+    id:'mamba2', name:'🐍 Mamba-2', full:'Mamba-2',
     paperTitle:'Transformers are SSMs: Generalized Models and Efficient Algorithms Through Structured State Space Duality',
     paperAuthors:'Tri Dao*, Albert Gu* &nbsp;(*equal contribution)',
     paper:'https://arxiv.org/pdf/2405.21060',
     attn:'linear', decays:['scalar'], accent:'#0891b2',
     imgRef:'mamba2-custom',
-    desc:`<p><strong>Mamba2</strong> establishes the <em>State Space Duality (SSD)</em> framework, proving that structured SSMs with scalar-times-identity decay are mathematically equivalent to a form of linear attention. The scalar gate a<sub>t</sub> multiplies the entire hidden state uniformly at each step, yielding a 1-semiseparable recurrence matrix that enables a highly efficient chunkwise parallel scan.</p><p>Within each chunk, the computation reduces to a dense masked matrix multiplication (tensor-core friendly); cross-chunk state is propagated sequentially. The Parallel Mamba Block pairs a Conv1d for local context mixing with a data-dependent SSM core (A, B, C) and an output gate, achieving 2–8× faster training than Mamba1 at the cost of per-feature decay expressiveness.</p>`,
+    desc:`<p>While <strong>Mamba</strong> achieves strong language modeling accuracy, it relies on <strong>parallel scan</strong> for training, which is slower than the matrix-multiply-based chunk-wise form used by softmax attention. <strong>Mamba-2</strong>'s primary goal is to bridge Mamba and linear attention and <strong>simplify the architecture</strong> so training reduces to pure matrix multiplications. To achieve this, Mamba-2 relaxes Mamba's diagonal per-channel decay into a single <strong>scalar decay</strong> \\(\\alpha_t\\), and consolidates all \\(q, k, v, \\alpha\\) projections into a single layer, reducing parameter overhead. The recurrence becomes: $$S_t = \\alpha_t S_{t-1} + v_t k_t^\\top, \\quad o_t = S_t q_t$$ Unrolling this recurrence yields the equivalent parallel form \\(O = (QK^\\top \\odot M)V\\), where the mask encodes cumulative decay: $$M_{ij} = \\begin{cases} \\prod_{r=j+1}^{i} \\alpha_r & i \\geq j \\\\\\\\ 0 & i < j \\end{cases}$$ Mamba-2 applies this in a <strong>chunk-wise</strong> manner, known as the <strong>State Space Duality (SSD)</strong> algorithm, using specialized CUDA kernels for efficiency. Since \\(\\alpha_t < 1\\), computations are performed in <strong>log-space</strong> for numerical stability, exactly as in <a href="https://goombalab.github.io/blog/2024/mamba2-part3-algorithm/" target="_blank">the chunk-wise SSD algorithm</a>. This makes Mamba-2 significantly faster than Mamba, following a similar training philosophy to GLA.</p>`,
     mathR:'S_t = \\alpha_t S_{t-1} + v_t k_t^\\top',
     mathO:'o_t = S_t q_t',
+    stateViz:{decay:'scalar', color:'0891b2', name:'Mamba-2'},
   },
   {
-    id:'fox', name:'FoX', full:'Forgetting Transformer',
+    id:'mamba3', name:'🐍 Mamba-3', full:'Mamba-3',
+    paperTitle:'Mamba-3: Multi-Input Multi-Output SSMs with Memory-Efficient Training',
+    paperAuthors:'Aakash Lahoti*, Kevin Y. Li*, Berlin Chen*, Caitlin Wang*, Aviv Bick, J. Zico Kolter, Tri Dao, Albert Gu &nbsp;(*equal contribution)',
+    paper:'https://arxiv.org/abs/2603.15569',
+    attn:'linear', decays:['scalar', 'rope'], accent:'#0f766e',
+    imgRef:'mamba3-custom',
+    desc:`<p><strong>Mamba-3</strong> focuses on <strong>faster inference</strong> and eliminates a ubiquitous but costly component of prior linear models: the <strong>short-range causal convolution</strong> on queries and keys, which appears across most models on this page. Rather than adding a separate conv module, Mamba-3 replaces the <strong>Zero-Order Hold (ZOH)</strong> discretization of prior Mamba models with a <strong>Trapezoidal discretization</strong>, which naturally subsumes the role of short-range convolutions in a selective form: $$S_t = \\alpha_t S_{t-1} + \\beta_t v_{t-1} k_{t-1}^\\top + \\gamma_t v_t k_t^\\top$$ The term \\(\\beta_t v_{t-1} k_{t-1}^\\top\\) acts as a <strong>selective short convolution</strong> baked into the discretization itself, removing the need for an additional causal conv on \\(q, k, v\\). Mamba-3 also replaces SISO (single-input single-output) projections with <strong>MIMO</strong> (multi-input multi-output) projections, directly increasing inference throughput.</p><p>Mamba-3 further integrates an <strong>input-dependent Rotary Position Embedding (RoPE)</strong> directly into the decay, yielding a complex-valued recurrence: $$S_t = e^{\\delta_t A + i\\delta_t \\Omega}\\, S_{t-1} + \\beta_t v_{t-1} k_{t-1}^\\top + \\gamma_t v_t k_t^\\top, \\qquad o_t = S_t q_t$$ Here \\(\\Omega\\) is fixed following the standard RoPE frequencies, \\(\\Omega = 10000^{-2i/d}\\) where \\(i\\) is the feature dimension index. Since this decay is <strong>non-diagonal in the real domain</strong> (complex scalar multiplication corresponds to a rotation matrix in real space), it improves state tracking over Mamba-2. For a deeper look at position embeddings and their connections, see the <a href="https://arshiaafzal.github.io/blog/2026/pe/" target="_blank">position embedding blog post</a>. Note that Selective RoPE was concurrently introduced for both linear and softmax attention in <a href="https://arxiv.org/abs/2511.17388" target="_blank">Selective RoPE</a>.</p>`,
+    mathDisplay: true,
+    mathR:'S_t = e^{\\delta_t A + i\\delta_t \\Omega} S_{t-1} + \\beta_t v_{t-1} k_{t-1}^\\top + \\gamma_t v_t k_t^\\top',
+    mathO:'o_t = S_t q_t',
+    stateViz:{decay:'scalar', color:'0f766e', name:'Mamba-3'},
+  },
+  {
+    id:'fox', name:'🦊 FoX', full:'Forgetting Transformer',
     paperTitle:'Forgetting Transformer: Softmax Attention with a Forget Gate',
     paperAuthors:'Zhixuan Lin, Evgenii Nikishin, Xu Owen He, Aaron Courville',
     paper:'https://arxiv.org/pdf/2503.02130',
     attn:'softmax', decays:['scalar'], accent:'#d97706',
     imgRef:'fox-custom',
-    desc:`<p><strong>FoX</strong> augments causal softmax attention with a <strong>scalar input-dependent forget gate f<sub>t</sub></strong> injected as a log-additive bias directly inside the softmax. Each position produces f<sub>t</sub> ∈ (0,1); its cumulative log-product over preceding positions forms a smooth causal decay mask that down-weights distant keys without discarding them entirely.</p><p>Because the gate lives inside the softmax normalisation, FoX preserves full softmax expressiveness — arbitrary key selection and proper probability renormalisation — while dynamically compressing effective context on long sequences. ShiftLinear projections for keys and values prevent look-ahead leakage, and RMSNorm on queries and keys stabilises training across scales.</p>`,
-    mathR:'A_{ij} = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} + \\sum_{l=j}^{i-1} \\log f_l',
-    mathO:'O = \\operatorname{softmax}(A + M)\\,V',
+    maskViz: true,
+    maskType: 'fox',
+    desc:`<p><strong>FoX</strong> augments causal softmax attention with a learnable <strong>scalar forget gate</strong> that injects an input-dependent decay bias directly into the attention logits. At each position \\(t\\) a gate value is predicted from the token: $$f_t = \\sigma(w^\\top x_t) \\in (0,1)$$ where \\(\\sigma\\) is sigmoid and \\(w\\) is a learned projection. For query \\(i\\) attending to key \\(j\\), these gates accumulate into a log-product bias: $$M_{ij} = \\sum_{l=j}^{i-1} \\log f_l = \\log\\!\\prod_{l=j}^{i-1} f_l$$ Since \\(f_l \\in (0,1)\\), each \\(\\log f_l < 0\\), so \\(M_{ij}\\) grows strictly more negative as distance \\((i-j)\\) grows — a smooth <strong>data-driven decay</strong> that suppresses distant keys without hard truncation. A token with \\(f_t \\approx 0\\) acts as a near-hard boundary; \\(f_t \\approx 1\\) means "forget nothing" and lets context flow freely. Unlike ALiBi's fixed slope, the decay rate is <strong>fully determined by the input</strong> at each position.</p><p style="font-size:.75rem;line-height:1.7">The heatmap shows a simulated learned mask. Decay is <strong>not uniform</strong>: low-\\(f_t\\) tokens act as boundaries (sharp drop), high-\\(f_t\\) tokens let context flow — unlike ALiBi's fixed slope.</p>`,
+    mathR:'A_{ij} = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} {\\color{#059669} +\\,\\sum_{l=j}^{i-1} \\log f_l}',
+    mathO:'O = \\operatorname{softmax}(A + {\\color{#059669} M})\\,V',
   },
   {
-    id:'nope', name:'NoPE', full:'NoPE Attention',
+    id:'swa', name:'SWA', full:'Sliding Window Attention',
+    paperTitle:'Longformer: The Long-Document Transformer',
+    paperAuthors:'Iz Beltagy, Matthew E. Peters, Arman Cohan',
+    paper:'https://arxiv.org/abs/2004.05150',
+    attn:'softmax', decays:['window', 'rope'], accent:'#475569',
+    imgRef:'swa-custom',
+    maskViz: true,
+    windowSize: 4,
+    desc:`<p><strong>Sliding Window Attention (SWA)</strong> addresses the quadratic memory and compute bottleneck of full softmax attention by restricting each token to attend only to the nearest \\(W\\) preceding tokens. This reduces the KV cache from \\(O(T)\\) to \\(O(W)\\) per layer and compute from \\(O(T^2)\\) to \\(O(TW)\\). Concretely: $$o_t = \\operatorname{softmax}\\!\\left(q_t\\,K_{[t-W:t]}^\\top\\right) V_{[t-W:t]}$$ The banded mask shows this pattern for \\(W = 4\\): at most 4 positions are attended (purple), the rest are masked to \\(-\\infty\\).</p><p>SWA is compatible with any positional encoding — <strong>NoPE</strong> or <strong>RoPE</strong> — and notably allows RoPE to generalise beyond its training context length, a well-known failure mode of standard RoPE addressed by scaling approaches such as <a href="https://arxiv.org/abs/2309.00071" target="_blank">YaRN</a>. Because the window is a fixed-size buffer, SWA also admits an exact recurrent form with two hidden states \\(S^k, S^v \\in \\mathbb{R}^{W \\times d}\\) tracking keys and values. At each step a one-hot vector \\(e_t = [0,\\ldots,0,1,0,\\ldots,0]^\\top \\in \\{0,1\\}^W\\) evicts the oldest slot and writes the newest token: $$S^k_t = (1 - e_t) \\odot S^k_{t-1} + e_t k_t^\\top$$ $$S^v_t = (1 - e_t) \\odot S^v_{t-1} + e_t v_t^\\top$$ giving an exact \\(O(W)\\) recurrent state with no approximation.</p><iframe class="az-anim-iframe" src="{{ '/assets/html/swa_recurrent_matrix_update.html' | relative_url }}" loading="lazy" scrolling="no" style="display:block;width:85%;height:0;border:0;border-radius:.5rem;overflow:hidden;margin:.5rem auto 0"></iframe>`,
+    mathR:'A_{ij} = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} + {\\color{#9333ea} M}_{ij}',
+    mathO:'o_i = \\operatorname{softmax}(A_i + {\\color{#9333ea} M}_i)\\,V',
+  },
+  {
+    id:'abc', name:'ABC', full:'Attention with Bounded-memory Control',
+    paperTitle:'ABC: Attention with Bounded-memory Control',
+    paperAuthors:'Hao Peng, Jungo Kasai, Nikolaos Pappas, Dani Yogatama, Zhaofeng Wu, Lingpeng Kong, Roy Schwartz, Noah A. Smith',
+    paper:'https://arxiv.org/abs/2110.02488',
+    attn:'softmax', decays:['window', 'none'], accent:'#4f46e5',
+    imgRef:'abc-custom',
+    desc:`<p>While SWA reduces the KV cache to \\(O(W)\\) using a first-in first-out buffer, its write mechanism is <strong>not input-dependent</strong>: the one-hot vector \\(e_t\\) always evicts the oldest slot regardless of content. <strong>ABC</strong> replaces \\(e_t\\) with a learned, input-dependent write gate \\(r_t = \\operatorname{softmax}(W_r x_t) \\in \\mathbb{R}^W\\), allowing the model to decide <em>which</em> memory slot to overwrite based on the current token. The two bounded hidden states update as: $$\\begin{aligned} S^k_t &= (1 - r_t) \\odot S^k_{t-1} + r_t k_t^\\top \\\\ S^v_t &= (1 - r_t) \\odot S^v_{t-1} + r_t v_t^\\top \\end{aligned}$$ Because \\(r_t\\) is a softmax, writes spread softly across all \\(W\\) slots and the total amount written always equals the total amount erased — a soft analogue of SWA's hard slot rotation.</p><p>The readout retrieves values by attending over the stored keys: $$o_t = {S^v_t}^\\top \\operatorname{softmax}(S^k_t\\, q_t)$$ This is the same two-state recurrent form as SWA but with input-dependent routing, strictly generalising the FIFO buffer into a content-addressable bounded memory.</p>`,
+    mathDisplay: true,
+    mathR:'\\begin{aligned} S^k_t &= (1-r_t)\\odot S^k_{t-1} + r_t k_t^\\top \\\\ S^v_t &= (1-r_t)\\odot S^v_{t-1} + r_t v_t^\\top \\end{aligned}',
+    mathO:'o_t = {S^v_t}^\\top \\operatorname{softmax}(S^k_t\\, q_t)',
+  },
+  {
+    id:'gsa', name:'GSA', full:'Gated Slot Attention',
+    paperTitle:'Gated Slot Attention for Efficient Linear-Time Sequence Modeling',
+    paperAuthors:'Yu Zhang*, Songlin Yang*, Ruijie Zhu, Yue Zhang, Leyang Cui, Yiqiao Wang, Bolun Wang, Freda Shi, Bailin Wang, Wei Bi, Peng Zhou, Guohong Fu &nbsp;(*equal contribution)',
+    paper:'https://arxiv.org/abs/2409.07146',
+    attn:'softmax', decays:['window','diagonal','scalar'],
+    decayOptions:[['window','diagonal'],['window','scalar']],
+    eqLbl:'Recurrence',
+    accent:'#be185d',
+    imgRef:'gsa-custom',
+    desc:`<p>Gated Slot Attention (GSA) applies a minimal fix to ABC: it adds a <strong>forget gate</strong> \\(\\sigma(Wx_t)^\\tau\\) to the dual-state write, inspired by <a href="https://arxiv.org/pdf/2312.06635" target="_blank">GLA</a>. In ABC the write gate \\(r_t\\) is a pure overwrite — prior content is erased and replaced. GSA instead blends the old state with the new token, allowing each slot to <em>gradually forget</em> stale information before absorbing a new key or value, preventing the bounded memory from becoming overloaded: $$\\begin{aligned} S^k_t &= S^k_{t-1}\\odot\\sigma(Wx_t)^\\tau + (1-\\sigma(Wx_t)^\\tau)\\,k_t^\\top \\\\ S^v_t &= S^v_{t-1}\\odot\\sigma(Wx_t)^\\tau + (1-\\sigma(Wx_t)^\\tau)\\,v_t^\\top \\end{aligned}$$ The exponent \\(\\tau\\), analogous to the gating temperature in GLA, controls how fast or slow each slot decays — larger \\(\\tau\\) pushes \\(\\sigma(Wx_t)^\\tau\\) toward 0 and 1, sharpening the gate into a near-binary forget/keep decision. The readout is identical to ABC: $$o_t = {S^v_t}^\\top\\operatorname{softmax}(S^k_t\\,q_t)$$ Unlike most SSMs, GSA does not rely on short-range convolutions, handling all dependencies through the recurrent slots and the softmax readout alone. This yields strong performance on recall-intensive benchmarks and makes GSA a natural candidate for finetuning pretrained Transformers into efficient RNNs (T2R).</p><iframe class="az-anim-iframe" src="{{ '/assets/html/ssm_recurrent_matrix_update.html' | relative_url }}" loading="lazy" scrolling="no" style="display:block;width:85%;height:0;border:0;border-radius:.5rem;overflow:hidden;margin:.5rem auto 0"></iframe>`,
+    mathDisplay: true,
+    mathR:'\\begin{aligned} S^k_t &= S^k_{t-1}\\odot\\sigma(Wx_t)^\\tau + (1-\\sigma(Wx_t)^\\tau)\\,k_t^\\top \\\\ S^v_t &= S^v_{t-1}\\odot\\sigma(Wx_t)^\\tau + (1-\\sigma(Wx_t)^\\tau)\\,v_t^\\top \\end{aligned}',
+    mathO:'o_t = {S^v_t}^\\top\\operatorname{softmax}(S^k_t\\,q_t)',
+  },
+  {
+    id:'raven', name:'🐦‍⬛ Raven', full:'Raven',
+    paperTitle:'Raven: High-Recall Sequence Modeling via Sparse Memory Routing',
+    paperAuthors:'Arshia Afzal*, Aviv Bick*, Eric P. Xing, Volkan Cevher, Albert Gu &nbsp;(*equal contribution)',
+    paper:'https://github.com/goombalab/raven/blob/main/raven.pdf',
+    attn:'softmax', decays:['window','diagonal','scalar'],
+    decayOptions:[['window','diagonal'],['window','scalar']],
+    eqLbl:'Recurrence',
+    accent:'#0f172a',
+    imgRef:'raven-custom',
+    desc:`<p><strong>Raven</strong> bridges the gap between GSA and SWA through <a href="https://goombalab.github.io/blog/2026/raven-part1/" target="_blank">Routing Slot Memories (RSM)</a>. SWA writes one token at a time to exactly one slot, but <strong>fully deletes and overwrites</strong> that cell's content. GSA writes to all memory slots softly, gently decaying rather than overwriting, but in a <strong>dense, non-sparse</strong> manner. Raven combines the best of both: a <strong>sparse router \\(r_t\\)</strong> selects which slots to write to while a <strong>per-slot decay \\(a_t\\)</strong> controls how much prior content to forget: $$\\begin{aligned} S^k_t &= \\exp(a_t r_t) \\odot S^k_{t-1} + \\bigl(\\mathbf{1} - \\exp(a_t r_t)\\bigr) k_t^\\top \\\\ S^v_t &= \\exp(a_t r_t) \\odot S^v_{t-1} + \\bigl(\\mathbf{1} - \\exp(a_t r_t)\\bigr) v_t^\\top \\end{aligned}$$ The router writes <strong>only to selected slots</strong>, leaving others untouched so critical information is preserved exactly. Like GSA and ABC, Raven has bounded memory with write and delete magnitudes balanced. Importantly, Raven operates <strong>without any short-range convolutions</strong> — eliminating the need for causal convolution kernels and significantly simplifying the model compared to most SSMs. This design enables length extrapolation up to <strong>16× the training sequence length</strong> and achieves the <strong>best recall</strong> on recall-heavy benchmarks among linear models.</p><iframe class="az-anim-iframe" src="{{ '/assets/html/raven_recurrent_matrix_update.html' | relative_url }}" loading="lazy" scrolling="no" style="display:block;width:85%;height:0;border:0;border-radius:.5rem;overflow:hidden;margin:.5rem auto 0"></iframe>`,
+    mathDisplay: true,
+    mathR:'\\begin{aligned} S^k_t &= \\exp(a_t r_t) \\odot S^k_{t-1} + \\bigl(\\mathbf{1} - \\exp(a_t r_t)\\bigr) k_t^\\top \\\\ S^v_t &= \\exp(a_t r_t) \\odot S^v_{t-1} + \\bigl(\\mathbf{1} - \\exp(a_t r_t)\\bigr) v_t^\\top \\end{aligned}',
+    mathO:'o_t = (S^v_t)^\\top\\operatorname{softmax}(S^k_t\\,q_t)',
+  },
+  {
+    id:'rope-attn', name:'RoPE', full:'RoPE Attention',
+    paperTitle:'RoFormer: Enhanced Transformer with Rotary Position Embedding',
+    paperAuthors:'Jianlin Su, Yu Lu, Shengding Hu, Anwen Hu, Hui Liu, Weizhen Qi, Guoyang Chen, Runxin Xu, Xiang Zhang, Lei Han',
+    paper:'https://arxiv.org/abs/2104.09864',
+    attn:'softmax', decays:['rope'], accent:'#b45309',
+    imgRef:'rope-custom',
+    maskViz: true,
+    maskType: 'rope',
+    desc:`<p><strong>RoPE Attention</strong> is standard softmax attention augmented with <strong>Rotary Position Embedding (RoPE)</strong>, which injects relative position information directly into queries and keys via rotation. For a token at position \\(m\\), the query and key are rotated as \\(\\tilde{q}_m = R_m q_m\\) and \\(\\tilde{k}_m = R_m k_m\\). The rotation matrix \\(R_m\\) is block-diagonal: its \\(i\\)-th 2D block rotates by angle \\(m\\theta_i\\) where the frequencies follow: $$\\theta_i = 10000^{-2i/d}, \\quad i = 1, \\ldots, d/2$$ These are the same frequencies used in sinusoidal position encodings, but applied as rotations to the vectors themselves rather than added to embeddings.</p>${ropeMatrixHTML()}<p><a href="https://arxiv.org/abs/2302.13971" target="_blank">LLaMA</a> adopted RoPE as the de facto positional encoding for modern LLMs — see the <a href="https://arshiaafzal.github.io/blog/2026/pe/" target="_blank">position embedding blog</a> for a full derivation.</p>`,
+    mathR:'A_{ij} = \\tfrac{q_i^\\top {\\color{#b45309} R_{i-j}}\\, k_j}{\\sqrt{d}}',
+    mathO:'O = \\operatorname{softmax}(A)\\,V',
+  },
+  {
+    id:'alibi', name:'ALiBi', full:'Attention with Linear Biases',
+    paperTitle:'Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation',
+    paperAuthors:'Ofir Press, Noah A. Smith, Mike Lewis',
+    paper:'https://arxiv.org/abs/2108.12409',
+    attn:'softmax', decays:['scalar'], accent:'#dc2626',
+    imgRef:'alibi-custom',
+    maskViz: true,
+    maskType: 'alibi',
+    desc:`<p>After the introduction of RoPE, its difficulty with <strong>length extrapolation</strong> (attending to positions unseen during training) motivated simpler alternatives. Many positional embeddings, including RoPE itself, can be <a href="https://arshiaafzal.github.io/blog/2026/pe/" target="_blank">derived from linear attention</a>. <strong>ALiBi</strong> draws direct inspiration from the RetNet decay mask: RetNet's exponential decay \\(\\gamma^{i-j}\\) is, inside the softmax, equivalent to a linear bias \\((i-j)\\log\\gamma\\). ALiBi makes this connection explicit, replacing any positional embedding with a <strong>fixed linear position bias</strong> added directly to the attention logits: $$O = \\operatorname{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d}} + M\\right)V$$ $$M_{ij} = \\begin{cases} -m\\,|i-j| & i \\geq j \\\\ -\\infty & i < j \\end{cases}$$ The scalar slope \\(m\\) is head-specific and fixed before training as a geometric sequence: for \\(n\\) heads, \\(m_h = 2^{-8h/n}\\), giving \\(\\bigl\\{2^{-8/n},\\,2^{-16/n},\\,\\ldots,\\,2^{-8}\\bigr\\}\\). Steeper slopes create heads that focus on local context; gentler slopes look further back.</p><p style="font-size:.75rem;line-height:1.7">The heatmap on the right shows the bias for a single head: the main diagonal (distance 0) is brightest, fading smoothly and <strong>monotonically</strong> with distance, with no oscillation unlike RoPE. Because the bias is a simple linear function of relative distance, ALiBi <strong>extrapolates naturally</strong> to longer sequences with no modification at inference time, directly addressing RoPE's main shortcoming.</p>`,
+    mathR:'A_{ij} = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} {\\color{#dc2626} -\\, m\\,|i-j|}',
+    mathO:'O = \\operatorname{softmax}(A + {\\color{#dc2626} M})\\,V',
+  },
+  {
+    id:'path', name:'🛣️ PaTH', full:'PaTH Attention',
+    paperTitle:'PaTH Attention: Position Encoding via Accumulating Householder Transformations',
+    paperAuthors:'Songlin Yang, Yikang Shen, Kaiyue Wen, Shawn Tan, Mayank Mishra, Liliang Ren, Rameswar Panda, Yoon Kim',
+    paper:'https://arxiv.org/abs/2505.16381',
+    attn:'softmax', decays:['delta'], accent:'#1d4ed8',
+    imgRef:'path-custom',
+    maskViz: true,
+    maskType: 'path',
+    desc:`<p><strong>PaTH Attention</strong> derives its position encoding by unrolling the <strong>DeltaNet</strong> linear recurrence. DeltaNet updates a matrix state via a delta rule with per-step transition matrix \\(H_t\\): $$S_t = S_{t-1}H_t + v_t k_t^\\top, \\qquad o_t = S_t q_t$$ Substituting recursively, the output at time \\(t\\) expands into a sum over all past positions — exactly in the form of a softmax attention readout: $$o_t = \\sum_{j=1}^{t} v_j \\underbrace{\\left(k_j^\\top \\prod_{s=j+1}^{t} H_s\\; q_t\\right)}_{\\text{attention logit }A_{tj}}$$ The dot product \\(k_j^\\top q_t\\) is thus replaced by \\(k_j^\\top P_{j\\to t}\\, q_t\\), where \\(P_{j\\to t} = \\prod_{s=j+1}^{t} H_s\\) is the <strong>accumulated product</strong> of transition matrices along the path from \\(j\\) to \\(t\\).</p><p>PaTH instantiates each \\(H_s\\) as a <strong>Householder-like transform</strong>: $$H_s = I - \\beta_s\\, w_s w_s^\\top$$ where \\(w_s\\) is a data-dependent unit vector and \\(\\beta_s \\in (0,2)\\) a learned scalar (a true reflection when \\(\\beta=2\\)). The resulting <strong>PaTH attention logit</strong> is: $$A_{ij} = k_j^\\top\\!\\left(\\prod_{s=j+1}^{i} H_s\\right) q_i$$ Unlike RoPE (fixed rotation angles) or ALiBi (fixed linear penalty), PaTH's correction is <em>data-dependent</em> — shaped by the actual input tokens \\(x_{j+1},\\ldots,x_i\\). The heatmap shows a simulated path bias: darker violet = the accumulated Householder product preserves more of the original dot product (short paths, small \\(d\\)); lighter = more rotation has accumulated. Efficient parallel computation uses the <strong>WY/UT representation</strong> \\(P = I - W^\\top T^{-1}W\\), compressing any product of rank-1 updates to standard attention cost.</p>`,
+    mathR:'A_{ij} = k_j^\\top\\!\\left(\\prod_{s=j+1}^{i} H_s\\right) q_i,\\quad H_s = I - \\beta_s w_s w_s^\\top',
+    mathO:'O = \\operatorname{softmax}(A)\\,V',
+  },
+  {
+    id:'path-fox', name:'🛣️🦊 PaTH-FoX', full:'PaTH-FoX Attention',
+    paperTitle:'PaTH Attention: Position Encoding via Accumulating Householder Transformations',
+    paperAuthors:'Songlin Yang, Yikang Shen, Kaiyue Wen, Shawn Tan, Mayank Mishra, Liliang Ren, Rameswar Panda, Yoon Kim',
+    paper:'https://arxiv.org/abs/2505.16381',
+    attn:'softmax', decays:['delta','scalar'], accent:'#7c3aed',
+    imgRef:'path-fox-custom',
+    maskViz: true,
+    maskType: 'path-fox',
+    desc:`<p><strong>PaTH-FoX</strong> is the softmax attention obtained by unrolling <strong>Gated DeltaNet (GDN)</strong> — which is exactly DeltaNet with a scalar forget gate — and using the result as a position encoding. GDN couples the Householder transition of DeltaNet with a FoX-style gate: $$S_t = f_t \\odot S_{t-1}H_t + v_t k_t^\\top$$ Unrolling yields logits that factor into two independent position biases: $$ {\\color{#dc2626} \\text{FoX gate:}}\\;\\prod_{s=j+1}^{i}f_s \\qquad {\\color{#1d4ed8} \\text{PaTH:}}\\;k_j^\\top\\!\\left(\\prod_{s=j+1}^{i}H_s\\right)\\!q_i$$ so that $$A_{ij}=\\left(\\prod_{s=j+1}^{i}f_s\\right)\\cdot k_j^\\top\\!\\left(\\prod_{s=j+1}^{i}H_s\\right)\\!q_i$$ Inside softmax the log decomposes additively: \\(\\log A_{ij} = \\sum \\log f_s + \\log|k_j^\\top P_{j\\to i}\\,q_i|\\). Setting \\(H_s=I\\) recovers <strong>FoX</strong>; setting \\(f_s=1\\) recovers <strong>PaTH</strong>.</p>`,
+    mathR:'A_{ij}=\\!\\left(\\prod_{s=j+1}^{i}\\!f_s\\right)\\cdot k_j^\\top\\!\\!\\left(\\prod_{s=j+1}^{i}\\!H_s\\right)\\!q_i',
+    mathO:'O = \\operatorname{softmax}(A)\\,V',
+  },
+  {
+    id:'wall', name:'🧱 Wall', full:'Wall Attention',
+    paperTitle:'Wall Attention',
+    paperAuthors:'Tilde Research',
+    paper:'https://blog.tilderesearch.com/blog/wall-attn',
+    attn:'softmax', decays:['diagonal'], accent:'#0891b2',
+    imgRef:'wall-custom',
+    maskViz: true,
+    maskType: 'wall',
+    desc:`<p><strong>Wall Attention</strong> generalises <strong>diagonal forget gates</strong> from linear RNNs — such as GLA — to softmax attention via a principled <em>induced-action</em> framework. The starting point is the same diagonal-gate recurrence as GLA: $$S_t = S_{t-1}\\operatorname{Diag}(\\boldsymbol{\\alpha}_t) + v_t k_t^\\top$$ Unrolling accumulates a per-channel product of gates across positions, $$\\boldsymbol{F}_{ij} = \\prod_{s=j+1}^{i} \\boldsymbol{\\alpha}_s$$ The <em>induced action</em> principle — gating the feature-map input equals gating the embedded state — then lifts this diagonal decay into softmax attention: $$A_{ij} = q_i^\\top\\operatorname{Diag}(\\boldsymbol{F}_{ij})\\,k_j$$ Defining \\(P_t = \\sum_{u \\le t}\\log\\boldsymbol{\\alpha}_u\\) (elementwise), this factors into standard attention on rescaled queries and keys \\(\\tilde{q}_i = e^{P_i}\\odot\\,q_i\\), \\(\\tilde{k}_j = e^{-P_j}\\odot\\,k_j\\), giving \\(A_{ij} = \\tilde{q}_i^\\top\\tilde{k}_j\\). Unlike <strong>FoX</strong> (additive scalar bias — ALiBi family), Wall applies a <em>multiplicative per-channel</em> rescaling — placing it in the <strong>RoPE family</strong> and making it strictly more expressive. Models trained at 4k tokens generalise to 160k+ without any length fine-tuning.</p>`,
+    mathR:'A_{ij} = q_i^\\top\\operatorname{Diag}(\\boldsymbol{F}_{ij})\\,k_j',
+    mathO:'O = \\operatorname{softmax}(A)\\,V',
+  },
+  {
+    id:'nope', name:'🤖 NoPE', full:'NoPE Attention',
     paperTitle:'The Impact of Positional Encoding on Length Generalization in Transformers',
     paperAuthors:'Amirhossein Kazemnejad, Inkit Padhi, Karthikeyan Natesan Ramamurthy, Payel Das, Siva Reddy',
     paper:'https://arxiv.org/pdf/2305.19466',
     attn:'softmax', decays:['none'], accent:'#475569',
     imgRef:'nope-custom',
-    desc:`<p><strong>NoPE</strong> (No Positional Encoding) studies what happens when a causal Transformer is trained with <em>no</em> positional encoding — no RoPE, ALiBi, or sinusoidal biases. Kazemnejad et al. find that such models generalise surprisingly well to lengths beyond training, challenging the assumption that explicit position signals are necessary.</p><p>As the baseline softmax model in this zoo, NoPE represents pure causal attention: full softmax expressiveness, no memory decay, and no positional prior. Its competitive length-generalisation behaviour motivates asking which structural inductive biases attention truly needs.</p>`,
+    maskViz: true,
+    desc:`<p><strong>NoPE Attention</strong> is vanilla softmax attention without any positional embedding. The output is computed as \\(O = \\operatorname{softmax}(QK^\\top/\\sqrt{d} + M)\\,V\\), where \\(d\\) is the head dimension. Dividing by \\(\\sqrt{d}\\) prevents the dot products from growing too large in high dimensions, which would push softmax into saturation regions with near-zero gradients. \\(M \\in \\mathbb{R}^{T \\times T}\\) is a binary causal mask that prevents each token from attending to future positions, preserving the autoregressive nature of the model. For <a href="https://arxiv.org/abs/2010.11929" target="_blank">vision transformers</a> the mask is removed, yielding full bidirectional attention \\(A = QK^\\top/\\sqrt{d}\\).</p><p>Since NoPE adds no positional signal to the attention scores, the attention is <a href="https://en.wikipedia.org/wiki/Equivariant_map" target="_blank"><strong>permutation-equivariant</strong></a>: reordering the input tokens simply reorders the output (in the mask-free, bidirectional setting). Despite this, NoPE exhibits stronger length generalisation than encodings such as <strong>RoPE</strong> and <strong>ALiBi</strong>, suggesting the triangular causal structure itself carries a sufficient implicit positional signal.</p>`,
     mathR:'A_{ij} = \\tfrac{q_i^\\top k_j}{\\sqrt{d}}',
-    mathO:'O = \\operatorname{softmax}(A + M)\\,V',
+    mathO:'O = \\operatorname{softmax}(A + {\\color{#9333ea} M})\\,V',
   },
 ];
 
@@ -371,17 +817,351 @@ let activeDecays = new Set(['all']);
 function exactMatch(m) {
   if (activeAttn !== 'all' && m.attn !== activeAttn) return false;
   if (activeDecays.has('all')) return true;
-  if (m.decays.length !== activeDecays.size) return false;
-  for (const d of m.decays) if (!activeDecays.has(d)) return false;
-  return true;
+  const candidates = m.decayOptions || [m.decays];
+  for (const decays of candidates) {
+    if (decays.length !== activeDecays.size) continue;
+    if (decays.every(d => activeDecays.has(d))) return true;
+  }
+  return false;
+}
+
+function ropeMatrixHTML() {
+  const d = 8;
+  const subs = ['\u2081','\u2082','\u2083','\u2084'];
+  const thetas = Array.from({length:d/2}, (_,i) => Math.pow(10000, -(2*(i+1)/d)));
+  const bgs = ['#fcd34d','#fde68a','#fef3c7','#fffbeb'];
+  const tcs = ['#78350f','#92400e','#a16207','#b45309'];
+  let cells = '';
+  for (let r = 0; r < d; r++) {
+    for (let c = 0; c < d; c++) {
+      const pair = Math.floor(r/2);
+      if (Math.floor(c/2) === pair) {
+        const rr = r%2, cc = c%2;
+        const isNeg = rr===0&&cc===1, isSin = rr===1&&cc===0;
+        const lbl  = isSin ? `s${subs[pair]}` : isNeg ? `\u2212s${subs[pair]}` : `c${subs[pair]}`;
+        const num  = isSin ? Math.sin(thetas[pair]) : isNeg ? -Math.sin(thetas[pair]) : Math.cos(thetas[pair]);
+        const fn   = isSin ? `sin` : isNeg ? `\u2212sin` : `cos`;
+        const tip  = `${fn}(t\u00b7\u03b8${subs[pair]}) = ${num.toFixed(4)}`;
+        cells += `<div class="rmcell" data-tip="${tip}" style="background:${bgs[pair]};height:22px;display:flex;align-items:center;justify-content:center;border-radius:2px;color:${tcs[pair]};font-size:.52rem;font-family:monospace">${lbl}</div>`;
+      } else {
+        cells += `<div style="background:#f8fafc;height:22px;display:flex;align-items:center;justify-content:center;border-radius:2px;color:#e2e8f0;font-size:.8rem">\xb7</div>`;
+      }
+    }
+  }
+  const kHdrs = Array.from({length:d}, (_,i) => `<div style="width:26px;text-align:center;font-size:.46rem;color:#94a3b8;font-style:italic">k<sub>${i+1}</sub></div>`).join('');
+  const qLbls = Array.from({length:d}, (_,i) => `<div style="height:22px;display:flex;align-items:center;justify-content:flex-end;padding-right:3px;font-size:.46rem;color:#94a3b8;font-style:italic">q<sub>${i+1}</sub></div>`).join('');
+  const bc = '#a16207';
+  return `<div style="margin:.75rem 0;text-align:center"><div style="font-size:.63rem;color:#a16207;margin-bottom:.5rem">\\(R_t=\\bigoplus_{i=1}^{d/2}\\begin{pmatrix}\\cos t\\theta_i&-\\sin t\\theta_i\\\\\\sin t\\theta_i&\\cos t\\theta_i\\end{pmatrix},\\quad\\theta_i=10000^{-2i/d}\\)</div><div style="display:inline-flex;flex-direction:column;align-items:flex-start"><div style="display:flex;margin-left:25px;gap:2px;padding-bottom:2px">${kHdrs}</div><div style="display:flex;align-items:stretch;position:relative"><span style="position:absolute;right:calc(100% + 6px);top:50%;transform:translateY(-50%);font-size:.75rem;color:${bc};white-space:nowrap">\\(R_t =\\)</span><div style="display:flex;flex-direction:column;gap:2px;width:20px">${qLbls}</div><div style="width:5px;border-left:2px solid ${bc};border-top:2px solid ${bc};border-bottom:2px solid ${bc};box-sizing:border-box;border-radius:1px 0 0 1px"></div><div style="display:inline-grid;grid-template-columns:repeat(8,26px);gap:2px">${cells}</div><div style="width:5px;border-right:2px solid ${bc};border-top:2px solid ${bc};border-bottom:2px solid ${bc};box-sizing:border-box;border-radius:0 1px 1px 0"></div></div></div></div>`;
+}
+
+function renderMask(m) {
+  const N = 8;
+  const isRope    = m.maskType === 'rope';
+  const isAlibi   = m.maskType === 'alibi';
+  const isFox     = m.maskType === 'fox';
+  const isPaTH    = m.maskType === 'path';
+  const isPaTHFoX = m.maskType === 'path-fox';
+  const isWall    = m.maskType === 'wall';
+  const kL = Array.from({length:N},(_,i)=>`k<sub>${i+1}</sub>`);
+  const qL = Array.from({length:N},(_,i)=>`q<sub>${i+1}</sub>`);
+
+  // RoPE: oscillatory decay
+  const ropeLvl  = [1.0, 0.58, 0.14, 0.40, 0.10, 0.26, 0.07, 0.03];
+  function ropeColor(t) {
+    const lo = [254,243,199], hi = [245,158,11];
+    return `rgb(${Math.round(lo[0]+t*(hi[0]-lo[0]))},${Math.round(lo[1]+t*(hi[1]-lo[1]))},${Math.round(lo[2]+t*(hi[2]-lo[2]))})`;
+  }
+  // ALiBi: strictly monotone exponential decay
+  const alibiLvl = [1.0, 0.74, 0.55, 0.41, 0.30, 0.22, 0.17, 0.12];
+  function alibiColor(t) {
+    const lo = [254,242,242], hi = [220,38,38]; // red-50 → red-600
+    return `rgb(${Math.round(lo[0]+t*(hi[0]-lo[0]))},${Math.round(lo[1]+t*(hi[1]-lo[1]))},${Math.round(lo[2]+t*(hi[2]-lo[2]))})`;
+  }
+  // FoX: input-dependent decay — per-position grid from f=[0.70,0.90,0.60,0.85,0.75,0.80,0.65,0.90]
+  const foxGrid = [
+    [1.00],
+    [0.70, 1.00],
+    [0.63, 0.90, 1.00],
+    [0.38, 0.54, 0.60, 1.00],
+    [0.32, 0.46, 0.51, 0.85, 1.00],
+    [0.24, 0.34, 0.38, 0.64, 0.75, 1.00],
+    [0.19, 0.28, 0.31, 0.51, 0.60, 0.80, 1.00],
+    [0.13, 0.18, 0.20, 0.33, 0.39, 0.52, 0.65, 1.00],
+  ];
+  function foxColor(t) {
+    const lo = [236,253,245], hi = [16,185,129]; // emerald-50 → emerald-500
+    return `rgb(${Math.round(lo[0]+t*(hi[0]-lo[0]))},${Math.round(lo[1]+t*(hi[1]-lo[1]))},${Math.round(lo[2]+t*(hi[2]-lo[2]))})`;
+  }
+  // PaTH: accumulated Householder path similarity (representative simulation)
+  const pathGrid = [
+    [1.00],
+    [0.72, 1.00],
+    [0.51, 0.74, 1.00],
+    [0.37, 0.55, 0.73, 1.00],
+    [0.26, 0.40, 0.57, 0.76, 1.00],
+    [0.18, 0.28, 0.42, 0.60, 0.78, 1.00],
+    [0.12, 0.20, 0.31, 0.46, 0.64, 0.80, 1.00],
+    [0.08, 0.14, 0.22, 0.35, 0.52, 0.67, 0.83, 1.00],
+  ];
+  function pathColor(t) {
+    const lo = [219,234,254], hi = [37,99,235]; // blue-100 → blue-600
+    return `rgb(${Math.round(lo[0]+t*(hi[0]-lo[0]))},${Math.round(lo[1]+t*(hi[1]-lo[1]))},${Math.round(lo[2]+t*(hi[2]-lo[2]))})`;
+  }
+  function foxRedColor(t) {
+    const lo = [254,242,242], hi = [220,38,38]; // red-50 → red-600
+    return `rgb(${Math.round(lo[0]+t*(hi[0]-lo[0]))},${Math.round(lo[1]+t*(hi[1]-lo[1]))},${Math.round(lo[2]+t*(hi[2]-lo[2]))})`;
+  }
+  // Wall: per-channel diagonal decay — geometric mean across d channels (rate ≈ 0.75/step)
+  const wallGrid = [
+    [1.00],
+    [0.75, 1.00],
+    [0.56, 0.75, 1.00],
+    [0.42, 0.56, 0.75, 1.00],
+    [0.32, 0.42, 0.56, 0.75, 1.00],
+    [0.24, 0.32, 0.42, 0.56, 0.75, 1.00],
+    [0.18, 0.24, 0.32, 0.42, 0.56, 0.75, 1.00],
+    [0.13, 0.18, 0.24, 0.32, 0.42, 0.56, 0.75, 1.00],
+  ];
+  function wallColor(t) {
+    const lo = [236,254,255], hi = [8,145,178]; // cyan-50 → cyan-600
+    return `rgb(${Math.round(lo[0]+t*(hi[0]-lo[0]))},${Math.round(lo[1]+t*(hi[1]-lo[1]))},${Math.round(lo[2]+t*(hi[2]-lo[2]))})`;
+  }
+  // Tooltip: exact avg cosine across 4 freq pairs (d=8 dim)
+  const ropeThetas = [Math.pow(10000,-.25), Math.pow(10000,-.5), Math.pow(10000,-.75), Math.pow(10000,-1)];
+  function ropeAvgCos(d) { return ropeThetas.reduce((s,th) => s + Math.cos(th*d), 0) / ropeThetas.length; }
+
+  let colRow = `<div class="az-mask-col-row"><div class="az-mask-cl"></div>${kL.map(l=>`<div class="az-mask-cl">${l}</div>`).join('')}</div>`;
+  let rows = '';
+  for (let r = 0; r < N; r++) {
+    let cells = `<div class="az-mask-rl">${qL[r]}</div>`;
+    for (let c = 0; c < N; c++) {
+      if (isRope) {
+        if (c > r) {
+          cells += `<div class="az-mask-cell" data-tip="future: M = \u2212\u221e" style="background:#fff7ed;border-radius:2px"></div>`;
+        } else {
+          const d = r - c;
+          cells += `<div class="az-mask-cell" data-tip="d=${d}: (1/n)\u03a3cos(\u03b8\u2099\u00b7d) = ${ropeAvgCos(d).toFixed(3)}" style="background:${ropeColor(ropeLvl[d])};border-radius:2px"></div>`;
+        }
+      } else if (isAlibi) {
+        if (c > r) {
+          cells += `<div class="az-mask-cell" data-tip="future: M = \u2212\u221e" style="background:#fef2f2;border-radius:2px"></div>`;
+        } else {
+          const d = r - c;
+          cells += `<div class="az-mask-cell" data-tip="d=${d}: M = \u2212m\u00b7d = ${Math.log(alibiLvl[d]).toFixed(3)}" style="background:${alibiColor(alibiLvl[d])};border-radius:2px"></div>`;
+        }
+      } else if (isFox) {
+        if (c > r) {
+          cells += `<div class="az-mask-cell" data-tip="future: M = \u2212\u221e" style="background:#f0fdf4;border-radius:2px"></div>`;
+        } else {
+          const t = foxGrid[r][c];
+          cells += `<div class="az-mask-cell" data-tip="d=${r-c}: M = \u03a3log(f\u2097) = ${Math.log(t).toFixed(3)}" style="background:${foxColor(t)};border-radius:2px"></div>`;
+        }
+      } else if (isPaTH) {
+        if (c > r) {
+          cells += `<div class="az-mask-cell" data-tip="future: M = \u2212\u221e" style="background:#eff6ff;border-radius:2px"></div>`;
+        } else {
+          const t = pathGrid[r][c];
+          cells += `<div class="az-mask-cell" data-tip="d=${r-c}: k\u1D40\u00b7P_{j\u2192i}\u00b7q \u2248 ${t.toFixed(3)}" style="background:${pathColor(t)};border-radius:2px"></div>`;
+        }
+      } else if (isWall) {
+        if (c > r) {
+          cells += `<div class="az-mask-cell" data-tip="future: masked" style="background:#ecfeff;border-radius:2px"></div>`;
+        } else {
+          const t = wallGrid[r][c];
+          cells += `<div class="az-mask-cell" data-tip="d=${r-c}: avg \u03a0 g\u2099 \u2248 ${t.toFixed(3)}" style="background:${wallColor(t)};border-radius:2px"></div>`;
+        }
+      } else {
+        const masked = c > r || (m.windowSize && c < r - m.windowSize + 1);
+        if (masked) {
+          cells += `<div class="az-mask-cell az-mask-off" data-tip="M(${r+1},${c+1}) = \u2212\u221e"></div>`;
+        } else {
+          cells += `<div class="az-mask-cell az-mask-on" data-tip="M(${r+1},${c+1}) = 0"></div>`;
+        }
+      }
+    }
+    rows += `<div class="az-mask-row">${cells}</div>`;
+  }
+
+  const gridLabel  = isRope ? '8 × 8 position bias' : isAlibi ? '8 × 8 ALiBi bias' : isFox ? '8 × 8 learned decay bias' : isPaTH ? '8 × 8 path bias (simulated)' : isWall ? '8 × 8 per-channel decay (avg)' : '8 × 8 causal mask';
+  const dotStyle   = isRope ? 'style="--mask-dot-c:#f59e0b"' : isAlibi ? 'style="--mask-dot-c:#dc2626"' : isFox ? 'style="--mask-dot-c:#10b981"' : isPaTH ? 'style="--mask-dot-c:#2563eb"' : isWall ? 'style="--mask-dot-c:#0891b2"' : '';
+  const leftLabel  = isRope
+    ? `\\({\\color{#b45309} R_{i-j}} =\\)`
+    : isAlibi
+      ? `\\({\\color{#dc2626} M} =\\)`
+      : isFox
+        ? `\\({\\color{#059669} M} =\\)`
+        : isPaTH
+          ? `\\({\\color{#1d4ed8} A_{ij}} =\\)`
+          : isWall
+            ? `\\({\\color{#0891b2} A_{ij}} =\\)`
+            : `\\({\\color{#c084fc} M} =\\)`;
+  const legend = isRope
+    ? `<div class="az-mask-legend">
+        <div class="az-mask-li"><span class="az-mask-sw" style="background:#f59e0b"></span>near (d small)</div>
+        <div class="az-mask-li"><span class="az-mask-sw" style="background:#fef3c7;border:1px solid #fde68a"></span>far (d large)</div>
+        <div class="az-mask-li"><span class="az-mask-sw" style="background:#fff7ed;border:1px solid #fed7aa"></span>future</div>
+      </div>`
+    : isAlibi
+      ? `<div class="az-mask-legend">
+          <div class="az-mask-li"><span class="az-mask-sw" style="background:#dc2626"></span>near (d small)</div>
+          <div class="az-mask-li"><span class="az-mask-sw" style="background:#fef2f2;border:1px solid #fecaca"></span>far (d large)</div>
+          <div class="az-mask-li"><span class="az-mask-sw" style="background:#fef2f2;border:1px solid #fecaca"></span>future</div>
+        </div>`
+      : isFox
+        ? `<div class="az-mask-legend">
+            <div class="az-mask-li"><span class="az-mask-sw" style="background:#10b981"></span>near (d small)</div>
+            <div class="az-mask-li"><span class="az-mask-sw" style="background:#ecfdf5;border:1px solid #a7f3d0"></span>far (d large)</div>
+            <div class="az-mask-li"><span class="az-mask-sw" style="background:#f0fdf4;border:1px solid #bbf7d0"></span>future</div>
+          </div>`
+        : isPaTH
+          ? `<div class="az-mask-legend">
+              <div class="az-mask-li"><span class="az-mask-sw" style="background:#2563eb"></span>strong path effect</div>
+              <div class="az-mask-li"><span class="az-mask-sw" style="background:#dbeafe;border:1px solid #bfdbfe"></span>weak path effect</div>
+              <div class="az-mask-li"><span class="az-mask-sw" style="background:#eff6ff;border:1px solid #dbeafe"></span>future</div>
+            </div>`
+          : isWall
+            ? `<div class="az-mask-legend">
+                <div class="az-mask-li"><span class="az-mask-sw" style="background:#0891b2"></span>near (decay ≈ 1)</div>
+                <div class="az-mask-li"><span class="az-mask-sw" style="background:#cffafe;border:1px solid #a5f3fc"></span>far (heavy decay)</div>
+                <div class="az-mask-li"><span class="az-mask-sw" style="background:#ecfeff;border:1px solid #cffafe"></span>future (masked)</div>
+              </div>`
+            : `<div class="az-mask-legend">
+                <div class="az-mask-li"><span class="az-mask-sw" style="background:#c084fc"></span>attend</div>
+                <div class="az-mask-li"><span class="az-mask-sw" style="background:#faf5ff;border:1px solid #ede9fe"></span>masked (−∞)</div>
+              </div>`;
+
+  if (isPaTHFoX) {
+    let pc = '', fc = '';
+    for (let r = 0; r < N; r++) {
+      for (let c = 0; c < N; c++) {
+        if (c > r) {
+          pc += `<div class="az-mask-cell" data-tip="future: masked" style="width:14px;height:14px;background:#eff6ff;border-radius:2px"></div>`;
+          fc += `<div class="az-mask-cell" data-tip="future: masked" style="width:14px;height:14px;background:#fef2f2;border-radius:2px"></div>`;
+        } else {
+          const pt = pathGrid[r][c];
+          pc += `<div class="az-mask-cell" data-tip="d=${r-c}: k\u1D40Pq\u2248${pt.toFixed(2)}" style="width:14px;height:14px;background:${pathColor(pt)};border-radius:2px"></div>`;
+          const ft = foxGrid[r][c];
+          fc += `<div class="az-mask-cell" data-tip="d=${r-c}: \u03a3log f=${Math.log(ft).toFixed(2)}" style="width:14px;height:14px;background:${foxRedColor(ft)};border-radius:2px"></div>`;
+        }
+      }
+    }
+    return `<div class="az-mask-section" style="display:block">
+      <div class="az-mask-eq-panel" style="border-right:none;border-bottom:1px solid var(--c-border);display:flex;flex-direction:column;gap:.6rem;padding:.9rem 1.5rem">
+        <div>
+          <div class="az-eq-lbl">Attention logit</div>
+          <div class="az-eq-val">\\( A_{ij} = {\\color{#dc2626}\\Bigl(\\prod_{s=j+1}^{i}\\!f_s\\Bigr)} \\cdot {\\color{#1d4ed8} k_j^\\top\\!\\Bigl(\\prod_{s=j+1}^{i}\\!H_s\\Bigr)\\!q_i} \\)</div>
+        </div>
+        <div>
+          <div class="az-eq-lbl" style="color:#94a3b8;font-style:italic">in log-space (additive)</div>
+          <div class="az-eq-val">\\( \\log A_{ij} = {\\color{#dc2626}\\textstyle\\sum_{s}\\!\\log f_s} + {\\color{#1d4ed8}\\log|k_j^\\top P_{j\\to i}\\,q_i|} \\)</div>
+        </div>
+        <div>
+          <div class="az-eq-lbl">Readout</div>
+          <div class="az-eq-val">\\( O = \\operatorname{softmax}(A)\\,V \\)</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:1rem 1.5rem .9rem;gap:.8rem;background:linear-gradient(to bottom,#f8fafc,#eef2f7)">
+        <div style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;display:flex;align-items:center;gap:.35rem">
+          <span style="width:5px;height:5px;border-radius:50%;background:#7c3aed;display:inline-block;flex-shrink:0"></span>
+          log-space position biases &middot; hover cells for values
+        </div>
+        <div style="display:flex;align-items:stretch;justify-content:center;gap:1rem;flex-wrap:wrap">
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem">
+            <div style="text-align:center;line-height:1.35">
+              <div style="font-size:.6rem;font-weight:800;color:#1d4ed8;letter-spacing:.07em;text-transform:uppercase">PaTH bias</div>
+              <div style="font-size:.62rem;color:#3b82f6;font-family:Georgia,serif;margin-top:1px">k<sub>j</sub><sup style="font-size:.5rem">&#x22A4;</sup> P<sub>j&#x2192;i</sub> q<sub>i</sub></div>
+            </div>
+            <div style="border:2px solid #93c5fd;border-radius:8px;padding:6px;background:#ffffff;box-shadow:0 2px 10px rgba(37,99,235,.13)">
+              <div style="display:grid;grid-template-columns:repeat(8,14px);grid-template-rows:repeat(8,14px);gap:2px">
+                ${pc}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;min-width:120px">
+              <div style="display:flex;align-items:center;gap:.35rem">
+                <span style="width:10px;height:10px;border-radius:2px;background:#1d4ed8;display:inline-block;flex-shrink:0"></span>
+                <span style="font-size:.56rem;color:#1d4ed8;font-weight:700">strong &mdash; nearby token</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.35rem">
+                <span style="width:10px;height:10px;border-radius:2px;background:#93c5fd;display:inline-block;flex-shrink:0"></span>
+                <span style="font-size:.56rem;color:#64748b">moderate</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.35rem">
+                <span style="width:10px;height:10px;border-radius:2px;background:#dbeafe;border:1px solid #bfdbfe;display:inline-block;flex-shrink:0"></span>
+                <span style="font-size:.56rem;color:#64748b">weak &mdash; distant token</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.35rem">
+                <span style="width:10px;height:10px;border-radius:2px;background:#eff6ff;border:1px solid #dbeafe;display:inline-block;flex-shrink:0"></span>
+                <span style="font-size:.56rem;color:#94a3b8">future (masked)</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:center;padding:0 .4rem;font-size:2.4rem;color:#cbd5e1;font-weight:200;line-height:1;padding-bottom:4rem">+</div>
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem">
+            <div style="text-align:center;line-height:1.35">
+              <div style="font-size:.6rem;font-weight:800;color:#dc2626;letter-spacing:.07em;text-transform:uppercase">FoX gate</div>
+              <div style="font-size:.62rem;color:#ef4444;font-family:Georgia,serif;margin-top:1px">&#x220F;<sub>s=j+1</sub><sup style="font-size:.5rem">i</sup> f<sub>s</sub></div>
+            </div>
+            <div style="border:2px solid #fca5a5;border-radius:8px;padding:6px;background:#ffffff;box-shadow:0 2px 10px rgba(220,38,38,.13)">
+              <div style="display:grid;grid-template-columns:repeat(8,14px);grid-template-rows:repeat(8,14px);gap:2px">
+                ${fc}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;min-width:120px">
+              <div style="display:flex;align-items:center;gap:.35rem">
+                <span style="width:10px;height:10px;border-radius:2px;background:#dc2626;display:inline-block;flex-shrink:0"></span>
+                <span style="font-size:.56rem;color:#dc2626;font-weight:700">gate &#x2248; 1 &mdash; nearby</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.35rem">
+                <span style="width:10px;height:10px;border-radius:2px;background:#f87171;display:inline-block;flex-shrink:0"></span>
+                <span style="font-size:.56rem;color:#64748b">moderate decay</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.35rem">
+                <span style="width:10px;height:10px;border-radius:2px;background:#fca5a5;border:1px solid #fecaca;display:inline-block;flex-shrink:0"></span>
+                <span style="font-size:.56rem;color:#64748b">heavy decay &mdash; distant</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.35rem">
+                <span style="width:10px;height:10px;border-radius:2px;background:#fef2f2;border:1px solid #fecaca;display:inline-block;flex-shrink:0"></span>
+                <span style="font-size:.56rem;color:#94a3b8">future (masked)</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="az-mask-section" ${isRope ? 'style="grid-template-columns:55% 45%"' : ''}>
+    <div class="az-mask-eq-panel">
+      <div class="az-mask-eq-block">
+        <div class="az-eq-lbl">Attention logit</div>
+        <div class="az-eq-val">\\(${m.mathR}\\)</div>
+      </div>
+      <div class="az-mask-eq-block">
+        <div class="az-eq-lbl">Readout</div>
+        <div class="az-eq-val">\\(${m.mathO}\\)</div>
+      </div>
+    </div>
+    <div class="az-mask-grid-panel" ${dotStyle}>
+      <div class="az-mask-lbl">${gridLabel}</div>
+      <div style="position:relative;display:inline-block;">
+        <span style="position:absolute;right:calc(100% + .35rem);top:50%;transform:translateY(-50%);font-size:1.15rem;white-space:nowrap;">${leftLabel}</span>
+        ${colRow}${rows}
+      </div>
+      ${legend}
+    </div>
+  </div>`;
 }
 
 function renderCard(m) {
   const attnBadge   = `<span class="az-badge b-${m.attn}">${m.attn}</span>`;
   const decayBadges = m.decays.map(d=>`<span class="az-badge b-${d}">${d}</span>`).join('');
-  const eqLbl = m.attn === 'linear' ? 'Recurrence' : 'Attention logit';
+  const eqLbl = m.eqLbl || (m.attn === 'linear' ? 'Recurrence' : 'Attention logit');
 
-  return `<div class="az-card" style="--card-accent:${m.accent}">
+  return `<div class="az-card" id="az-card-${m.id}" style="--card-accent:${m.accent}">
   <div class="az-card-header">
     <div>
       <div class="az-card-name">${m.name}</div>
@@ -401,12 +1181,9 @@ function renderCard(m) {
   </div>
   <div class="az-card-body">
     <div class="az-desc">${m.desc}</div>
-    <div class="az-arch">
-      <img class="az-arch-img"
-        src="/assets/img/attention-zoo/${m.imgRef}.png"
-        alt="${m.name} architecture" loading="lazy">
-    </div>
+    ${m.imgRef ? `<div class="az-arch"><img class="az-arch-img" src="/assets/img/attention-zoo/${m.imgRef}.png" alt="${m.name} architecture" loading="lazy"></div>` : ''}
   </div>
+  ${m.maskViz ? renderMask(m) : `
   <div class="az-eq-row">
     <div class="az-eq-cell">
       <div class="az-eq-lbl">${eqLbl}</div>
@@ -418,9 +1195,32 @@ function renderCard(m) {
       <div class="az-eq-val">${m.mathDisplay ? `$$${m.mathO}$$` : `\\(${m.mathO}\\)`}</div>
       ${m.mathOExtra ? `<div class="az-eq-extra"><span class="az-eq-val">\\(${m.mathOExtra}\\)</span><span class="az-opt-tag">optional</span></div>` : ''}
     </div>
-  </div>
+  </div>`}
+  ${m.stateViz ? `<iframe class="az-anim-iframe" src="${AZ_HTML_BASE}/linear_state_update.html?decay=${m.stateViz.decay}&amp;color=${m.stateViz.color}&amp;name=${m.stateViz.name}" loading="lazy" scrolling="no" style="display:block;width:100%;height:0;border:0;border-top:1px solid #e2e8f0;overflow:hidden;margin:0;border-radius:0 0 var(--radius) var(--radius)"></iframe>` : ''}
 </div>`;
 }
+
+function resizeAnimIframes() {
+  document.querySelectorAll('.az-anim-iframe').forEach(function(f) {
+    var resize = function() {
+      try {
+        var doc = f.contentDocument || (f.contentWindow && f.contentWindow.document);
+        if (!doc || !doc.body) return;
+        f.style.height = Math.min(Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight, doc.body.offsetHeight), 340) + 'px';
+      } catch(e) {}
+    };
+    f.addEventListener('load', function() { resize(); setTimeout(resize, 250); setTimeout(resize, 1000); });
+  });
+}
+window.addEventListener('resize', function() {
+  document.querySelectorAll('.az-anim-iframe').forEach(function(f) {
+    try {
+      var doc = f.contentDocument || (f.contentWindow && f.contentWindow.document);
+      if (!doc || !doc.body) return;
+      f.style.height = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight, doc.body.offsetHeight) + 'px';
+    } catch(e) {}
+  });
+});
 
 function updateGrid() {
   const grid  = document.getElementById('az-grid');
@@ -430,11 +1230,20 @@ function updateGrid() {
   grid.style.display = visible.length ? 'flex' : 'none';
   empty.style.display = visible.length ? 'none' : 'block';
   if (window.MathJax) MathJax.typesetPromise([grid]).catch(()=>{});
+  resizeAnimIframes();
 }
 
 document.getElementById('az-attn').addEventListener('click', e => {
   const p = e.target.closest('.az-pill'); if (!p) return;
   activeAttn = p.dataset.type;
+  // Rule: linear and window cannot coexist — drop window when switching to linear
+  if (activeAttn === 'linear' && activeDecays.has('window')) {
+    activeDecays.delete('window');
+    if (!activeDecays.size) activeDecays.add('all');
+    document.querySelectorAll('#az-decay .az-pill').forEach(x => {
+      x.classList.toggle('active', x.dataset.decay === 'all' ? activeDecays.has('all') : activeDecays.has(x.dataset.decay));
+    });
+  }
   document.querySelectorAll('#az-attn .az-pill').forEach(x => x.classList.toggle('active', x === p));
   updateGrid();
 });
@@ -442,14 +1251,27 @@ document.getElementById('az-attn').addEventListener('click', e => {
 document.getElementById('az-decay').addEventListener('click', e => {
   const p = e.target.closest('.az-pill'); if (!p) return;
   const d = p.dataset.decay;
-  if (d === 'all')  { activeDecays = new Set(['all']); }
-  else if (d === 'none') { activeDecays = new Set(['none']); }
-  else {
-    activeDecays.delete('all'); activeDecays.delete('none');
-    if (activeDecays.has(d)) { activeDecays.delete(d); if (!activeDecays.size) activeDecays.add('all'); }
-    else {
+  if (d === 'all') {
+    activeDecays = new Set(['all']);
+  } else if (d === 'none') {
+    // None is exclusive: toggle it on, or back to all if already active
+    activeDecays = activeDecays.has('none') ? new Set(['all']) : new Set(['none']);
+  } else if (d === 'window' && activeAttn === 'linear') {
+    // Window and Linear cannot coexist
+    return;
+  } else {
+    activeDecays.delete('all');
+    activeDecays.delete('none'); // None is mutually exclusive — clear it when switching to anything else
+    if (activeDecays.has(d)) {
+      activeDecays.delete(d);
+      if (!activeDecays.size) activeDecays.add('all');
+    } else {
       if (d === 'diagonal') activeDecays.delete('scalar');
       if (d === 'scalar') activeDecays.delete('diagonal');
+      // Rule: softmax + window + rope active → adding another decay deselects rope first
+      if (activeAttn === 'softmax' && activeDecays.has('window') && activeDecays.has('rope') && d !== 'rope') {
+        activeDecays.delete('rope');
+      }
       activeDecays.add(d);
     }
   }
@@ -462,3 +1284,11 @@ document.getElementById('az-decay').addEventListener('click', e => {
 
 updateGrid();
 </script>
+
+---
+
+## 📬 Final Note
+
+If you feel that some linear or softmax models are missing from the Zoo, feel free to ping me and I will add them. A [sample architecture block template](https://docs.google.com/presentation/d/1Uc4zlW3HYFmUEJOV9rZC72WtZabq0Oto0LgebNq5yWc/edit?slide=id.p#slide=id.p) is available — create your model's block in the same style and send it over. You can reach out on Twitter/X, DMs are open 😉 [@rshia_afz](https://x.com/rshia_afz).
+
+Also, the same recurrences and rollouts can be applied to the **residual stream**, resulting in Deep Delta Learning, gating, and attention residuals. Stay tuned, there will soon be another post, or an update to this one, covering upgrades to the residual stream as well.
