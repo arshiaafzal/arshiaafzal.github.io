@@ -325,8 +325,8 @@ $$A \in \mathbb{R}^{T \times T} \qquad S_t \in \mathbb{R}^{d \times d}$$
 #az-ls .az2-leg{display:flex;gap:7px;flex-shrink:0;margin-top:2px;}
 #az-ls .az2-lp{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:#475569;padding:3px 9px;border:1.5px solid #e2e8f0;border-radius:100px;background:#fff;}
 #az-ls .az2-ld{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-#az-ls .az2-scr{overflow:hidden;background-color:#f9fafb;background-image:radial-gradient(circle,#dde3ed 1px,transparent 1px);background-size:22px 22px;}
-#az-ls .az2-stg{position:relative;width:980px;height:300px;overflow:visible;transform-origin:top left;}
+#az-ls .az2-scr{overflow-x:auto;overflow-y:visible;background-color:#f9fafb;background-image:radial-gradient(circle,#dde3ed 1px,transparent 1px);background-size:22px 22px;}
+#az-ls .az2-stg{position:relative;width:980px;height:300px;overflow:visible;}
 #az-ls .az2-bs{position:absolute;top:0;left:0;right:0;height:150px;background:linear-gradient(180deg,rgba(217,119,6,.06) 0%,rgba(217,119,6,0) 100%);pointer-events:none;}
 #az-ls .az2-bl{position:absolute;top:150px;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(99,102,241,0) 0%,rgba(99,102,241,.06) 100%);pointer-events:none;}
 #az-ls .az2-div{position:absolute;left:50px;right:0;top:150px;height:1px;background:linear-gradient(90deg,#e2e8f0 0%,#a5b4fc 25%,#a5b4fc 75%,#e2e8f0 100%);pointer-events:none;}
@@ -497,19 +497,6 @@ function hlE(nodeId,on){
     if(active)p.setAttribute('filter','url(#az2glow)');else p.removeAttribute('filter');
   });
 }
-})();
-
-(function(){
-  function scaleStage(){
-    var scr=document.querySelector('#az-ls .az2-scr');
-    var stg=document.getElementById('az2-stg');
-    if(!scr||!stg)return;
-    var s=Math.min(1,scr.clientWidth/980);
-    stg.style.transform='scale('+s+')';
-    scr.style.height=Math.round(300*s)+'px';
-  }
-  scaleStage();
-  window.addEventListener('resize',scaleStage);
 })();
 </script>
 
