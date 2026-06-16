@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-raven-part-2",
+        },{id: "post-attention-zoo-summary-of-ssms-and-transformers",
+      
+        title: "Attention Zoo: Summary of SSMs and Transformers",
+      
+      description: "An interactive guide to modern sequence models, explore architectures and recurrences across the linear-softmax landscape.",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2026/attention-zoo/";
+        
+      },
+    },{id: "post-raven-part-2",
       
         title: "Raven (Part-2)",
       
@@ -50,17 +61,6 @@ ninja.data = [{
       handler: () => {
         
           window.location.href = "/blog/2026/raven-part1/";
-        
-      },
-    },{id: "post-attention-zoo-summary-of-ssms-and-transformers",
-      
-        title: "Attention Zoo: Summary of SSMs and Transformers",
-      
-      description: "An interactive guide to modern sequence models, explore architectures and recurrences across the linear-softmax landscape.",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2026/attention-zoo/";
         
       },
     },{id: "post-on-the-legacy-of-linear-transformers-in-positional-embeddings",
