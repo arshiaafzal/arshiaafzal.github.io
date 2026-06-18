@@ -314,6 +314,27 @@ The attention weight matrix and the SSM hidden state are:
 
 $$A \in \mathbb{R}^{T \times T} \qquad S_t \in \mathbb{R}^{d \times d}$$
 
+**The general linear transformer recurrence.** Every linear model in this Zoo can be written as:
+
+$$S_t = \mathbf{A}_t \odot S_{t-1} + v_t k_t^\top, \qquad o_t = S_t q_t$$
+
+where $$\mathbf{A}_t \in \mathbb{R}^{d \times d}$$ is the **decay matrix** (also called the transition matrix). Depending on the structure of $$\mathbf{A}_t$$, we recover a different linear model:
+
+| Decay $$\mathbf{A}_t$$ | Structure | Model |
+|---|---|---|
+| $$I$$ | No decay | LinAtt |
+| $$\gamma I,\; \gamma < 1$$ | Scalar | RetNet, Mamba-2 |
+| $$\operatorname{Diag}(\alpha_t)$$ | Diagonal | GLA, Mamba |
+| $$I - \beta_t k_t k_t^\top$$ | Delta rule | DeltaNet |
+| $$\gamma I \cdot (I - \beta_t k_t k_t^\top)$$ | Scalar + Delta | GDN |
+| $$\operatorname{Diag}(\alpha_t)(I - k_t k_t^\top)$$ | Diagonal + Delta | KDA, GDN-2 |
+
+**Unrolling and the connection to softmax positional encodings.** Unrolling the recurrence gives:
+
+$$o_t = S_t q_t = \sum_{j=1}^{t} \underbrace{\left(\prod_{i=j+1}^{t} \mathbf{A}_i\right)}_{\text{position-dependent mask}} v_j\, (k_j^\top q_t)$$
+
+This is structurally identical to causal softmax attention $$o_t = \sum_j M_{tj}\, (k_j^\top q_t)\, v_j$$ where the cumulative decay product $$\prod_{i=j+1}^{t} \mathbf{A}_i$$ plays the role of a **positional bias**. Different choices of $$\mathbf{A}_t$$ therefore induce different positional encoding schemes in the softmax world — scalar decay maps to ALiBi-style linear biases, diagonal decay to per-channel masks as in Wall, and block-diagonal rotation to RoPE. The softmax models in this Zoo can each be understood through the lens of which decay $$\mathbf{A}_t$$ they implicitly apply. For a deeper treatment of this connection, see the companion post [On the Legacy of Linear Transformers in Positional Embeddings]({% post_url 2025-01-06-pe %}).
+
 <div id="az-ls" style="margin:1.8rem 0 2.4rem;">
 <style>
 #az-ls,#az-ls *{box-sizing:border-box;}
