@@ -320,9 +320,9 @@ $$S_t = S_{t-1}\mathbf{A}_t + v_t k_t^\top, \qquad o_t = S_t q_t$$
 
 where $$\mathbf{A}_t \in \mathbb{R}^{d \times d}$$ is the **decay matrix**. Unrolling the recurrence gives:
 
-$$o_t = \sum_{j=1}^{t} \underbrace{\left(\prod_{i=j+1}^{t} \mathbf{A}_i\right)}_{\text{position-dependent mask}} v_j\, (k_j^\top q_t)$$
+$$o_t = \sum_{j=1}^{t} \underbrace{\left(q_t^\top \prod_{i=j+1}^{t} \mathbf{A}_i\; k_j\right)}_{\text{position-aware score}} v_j$$
 
-The cumulative product $$\prod_{i=j+1}^{t} \mathbf{A}_i$$ acts as a positional bias, connecting linear models to positional encodings in softmax transformers. For a deeper treatment see [On the Legacy of Linear Transformers in Positional Embeddings]({% post_url 2025-01-06-pe %}).
+The decay matrices sit between the query and key, acting as a position-dependent bias — connecting linear models to positional encodings in softmax transformers. For a deeper treatment see [On the Legacy of Linear Transformers in Positional Embeddings]({% post_url 2025-01-06-pe %}).
 
 <div id="az-ls" style="margin:1.8rem 0 2.4rem;">
 <style>
