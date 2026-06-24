@@ -286,6 +286,74 @@ toc:
   text-align:center; padding:3rem 1rem;
   color:var(--c-muted); display:none;
 }
+
+/* ── Book layout ───────────────────────────────────── */
+.az-book-wrap { display:flex; align-items:flex-start; gap:12px; margin-top:0; }
+.az-book {
+  flex:1; min-width:0; display:flex;
+  min-height:580px; border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:4px 6px 32px rgba(0,0,0,.12),1px 2px 6px rgba(0,0,0,.05);
+}
+.az-spine {
+  width:14px; flex-shrink:0;
+  background:linear-gradient(180deg,#1e293b 0%,#334155 55%,#1e293b 100%);
+}
+.az-book-inner {
+  flex:1; display:flex; flex-direction:column;
+  background:#fff; border:1px solid var(--c-border);
+  border-left:none; border-radius:0 var(--radius) var(--radius) 0; min-width:0;
+}
+.az-page { flex:1; overflow-y:auto; transition:opacity .2s ease,transform .2s ease; }
+.az-page-hero {
+  position:relative; overflow:hidden;
+  padding:1.1rem 1.5rem .9rem;
+  display:flex; align-items:flex-start; gap:1rem;
+  border-bottom:1px solid var(--c-border);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--page-accent,#6366f1) 7%,#f8fafc) 0%,#f8fafc 100%);
+}
+.az-page-hero::after {
+  content:attr(data-emoji); position:absolute; right:1.2rem; top:50%;
+  transform:translateY(-50%); font-size:6rem; line-height:1; opacity:.07; pointer-events:none;
+}
+.az-page-icon { font-size:2.2rem; line-height:1; flex-shrink:0; margin-top:.1rem; }
+.az-page-meta { flex:1; min-width:0; }
+.az-page-name { font-size:1.3rem; font-weight:800; letter-spacing:-.02em; color:#0f172a; }
+.az-page-full { font-size:.8rem; color:var(--c-muted); margin:.1rem 0 0; }
+.az-page-nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.6rem 1rem; border-top:1px solid var(--c-border);
+  background:var(--c-subtle); flex-shrink:0;
+}
+.az-nav-btn {
+  padding:.32rem .85rem; border-radius:8px; border:1.5px solid var(--c-border);
+  background:#fff; font-size:.78rem; font-weight:600; color:var(--c-muted);
+  cursor:pointer; transition:all .18s;
+}
+.az-nav-btn:hover:not(:disabled) { border-color:#94a3b8; color:#0f172a; }
+.az-nav-btn:disabled { opacity:.35; cursor:default; }
+.az-page-ctr { display:flex; align-items:center; gap:.5rem; font-size:.75rem; color:var(--c-muted); font-weight:600; }
+.az-page-ctr-dot { width:8px; height:8px; border-radius:50%; background:var(--page-accent,#6366f1); display:inline-block; }
+.az-bm-strip {
+  width:140px; flex-shrink:0; max-height:580px; overflow-y:auto;
+  display:flex; flex-direction:column; gap:2px; padding:4px 0; scrollbar-width:thin;
+}
+.az-bm {
+  display:flex; align-items:center; gap:.35rem; padding:.38rem .55rem;
+  border-radius:8px; border:1.5px solid transparent; background:transparent;
+  cursor:pointer; font-size:.73rem; font-weight:600; color:var(--c-muted);
+  text-align:left; transition:all .15s; width:100%;
+}
+.az-bm:hover { background:var(--c-subtle); color:var(--c-text); }
+.az-bm.active { background:var(--bm-c,#6366f1); color:#fff; border-color:var(--bm-c,#6366f1); }
+.az-bm.dim { opacity:.3; }
+.az-bm-icon { font-size:.95rem; flex-shrink:0; }
+.az-bm-nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@media(max-width:680px){
+  .az-book-wrap { flex-direction:column; }
+  .az-bm-strip { width:100%; max-height:120px; flex-direction:row; flex-wrap:wrap; overflow-x:auto; }
+  .az-bm { flex:0 0 auto; width:auto; }
+}
 </style>
 
 ---
@@ -467,8 +535,9 @@ M.forEach(function(m){
     activeAttn='all';activeDecays=new Set(['all']);
     document.querySelectorAll('#az-attn .az-pill').forEach(function(p){p.classList.toggle('active',p.dataset.type==='all');});
     document.querySelectorAll('#az-decay .az-pill').forEach(function(p){p.classList.toggle('active',p.dataset.decay==='all');});
-    updateGrid();
-    setTimeout(function(){var c=document.getElementById('az-card-'+cid);if(c)c.scrollIntoView({behavior:'smooth',block:'center'});},80);
+    FILTERED_MODELS=MODELS.slice();
+    var tidx=MODELS.findIndex(function(x){return x.id===cid;});
+    if(tidx>=0)goToPage(tidx,BOOK_IDX<tidx?1:-1);
   });
   stg.appendChild(el);
 });
@@ -538,10 +607,19 @@ function hlE(nodeId,on){
 
   <div class="az-hr"></div>
 
-  <div id="az-grid"></div>
-  <div id="az-empty">
-    <div style="font-size:2rem;margin-bottom:.5rem">🔬</div>
-    <p>No models match this combination. Try a different filter.</p>
+  <div class="az-book-wrap">
+    <div class="az-book">
+      <div class="az-spine"></div>
+      <div class="az-book-inner">
+        <div class="az-page" id="az-page"></div>
+        <div class="az-page-nav">
+          <button class="az-nav-btn" id="az-prev">← Prev</button>
+          <div class="az-page-ctr"><span class="az-page-ctr-dot" id="az-ctr-dot"></span><span id="az-counter">1 / 21</span></div>
+          <button class="az-nav-btn" id="az-next">Next →</button>
+        </div>
+      </div>
+    </div>
+    <div class="az-bm-strip" id="az-bm-strip"></div>
   </div>
 
 </div>
@@ -819,6 +897,19 @@ const MODELS = [
     mathO:'O = \\operatorname{softmax}(L + {\\color{#9333ea} M})\\,V',
   },
 ];
+
+var ICONS={
+  'la':'🧮','retnet':'🔁','gla':'⚡',
+  'mamba':'🐍','deltanet':'🔺','gated-deltanet':'🌀',
+  'kimi-linear':'🌙','gdn2':'🌀','mamba2':'🐍','mamba3':'🐍',
+  'fox':'🦊','swa':'🪟','abc':'🔑','gsa':'🗄️',
+  'raven':'🐦‍⬛','rope-attn':'🪲','alibi':'📐',
+  'path':'🛣️','path-fox':'🛣️🦊','wall':'🧱','nope':'🤖'
+};
+var BOOK_IDX=0;
+var FILTERED_MODELS=[];
+function cleanName(m){return m.name.replace(/^[^\w]+/u,'').trim();}
+function getIcon(id){return ICONS[id]||'📄';}
 
 let activeAttn = 'all';
 let activeDecays = new Set(['all']);
@@ -1165,48 +1256,50 @@ function renderMask(m) {
   </div>`;
 }
 
-function renderCard(m) {
-  const attnBadge   = `<span class="az-badge b-${m.attn}">${m.attn}</span>`;
-  const decayBadges = m.decays.map(d=>`<span class="az-badge b-${d}">${d}</span>`).join('');
-  const eqLbl = m.eqLbl || (m.attn === 'linear' ? 'Recurrence' : 'Attention logit');
-
-  return `<div class="az-card" id="az-card-${m.id}" style="--card-accent:${m.accent}">
-  <div class="az-card-header">
-    <div>
-      <div class="az-card-name">${m.name}</div>
-      <div class="az-card-full">${m.full}</div>
-      <div class="az-paper-meta">
-        <span class="az-paper-title">${m.paperTitle}</span>
-        <span class="az-paper-authors">${m.paperAuthors}</span>
-      </div>
-      <a class="az-paper-btn" href="${m.paper}" target="_blank">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-        </svg>Paper
-      </a>
-    </div>
-    <div class="az-card-badges">${attnBadge}${decayBadges}</div>
-  </div>
-  <div class="az-card-body">
-    <div class="az-desc">${m.desc}</div>
-    ${m.imgRef ? `<div class="az-arch"><img class="az-arch-img" src="/assets/img/attention-zoo/${m.imgRef}.png" alt="${m.name} architecture" loading="lazy"></div>` : ''}
-  </div>
-  ${m.maskViz ? renderMask(m) : `
-  <div class="az-eq-row">
-    <div class="az-eq-cell">
-      <div class="az-eq-lbl">${eqLbl}</div>
-      <div class="az-eq-val">${m.mathDisplay ? `$$${m.mathR}$$` : `\\(${m.mathR}\\)`}</div>
-      ${m.mathRExtra ? `<div class="az-eq-extra"><span class="az-eq-val">\\(${m.mathRExtra}\\)</span><span class="az-opt-tag">optional</span></div>` : ''}
-    </div>
-    <div class="az-eq-cell">
-      <div class="az-eq-lbl">Readout</div>
-      <div class="az-eq-val">${m.mathDisplay ? `$$${m.mathO}$$` : `\\(${m.mathO}\\)`}</div>
-      ${m.mathOExtra ? `<div class="az-eq-extra"><span class="az-eq-val">\\(${m.mathOExtra}\\)</span><span class="az-opt-tag">optional</span></div>` : ''}
-    </div>
-  </div>`}
-  ${m.stateViz ? `<iframe class="az-anim-iframe" src="${AZ_HTML_BASE}/linear_state_update.html?decay=${m.stateViz.decay}&amp;color=${m.stateViz.color}&amp;name=${m.stateViz.name}" loading="lazy" scrolling="no" style="display:block;width:100%;height:0;border:0;border-top:1px solid #e2e8f0;overflow:hidden;margin:0;border-radius:0 0 var(--radius) var(--radius)"></iframe>` : ''}
-</div>`;
+function renderPage(m) {
+  var icon=getIcon(m.id);
+  var nm=cleanName(m);
+  var attnBadge='<span class="az-badge b-'+m.attn+'">'+m.attn+'</span>';
+  var decayBadges=m.decays.map(function(d){return '<span class="az-badge b-'+d+'">'+d+'</span>';}).join('');
+  var eqLbl=m.eqLbl||(m.attn==='linear'?'Recurrence':'Attention logit');
+  var html='<div class="az-page-hero" data-emoji="'+icon+'" style="--page-accent:'+m.accent+';">';
+  html+='<div class="az-page-icon">'+icon+'</div>';
+  html+='<div class="az-page-meta">';
+  html+='<div class="az-page-name">'+nm+'</div>';
+  html+='<div class="az-page-full">'+m.full+'</div>';
+  html+='<div class="az-paper-meta">';
+  html+='<span class="az-paper-title">'+m.paperTitle+'</span>';
+  html+='<span class="az-paper-authors">'+m.paperAuthors+'</span>';
+  html+='</div>';
+  html+='<div style="display:flex;align-items:center;gap:.5rem;margin-top:.35rem;flex-wrap:wrap;">';
+  html+='<div class="az-card-badges" style="flex-direction:row;">'+attnBadge+decayBadges+'</div>';
+  html+='<a class="az-paper-btn" href="'+m.paper+'" target="_blank">';
+  html+='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">';
+  html+='<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>';
+  html+='<polyline points="14 2 14 8 20 8"/>';
+  html+='</svg>Paper</a></div></div></div>';
+  html+='<div class="az-card-body" style="--card-accent:'+m.accent+';">';
+  html+='<div class="az-desc">'+m.desc+'</div>';
+  if(m.imgRef)html+='<div class="az-arch"><img class="az-arch-img" src="/assets/img/attention-zoo/'+m.imgRef+'.png" alt="'+nm+' architecture" loading="lazy"></div>';
+  html+='</div>';
+  if(m.maskViz){
+    html+=renderMask(m);
+  } else {
+    html+='<div class="az-eq-row" style="--card-accent:'+m.accent+';">';
+    html+='<div class="az-eq-cell">';
+    html+='<div class="az-eq-lbl">'+eqLbl+'</div>';
+    html+='<div class="az-eq-val">'+(m.mathDisplay?'$$'+m.mathR+'$$':'\\('+m.mathR+'\\)')+'</div>';
+    if(m.mathRExtra)html+='<div class="az-eq-extra"><span class="az-eq-val">\\('+m.mathRExtra+'\\)</span><span class="az-opt-tag">optional</span></div>';
+    html+='</div><div class="az-eq-cell">';
+    html+='<div class="az-eq-lbl">Readout</div>';
+    html+='<div class="az-eq-val">'+(m.mathDisplay?'$$'+m.mathO+'$$':'\\('+m.mathO+'\\)')+'</div>';
+    if(m.mathOExtra)html+='<div class="az-eq-extra"><span class="az-eq-val">\\('+m.mathOExtra+'\\)</span><span class="az-opt-tag">optional</span></div>';
+    html+='</div></div>';
+  }
+  if(m.stateViz){
+    html+='<iframe class="az-anim-iframe" src="'+AZ_HTML_BASE+'/linear_state_update.html?decay='+m.stateViz.decay+'&amp;color='+m.stateViz.color+'&amp;name='+m.stateViz.name+'" loading="lazy" scrolling="no" style="display:block;width:100%;height:0;border:0;border-top:1px solid #e2e8f0;overflow:hidden;margin:0;"></iframe>';
+  }
+  return html;
 }
 
 function resizeAnimIframes() {
@@ -1231,15 +1324,88 @@ window.addEventListener('resize', function() {
   });
 });
 
-function updateGrid() {
-  const grid  = document.getElementById('az-grid');
-  const empty = document.getElementById('az-empty');
-  const visible = MODELS.filter(exactMatch);
-  grid.innerHTML = visible.map(renderCard).join('');
-  grid.style.display = visible.length ? 'flex' : 'none';
-  empty.style.display = visible.length ? 'none' : 'block';
-  if (window.MathJax) MathJax.typesetPromise([grid]).catch(()=>{});
-  resizeAnimIframes();
+function goToPage(idx,dir){
+  var n=FILTERED_MODELS.length;
+  if(!n)return;
+  idx=Math.max(0,Math.min(n-1,idx));
+  BOOK_IDX=idx;
+  var m=FILTERED_MODELS[BOOK_IDX];
+  var pg=document.getElementById('az-page');
+  pg.style.transition='none';
+  pg.style.opacity='0';
+  pg.style.transform=dir?(dir>0?'translateX(24px)':'translateX(-24px)'):'none';
+  setTimeout(function(){
+    pg.innerHTML=renderPage(m);
+    pg.style.setProperty('--page-accent',m.accent);
+    pg.style.setProperty('--card-accent',m.accent);
+    var counter=document.getElementById('az-counter');
+    if(counter)counter.textContent=(BOOK_IDX+1)+' / '+n;
+    var prevBtn=document.getElementById('az-prev');
+    var nextBtn=document.getElementById('az-next');
+    if(prevBtn)prevBtn.disabled=BOOK_IDX===0;
+    if(nextBtn)nextBtn.disabled=BOOK_IDX===n-1;
+    pg.scrollTop=0;
+    pg.style.transition='opacity .22s ease,transform .22s ease';
+    pg.style.opacity='1';
+    pg.style.transform='none';
+    updateBookmarks();
+    if(window.MathJax)MathJax.typesetPromise([pg]).catch(function(){});
+    resizeAnimIframes();
+  },dir?110:0);
+}
+function updateBookmarks(){
+  var cur=FILTERED_MODELS[BOOK_IDX];
+  document.querySelectorAll('.az-bm').forEach(function(bm){
+    var mid=bm.dataset.id;
+    var isAct=cur&&mid===cur.id;
+    var inFiltered=FILTERED_MODELS.some(function(x){return x.id===mid;});
+    bm.classList.toggle('active',isAct);
+    bm.classList.toggle('dim',!inFiltered&&!isAct);
+  });
+  var act=document.querySelector('.az-bm.active');
+  if(act)act.scrollIntoView({block:'nearest',inline:'nearest'});
+}
+function buildBookmarks(){
+  var strip=document.getElementById('az-bm-strip');
+  strip.innerHTML=MODELS.map(function(m,i){
+    var bmc=m.attn==='linear'?'#6366f1':m.accent;
+    return '<button class="az-bm" data-id="'+m.id+'" data-idx="'+i+'" style="--bm-c:'+bmc+';">'
+        +'<span class="az-bm-icon">'+getIcon(m.id)+'</span>'
+        +'<span class="az-bm-nm">'+cleanName(m)+'</span>'
+        +'</button>';
+  }).join('');
+  strip.addEventListener('click',function(e){
+    var bm=e.target.closest('.az-bm');
+    if(!bm)return;
+    var mid=bm.dataset.id;
+    activeAttn='all';activeDecays=new Set(['all']);
+    FILTERED_MODELS=MODELS.slice();
+    document.querySelectorAll('#az-attn .az-pill').forEach(function(p){p.classList.toggle('active',p.dataset.type==='all');});
+    document.querySelectorAll('#az-decay .az-pill').forEach(function(p){p.classList.toggle('active',p.dataset.decay==='all');});
+    var tidx=FILTERED_MODELS.findIndex(function(x){return x.id===mid;});
+    if(tidx>=0)goToPage(tidx,tidx>BOOK_IDX?1:-1);
+  });
+}
+function applyFilters(){
+  var prev=FILTERED_MODELS[BOOK_IDX];
+  FILTERED_MODELS=MODELS.filter(exactMatch);
+  var n=FILTERED_MODELS.length;
+  var counter=document.getElementById('az-counter');
+  var prevBtn=document.getElementById('az-prev');
+  var nextBtn=document.getElementById('az-next');
+  if(!n){
+    var pg=document.getElementById('az-page');
+    pg.innerHTML='<div style="text-align:center;padding:3rem 1rem;color:var(--c-muted);"><div style="font-size:2rem;margin-bottom:.5rem">🔬</div><p>No models match this filter.</p></div>';
+    if(counter)counter.textContent='0 / 0';
+    if(prevBtn)prevBtn.disabled=true;
+    if(nextBtn)nextBtn.disabled=true;
+    updateBookmarks();
+    return;
+  }
+  BOOK_IDX=0;
+  if(prev){var fi=FILTERED_MODELS.findIndex(function(x){return x.id===prev.id;});if(fi>=0)BOOK_IDX=fi;}
+  if(counter)counter.textContent=(BOOK_IDX+1)+' / '+n;
+  goToPage(BOOK_IDX,0);
 }
 
 document.getElementById('az-attn').addEventListener('click', e => {
@@ -1254,7 +1420,7 @@ document.getElementById('az-attn').addEventListener('click', e => {
     });
   }
   document.querySelectorAll('#az-attn .az-pill').forEach(x => x.classList.toggle('active', x === p));
-  updateGrid();
+  applyFilters();
 });
 
 document.getElementById('az-decay').addEventListener('click', e => {
@@ -1288,10 +1454,14 @@ document.getElementById('az-decay').addEventListener('click', e => {
     const dd = x.dataset.decay;
     x.classList.toggle('active', dd === 'all' ? activeDecays.has('all') : activeDecays.has(dd));
   });
-  updateGrid();
+  applyFilters();
 });
 
-updateGrid();
+FILTERED_MODELS=MODELS.slice();
+buildBookmarks();
+goToPage(0,0);
+document.getElementById('az-prev').addEventListener('click',function(){if(BOOK_IDX>0)goToPage(BOOK_IDX-1,-1);});
+document.getElementById('az-next').addEventListener('click',function(){if(BOOK_IDX<FILTERED_MODELS.length-1)goToPage(BOOK_IDX+1,1);});
 </script>
 
 ---
