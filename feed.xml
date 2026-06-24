@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://arshiaafzal.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://arshiaafzal.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-06-24T14:24:49+00:00</updated><id>https://arshiaafzal.github.io/feed.xml</id><title type="html">blank</title><subtitle>Arshia Afzal personal page. </subtitle><entry><title type="html">Attention Zoo: Summary of SSMs and Transformers</title><link href="https://arshiaafzal.github.io/blog/2026/attention-zoo/" rel="alternate" type="text/html" title="Attention Zoo: Summary of SSMs and Transformers"/><published>2026-06-15T00:00:00+00:00</published><updated>2026-06-15T00:00:00+00:00</updated><id>https://arshiaafzal.github.io/blog/2026/attention-zoo</id><content type="html" xml:base="https://arshiaafzal.github.io/blog/2026/attention-zoo/"><![CDATA[<script>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://arshiaafzal.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://arshiaafzal.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-06-24T17:12:55+00:00</updated><id>https://arshiaafzal.github.io/feed.xml</id><title type="html">blank</title><subtitle>Arshia Afzal personal page. </subtitle><entry><title type="html">Attention Zoo: Summary of SSMs and Transformers</title><link href="https://arshiaafzal.github.io/blog/2026/attention-zoo/" rel="alternate" type="text/html" title="Attention Zoo: Summary of SSMs and Transformers"/><published>2026-06-15T00:00:00+00:00</published><updated>2026-06-15T00:00:00+00:00</updated><id>https://arshiaafzal.github.io/blog/2026/attention-zoo</id><content type="html" xml:base="https://arshiaafzal.github.io/blog/2026/attention-zoo/"><![CDATA[<script>
 (function(){
   var lnk = document.querySelector("link[rel~='icon']") || document.createElement('link');
   lnk.rel = 'icon';
@@ -249,9 +249,10 @@ const MODELS = [
     paper:'https://arxiv.org/abs/2603.15569',
     attn:'linear', decays:['scalar', 'rope'], accent:'#0f766e',
     imgRef:'mamba3-custom',
-    desc:`<p><strong>Mamba-3</strong> focuses on <strong>faster inference</strong> and eliminates a ubiquitous but costly component of prior linear models: the <strong>short-range causal convolution</strong> on queries and keys, which appears across most models on this page. Rather than adding a separate conv module, Mamba-3 replaces the <strong>Zero-Order Hold (ZOH)</strong> discretization of prior Mamba models with a <strong>Trapezoidal discretization</strong>, which naturally subsumes the role of short-range convolutions in a selective form: $$S_t = \\alpha_t S_{t-1} + \\beta_t v_{t-1} k_{t-1}^\\top + \\gamma_t v_t k_t^\\top$$ The term \\(\\beta_t v_{t-1} k_{t-1}^\\top\\) acts as a <strong>selective short convolution</strong> baked into the discretization itself, removing the need for an additional causal conv on \\(q, k, v\\). Mamba-3 also replaces SISO (single-input single-output) projections with <strong>MIMO</strong> (multi-input multi-output) projections, directly increasing inference throughput.</p><p>Mamba-3 further integrates an <strong>input-dependent Rotary Position Embedding (RoPE)</strong> directly into the decay, yielding a complex-valued recurrence: $$S_t = e^{\\delta_t A + i\\delta_t \\Omega}\\, S_{t-1} + \\beta_t v_{t-1} k_{t-1}^\\top + \\gamma_t v_t k_t^\\top, \\qquad o_t = S_t q_t$$ Here \\(\\Omega\\) is fixed following the standard RoPE frequencies, \\(\\Omega = 10000^{-2i/d}\\) where \\(i\\) is the feature dimension index. Since this decay is <strong>non-diagonal in the real domain</strong> (complex scalar multiplication corresponds to a rotation matrix in real space), it improves state tracking over Mamba-2. For a deeper look at position embeddings and their connections, see the <a href="https://arshiaafzal.github.io/blog/2026/pe/" target="_blank">position embedding blog post</a>. Note that Selective RoPE was concurrently introduced for both linear and softmax attention in <a href="https://arxiv.org/abs/2511.17388" target="_blank">Selective RoPE</a>.</p>`,
+    desc:`<p><strong>Mamba-3</strong> focuses on <strong>faster inference</strong> and eliminates a ubiquitous but costly component of prior linear models: the <strong>short-range causal convolution</strong> on queries and keys, which appears across most models on this page. Rather than adding a separate conv module, Mamba-3 replaces the <strong>Zero-Order Hold (ZOH)</strong> discretization of prior Mamba models with a <strong>Trapezoidal discretization</strong>, which naturally subsumes the role of short-range convolutions in a selective form: $$S_t = \\alpha_t S_{t-1} + \\beta_t v_{t-1} k_{t-1}^\\top + \\gamma_t v_t k_t^\\top$$ The term \\(\\beta_t v_{t-1} k_{t-1}^\\top\\) acts as a <strong>selective short convolution</strong> baked into the discretization itself, removing the need for an additional causal conv on \\(q, k, v\\). Mamba-3 also replaces SISO (single-input single-output) projections with <strong>MIMO</strong> (multi-input multi-output) projections, directly increasing inference throughput.</p><p>Mamba-3 further integrates an <strong>input-dependent Rotary Position Embedding (RoPE)</strong> directly into the decay, yielding a complex-valued recurrence: $$S_t = e^{\\delta_t A + i\\delta_t \\Omega}\\, S_{t-1} + \\beta_t v_{t-1} k_{t-1}^\\top + \\gamma_t v_t k_t^\\top$$ Here \\(\\Omega\\) is fixed following the standard RoPE frequencies, \\(\\Omega = 10000^{-2i/d}\\) where \\(i\\) is the feature dimension index. Since this decay is <strong>non-diagonal in the real domain</strong> (complex scalar multiplication corresponds to a rotation matrix in real space), it improves state tracking over Mamba-2. For a deeper look at position embeddings and their connections, see the <a href="https://arshiaafzal.github.io/blog/2026/pe/" target="_blank">position embedding blog post</a>. Note that Selective RoPE was concurrently introduced for both linear and softmax attention in <a href="https://arxiv.org/abs/2511.17388" target="_blank">Selective RoPE</a>.</p>`,
     mathDisplay: true,
     mathR:'S_t = e^{\\delta_t A + i\\delta_t \\Omega} S_{t-1} + \\beta_t v_{t-1} k_{t-1}^\\top + \\gamma_t v_t k_t^\\top',
+    mathO:'o_t = S_t q_t',
     stateViz:{decay:'scalar', color:'0f766e', name:'Mamba-3'},
   },
   {
@@ -745,10 +746,7 @@ function renderMask(m) {
         <div class="az-eq-lbl">Attention logit</div>
         <div class="az-eq-val">\\(${m.mathR}\\)</div>
       </div>
-      <div class="az-mask-eq-block">
-        <div class="az-eq-lbl">Readout</div>
-        <div class="az-eq-val">\\(${m.mathO}\\)</div>
-      </div>
+      ${m.mathO?`<div class="az-mask-eq-block"><div class="az-eq-lbl">Readout</div><div class="az-eq-val">\\(${m.mathO}\\)</div></div>`:''}
     </div>
     <div class="az-mask-grid-panel" ${dotStyle}>
       <div class="az-mask-lbl">${gridLabel}</div>
@@ -832,11 +830,15 @@ function renderPage(m) {
     html+='<div class="az-eq-lbl">'+eqLbl+'</div>';
     html+='<div class="az-eq-val">'+(m.mathDisplay?'$$'+m.mathR+'$$':'\\('+m.mathR+'\\)')+'</div>';
     if(m.mathRExtra)html+='<div class="az-eq-extra"><span class="az-eq-val">\\('+m.mathRExtra+'\\)</span><span class="az-opt-tag">optional</span></div>';
-    html+='</div><div class="az-eq-cell">';
-    html+='<div class="az-eq-lbl">Readout</div>';
-    html+='<div class="az-eq-val">'+(m.mathDisplay?'$$'+m.mathO+'$$':'\\('+m.mathO+'\\)')+'</div>';
-    if(m.mathOExtra)html+='<div class="az-eq-extra"><span class="az-eq-val">\\('+m.mathOExtra+'\\)</span><span class="az-opt-tag">optional</span></div>';
-    html+='</div></div>';
+    html+='</div>';
+    if(m.mathO){
+      html+='<div class="az-eq-cell">';
+      html+='<div class="az-eq-lbl">Readout</div>';
+      html+='<div class="az-eq-val">'+(m.mathDisplay?'$$'+m.mathO+'$$':'\\('+m.mathO+'\\)')+'</div>';
+      if(m.mathOExtra)html+='<div class="az-eq-extra"><span class="az-eq-val">\\('+m.mathOExtra+'\\)</span><span class="az-opt-tag">optional</span></div>';
+      html+='</div>';
+    }
+    html+='</div>';
   }
   if(m.stateViz){
     html+='<iframe class="az-anim-iframe" src="'+AZ_HTML_BASE+'/linear_state_update.html?decay='+m.stateViz.decay+'&amp;color='+m.stateViz.color+'&amp;name='+m.stateViz.name+'" loading="lazy" scrolling="no" style="display:block;width:100%;height:0;border:0;border-top:1px solid #e2e8f0;overflow:hidden;margin:0;"></iframe>';
