@@ -62,6 +62,43 @@ toc:
   box-shadow: 0 4px 24px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04);
 }
 
+/* ── Section label ─────────────────────────────────── */
+.az-label {
+  font-size: .7rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--c-muted);
+  display: flex; align-items: center; gap: .5rem; margin-bottom: .65rem;
+}
+.az-label::after { content:''; flex:1; height:1px; background:var(--c-border); }
+
+/* ── Pills ─────────────────────────────────────────── */
+.az-pills { display:flex; flex-wrap:wrap; gap:.45rem; margin-bottom:1.1rem; }
+.az-pill {
+  padding:.38rem 1rem; border-radius:100px;
+  border:1.5px solid var(--c-border);
+  background:#fff; color:var(--c-muted);
+  font-size:.82rem; font-weight:600;
+  cursor:pointer; transition:all var(--trans);
+  user-select:none;
+}
+.az-pill:hover { border-color:#94a3b8; color:var(--c-text); }
+.az-pill.active {
+  background:var(--pill-c); border-color:var(--pill-c);
+  color:#fff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pill-c) 25%, transparent);
+}
+[data-type="linear"]   { --pill-c: var(--c-linear); }
+[data-type="softmax"]  { --pill-c: var(--c-softmax); }
+[data-decay="delta"]   { --pill-c: var(--c-delta); }
+[data-decay="diagonal"]{ --pill-c: var(--c-diag); }
+[data-decay="scalar"]  { --pill-c: var(--c-scalar); }
+[data-decay="rope"]    { --pill-c: var(--c-rope); }
+[data-decay="window"]  { --pill-c: var(--c-window); }
+[data-decay="none"]    { --pill-c: var(--c-none); }
+[data-type="all"],[data-decay="all"]{ --pill-c: #334155; }
+
+/* ── Divider ───────────────────────────────────────── */
+.az-hr { height:1px; background:var(--c-border); margin:1.25rem 0; }
+
 /* ── Grid ──────────────────────────────────────────── */
 #az-grid { display:flex; flex-direction:column; gap:1.75rem; }
 
@@ -546,6 +583,26 @@ function hlE(nodeId,on){
 ## The ZOO
 
 <div id="az-root">
+
+  <div class="az-label">Readout</div>
+  <div class="az-pills" id="az-attn">
+    <button class="az-pill active" data-type="all">All</button>
+    <button class="az-pill" data-type="linear">Linear</button>
+    <button class="az-pill" data-type="softmax">Softmax</button>
+  </div>
+
+  <div class="az-label">Decay Type <span style="font-weight:400;font-size:.65rem;letter-spacing:0;text-transform:none;margin-left:.25rem">(exact match, selects unique models)</span></div>
+  <div class="az-pills" id="az-decay">
+    <button class="az-pill active" data-decay="all">All</button>
+    <button class="az-pill" data-decay="none">None</button>
+    <button class="az-pill" data-decay="delta">Delta-Rule</button>
+    <button class="az-pill" data-decay="diagonal">Diagonal</button>
+    <button class="az-pill" data-decay="scalar">Scalar</button>
+    <button class="az-pill" data-decay="rope">RoPE</button>
+    <button class="az-pill" data-decay="window">Window</button>
+  </div>
+
+  <div class="az-hr"></div>
 
   <div class="az-book-wrap">
     <div class="az-book">
@@ -1346,6 +1403,51 @@ function applyFilters(){
   if(counter)counter.textContent=(BOOK_IDX+1)+' / '+n;
   goToPage(BOOK_IDX,0);
 }
+
+document.getElementById('az-attn').addEventListener('click', e => {
+  const p = e.target.closest('.az-pill'); if (!p) return;
+  activeAttn = p.dataset.type;
+  if (activeAttn === 'linear' && activeDecays.has('window')) {
+    activeDecays.delete('window');
+    if (!activeDecays.size) activeDecays.add('all');
+    document.querySelectorAll('#az-decay .az-pill').forEach(x => {
+      x.classList.toggle('active', x.dataset.decay === 'all' ? activeDecays.has('all') : activeDecays.has(x.dataset.decay));
+    });
+  }
+  document.querySelectorAll('#az-attn .az-pill').forEach(x => x.classList.toggle('active', x === p));
+  applyFilters();
+});
+
+document.getElementById('az-decay').addEventListener('click', e => {
+  const p = e.target.closest('.az-pill'); if (!p) return;
+  const d = p.dataset.decay;
+  if (d === 'all') {
+    activeDecays = new Set(['all']);
+  } else if (d === 'none') {
+    activeDecays = activeDecays.has('none') ? new Set(['all']) : new Set(['none']);
+  } else if (d === 'window' && activeAttn === 'linear') {
+    return;
+  } else {
+    activeDecays.delete('all');
+    activeDecays.delete('none');
+    if (activeDecays.has(d)) {
+      activeDecays.delete(d);
+      if (!activeDecays.size) activeDecays.add('all');
+    } else {
+      if (d === 'diagonal') activeDecays.delete('scalar');
+      if (d === 'scalar') activeDecays.delete('diagonal');
+      if (activeAttn === 'softmax' && activeDecays.has('window') && activeDecays.has('rope') && d !== 'rope') {
+        activeDecays.delete('rope');
+      }
+      activeDecays.add(d);
+    }
+  }
+  document.querySelectorAll('#az-decay .az-pill').forEach(x => {
+    const dd = x.dataset.decay;
+    x.classList.toggle('active', dd === 'all' ? activeDecays.has('all') : activeDecays.has(dd));
+  });
+  applyFilters();
+});
 
 FILTERED_MODELS=MODELS.slice();
 buildBookmarks();
