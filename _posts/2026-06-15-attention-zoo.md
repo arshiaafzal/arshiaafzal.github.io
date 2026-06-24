@@ -185,11 +185,11 @@ toc:
 .az-mask-section {
   border-top: 1px solid var(--c-border);
   background: linear-gradient(to bottom, #f8fafc, #eef2f7);
-  display: grid; grid-template-columns: 60% 40%;
+  display: grid; grid-template-columns: 38% 62%;
 }
 .az-mask-eq-panel {
   display: flex; flex-direction: column; justify-content: flex-start; gap: .65rem;
-  padding: .9rem 1.4rem .85rem; border-right: 1px solid var(--c-border);
+  padding: .9rem 1.2rem .85rem; border-right: 1px solid var(--c-border);
 }
 .az-mask-eq-block { }
 .az-mask-eq-block .az-eq-lbl { margin-bottom: .2rem; }
@@ -305,6 +305,7 @@ toc:
 }
 .az-bm:hover { background:var(--c-subtle); color:var(--c-text); }
 .az-bm.active { background:var(--bm-c,#6366f1); color:#fff; border-color:var(--bm-c,#6366f1); }
+.az-bm.active .az-bm-nm, .az-bm.active .az-bm-icon { color:#fff; }
 .az-bm.dim { opacity:.3; }
 .az-bm-icon { font-size:.95rem; flex-shrink:0; }
 .az-bm-nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -1172,7 +1173,7 @@ function renderMask(m) {
     </div>`;
   }
 
-  return `<div class="az-mask-section" ${isRope ? 'style="grid-template-columns:55% 45%"' : ''}>
+  return `<div class="az-mask-section">
     <div class="az-mask-eq-panel">
       <div class="az-mask-eq-block">
         <div class="az-eq-lbl">Attention logit</div>
