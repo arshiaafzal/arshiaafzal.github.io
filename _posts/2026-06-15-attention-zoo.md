@@ -310,9 +310,9 @@ Throughout this post, vectors are lowercase and matrices are uppercase. The quer
 
 $$q_t,\, k_t,\, v_t \in \mathbb{R}^d \qquad Q,\, K,\, V \in \mathbb{R}^{T \times d}$$
 
-The attention weight matrix and the SSM hidden state are:
+The SSM hidden state is:
 
-$$A \in \mathbb{R}^{T \times T} \qquad S_t \in \mathbb{R}^{d \times d}$$
+$$S_t \in \mathbb{R}^{d \times d}$$
 
 **The general linear transformer recurrence.** Every linear model in this Zoo can be written as:
 
@@ -683,8 +683,8 @@ const MODELS = [
     maskViz: true,
     maskType: 'fox',
     desc:`<p><strong>FoX</strong> augments causal softmax attention with a learnable <strong>scalar forget gate</strong> that injects an input-dependent decay bias directly into the attention logits. At each position \\(t\\) a gate value is predicted from the token: $$f_t = \\sigma(w^\\top x_t) \\in (0,1)$$ where \\(\\sigma\\) is sigmoid and \\(w\\) is a learned projection. For query \\(i\\) attending to key \\(j\\), these gates accumulate into a log-product bias: $$M_{ij} = \\sum_{l=j}^{i-1} \\log f_l = \\log\\!\\prod_{l=j}^{i-1} f_l$$ Since \\(f_l \\in (0,1)\\), each \\(\\log f_l < 0\\), so \\(M_{ij}\\) grows strictly more negative as distance \\((i-j)\\) grows — a smooth <strong>data-driven decay</strong> that suppresses distant keys without hard truncation. A token with \\(f_t \\approx 0\\) acts as a near-hard boundary; \\(f_t \\approx 1\\) means "forget nothing" and lets context flow freely. Unlike ALiBi's fixed slope, the decay rate is <strong>fully determined by the input</strong> at each position.</p><p style="font-size:.75rem;line-height:1.7">The heatmap shows a simulated learned mask. Decay is <strong>not uniform</strong>: low-\\(f_t\\) tokens act as boundaries (sharp drop), high-\\(f_t\\) tokens let context flow — unlike ALiBi's fixed slope.</p>`,
-    mathR:'A_{ij} = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} {\\color{#059669} +\\,\\sum_{l=j}^{i-1} \\log f_l}',
-    mathO:'O = \\operatorname{softmax}(A + {\\color{#059669} M})\\,V',
+    mathR:'\\operatorname{Attn}(q_i,k_j,f) = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} {\\color{#059669} +\\,\\sum_{l=j}^{i-1} \\log f_l}',
+    mathO:'O = \\operatorname{softmax}(L)\\,V',
   },
   {
     id:'swa', name:'SWA', full:'Sliding Window Attention',
@@ -696,8 +696,8 @@ const MODELS = [
     maskViz: true,
     windowSize: 4,
     desc:`<p><strong>Sliding Window Attention (SWA)</strong> addresses the quadratic memory and compute bottleneck of full softmax attention by restricting each token to attend only to the nearest \\(W\\) preceding tokens. This reduces the KV cache from \\(O(T)\\) to \\(O(W)\\) per layer and compute from \\(O(T^2)\\) to \\(O(TW)\\). Concretely: $$o_t = \\operatorname{softmax}\\!\\left(q_t\\,K_{[t-W:t]}^\\top\\right) V_{[t-W:t]}$$ The banded mask shows this pattern for \\(W = 4\\): at most 4 positions are attended (purple), the rest are masked to \\(-\\infty\\).</p><p>SWA is compatible with any positional encoding — <strong>NoPE</strong> or <strong>RoPE</strong> — and notably allows RoPE to generalise beyond its training context length, a well-known failure mode of standard RoPE addressed by scaling approaches such as <a href="https://arxiv.org/abs/2309.00071" target="_blank">YaRN</a>. Because the window is a fixed-size buffer, SWA also admits an exact recurrent form with two hidden states \\(S^k, S^v \\in \\mathbb{R}^{W \\times d}\\) tracking keys and values. At each step a one-hot vector \\(e_t = [0,\\ldots,0,1,0,\\ldots,0]^\\top \\in \\{0,1\\}^W\\) evicts the oldest slot and writes the newest token: $$S^k_t = (1 - e_t) \\odot S^k_{t-1} + e_t k_t^\\top$$ $$S^v_t = (1 - e_t) \\odot S^v_{t-1} + e_t v_t^\\top$$ giving an exact \\(O(W)\\) recurrent state with no approximation.</p><iframe class="az-anim-iframe" src="{{ '/assets/html/swa_recurrent_matrix_update.html' | relative_url }}" loading="lazy" scrolling="no" style="display:block;width:85%;height:0;border:0;border-radius:.5rem;overflow:hidden;margin:.5rem auto 0"></iframe>`,
-    mathR:'A_{ij} = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} + {\\color{#9333ea} M}_{ij}',
-    mathO:'o_i = \\operatorname{softmax}(A_i + {\\color{#9333ea} M}_i)\\,V',
+    mathR:'\\operatorname{Attn}(q_i,k_j) = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} + {\\color{#9333ea} M}_{ij}',
+    mathO:'o_i = \\operatorname{softmax}(L_i + {\\color{#9333ea} M}_i)\\,V',
   },
   {
     id:'abc', name:'ABC', full:'Attention with Bounded-memory Control',
@@ -751,8 +751,8 @@ const MODELS = [
     maskViz: true,
     maskType: 'rope',
     desc:`<p><strong>RoPE Attention</strong> is standard softmax attention augmented with <strong>Rotary Position Embedding (RoPE)</strong>, which injects relative position information directly into queries and keys via rotation. For a token at position \\(m\\), the query and key are rotated as \\(\\tilde{q}_m = R_m q_m\\) and \\(\\tilde{k}_m = R_m k_m\\). The rotation matrix \\(R_m\\) is block-diagonal: its \\(i\\)-th 2D block rotates by angle \\(m\\theta_i\\) where the frequencies follow: $$\\theta_i = 10000^{-2i/d}, \\quad i = 1, \\ldots, d/2$$ These are the same frequencies used in sinusoidal position encodings, but applied as rotations to the vectors themselves rather than added to embeddings.</p>${ropeMatrixHTML()}<p><a href="https://arxiv.org/abs/2302.13971" target="_blank">LLaMA</a> adopted RoPE as the de facto positional encoding for modern LLMs — see the <a href="https://arshiaafzal.github.io/blog/2026/pe/" target="_blank">position embedding blog</a> for a full derivation.</p>`,
-    mathR:'A_{ij} = \\tfrac{q_i^\\top {\\color{#b45309} R_{i-j}}\\, k_j}{\\sqrt{d}}',
-    mathO:'O = \\operatorname{softmax}(A)\\,V',
+    mathR:'\\operatorname{Attn}(q_i,k_j,R) = \\tfrac{q_i^\\top {\\color{#b45309} R_{i-j}}\\, k_j}{\\sqrt{d}}',
+    mathO:'O = \\operatorname{softmax}(L)\\,V',
   },
   {
     id:'alibi', name:'ALiBi', full:'Attention with Linear Biases',
@@ -764,8 +764,8 @@ const MODELS = [
     maskViz: true,
     maskType: 'alibi',
     desc:`<p>After the introduction of RoPE, its difficulty with <strong>length extrapolation</strong> (attending to positions unseen during training) motivated simpler alternatives. Many positional embeddings, including RoPE itself, can be <a href="https://arshiaafzal.github.io/blog/2026/pe/" target="_blank">derived from linear attention</a>. <strong>ALiBi</strong> draws direct inspiration from the RetNet decay mask: RetNet's exponential decay \\(\\gamma^{i-j}\\) is, inside the softmax, equivalent to a linear bias \\((i-j)\\log\\gamma\\). ALiBi makes this connection explicit, replacing any positional embedding with a <strong>fixed linear position bias</strong> added directly to the attention logits: $$O = \\operatorname{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d}} + M\\right)V$$ $$M_{ij} = \\begin{cases} -m\\,|i-j| & i \\geq j \\\\ -\\infty & i < j \\end{cases}$$ The scalar slope \\(m\\) is head-specific and fixed before training as a geometric sequence: for \\(n\\) heads, \\(m_h = 2^{-8h/n}\\), giving \\(\\bigl\\{2^{-8/n},\\,2^{-16/n},\\,\\ldots,\\,2^{-8}\\bigr\\}\\). Steeper slopes create heads that focus on local context; gentler slopes look further back.</p><p style="font-size:.75rem;line-height:1.7">The heatmap on the right shows the bias for a single head: the main diagonal (distance 0) is brightest, fading smoothly and <strong>monotonically</strong> with distance, with no oscillation unlike RoPE. Because the bias is a simple linear function of relative distance, ALiBi <strong>extrapolates naturally</strong> to longer sequences with no modification at inference time, directly addressing RoPE's main shortcoming.</p>`,
-    mathR:'A_{ij} = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} {\\color{#dc2626} -\\, m\\,|i-j|}',
-    mathO:'O = \\operatorname{softmax}(A + {\\color{#dc2626} M})\\,V',
+    mathR:'\\operatorname{Attn}(q_i,k_j,m) = \\tfrac{q_i^\\top k_j}{\\sqrt{d}} {\\color{#dc2626} -\\, m\\,|i-j|}',
+    mathO:'O = \\operatorname{softmax}(L)\\,V',
   },
   {
     id:'path', name:'🛣️ PaTH', full:'PaTH Attention',
@@ -776,9 +776,9 @@ const MODELS = [
     imgRef:'path-custom',
     maskViz: true,
     maskType: 'path',
-    desc:`<p><strong>PaTH Attention</strong> derives its position encoding by unrolling the <strong>DeltaNet</strong> linear recurrence. DeltaNet updates a matrix state via a delta rule with per-step transition matrix \\(H_t\\): $$S_t = S_{t-1}H_t + v_t k_t^\\top, \\qquad o_t = S_t q_t$$ Substituting recursively, the output at time \\(t\\) expands into a sum over all past positions — exactly in the form of a softmax attention readout: $$o_t = \\sum_{j=1}^{t} v_j \\underbrace{\\left(k_j^\\top \\prod_{s=j+1}^{t} H_s\\; q_t\\right)}_{\\text{attention logit }A_{tj}}$$ The dot product \\(k_j^\\top q_t\\) is thus replaced by \\(k_j^\\top P_{j\\to t}\\, q_t\\), where \\(P_{j\\to t} = \\prod_{s=j+1}^{t} H_s\\) is the <strong>accumulated product</strong> of transition matrices along the path from \\(j\\) to \\(t\\).</p><p>PaTH instantiates each \\(H_s\\) as a <strong>Householder-like transform</strong>: $$H_s = I - \\beta_s\\, w_s w_s^\\top$$ where \\(w_s\\) is a data-dependent unit vector and \\(\\beta_s \\in (0,2)\\) a learned scalar (a true reflection when \\(\\beta=2\\)). The resulting <strong>PaTH attention logit</strong> is: $$A_{ij} = k_j^\\top\\!\\left(\\prod_{s=j+1}^{i} H_s\\right) q_i$$ Unlike RoPE (fixed rotation angles) or ALiBi (fixed linear penalty), PaTH's correction is <em>data-dependent</em> — shaped by the actual input tokens \\(x_{j+1},\\ldots,x_i\\). The heatmap shows a simulated path bias: darker violet = the accumulated Householder product preserves more of the original dot product (short paths, small \\(d\\)); lighter = more rotation has accumulated. Efficient parallel computation uses the <strong>WY/UT representation</strong> \\(P = I - W^\\top T^{-1}W\\), compressing any product of rank-1 updates to standard attention cost.</p>`,
-    mathR:'A_{ij} = k_j^\\top\\!\\left(\\prod_{s=j+1}^{i} H_s\\right) q_i,\\quad H_s = I - \\beta_s w_s w_s^\\top',
-    mathO:'O = \\operatorname{softmax}(A)\\,V',
+    desc:`<p><strong>PaTH Attention</strong> derives its position encoding by unrolling the <strong>DeltaNet</strong> linear recurrence. DeltaNet updates a matrix state via a delta rule with per-step transition matrix \\(H_t\\): $$S_t = S_{t-1}H_t + v_t k_t^\\top, \\qquad o_t = S_t q_t$$ Substituting recursively, the output at time \\(t\\) expands into a sum over all past positions — exactly in the form of a softmax attention readout: $$o_t = \\sum_{j=1}^{t} v_j \\underbrace{\\left(k_j^\\top \\prod_{s=j+1}^{t} H_s\\; q_t\\right)}_{\\operatorname{Attn}_{tj}}$$ The dot product \\(k_j^\\top q_t\\) is thus replaced by \\(k_j^\\top P_{j\\to t}\\, q_t\\), where \\(P_{j\\to t} = \\prod_{s=j+1}^{t} H_s\\) is the <strong>accumulated product</strong> of transition matrices along the path from \\(j\\) to \\(t\\).</p><p>PaTH instantiates each \\(H_s\\) as a <strong>Householder-like transform</strong>: $$H_s = I - \\beta_s\\, w_s w_s^\\top$$ where \\(w_s\\) is a data-dependent unit vector and \\(\\beta_s \\in (0,2)\\) a learned scalar (a true reflection when \\(\\beta=2\\)). The resulting <strong>PaTH attention logit</strong> is: $$\\operatorname{Attn}(q_i,k_j,P) = k_j^\\top\\!\\left(\\prod_{s=j+1}^{i} H_s\\right) q_i$$ Unlike RoPE (fixed rotation angles) or ALiBi (fixed linear penalty), PaTH's correction is <em>data-dependent</em> — shaped by the actual input tokens \\(x_{j+1},\\ldots,x_i\\). The heatmap shows a simulated path bias: darker violet = the accumulated Householder product preserves more of the original dot product (short paths, small \\(d\\)); lighter = more rotation has accumulated. Efficient parallel computation uses the <strong>WY/UT representation</strong> \\(P = I - W^\\top T^{-1}W\\), compressing any product of rank-1 updates to standard attention cost.</p>`,
+    mathR:'\\operatorname{Attn}(q_i,k_j,P) = k_j^\\top\\!\\left(\\prod_{s=j+1}^{i} H_s\\right) q_i,\\quad H_s = I - \\beta_s w_s w_s^\\top',
+    mathO:'O = \\operatorname{softmax}(L)\\,V',
   },
   {
     id:'path-fox', name:'🛣️🦊 PaTH-FoX', full:'PaTH-FoX Attention',
@@ -789,9 +789,9 @@ const MODELS = [
     imgRef:'path-fox-custom',
     maskViz: true,
     maskType: 'path-fox',
-    desc:`<p><strong>PaTH-FoX</strong> is the softmax attention obtained by unrolling <strong>Gated DeltaNet (GDN)</strong> — which is exactly DeltaNet with a scalar forget gate — and using the result as a position encoding. GDN couples the Householder transition of DeltaNet with a FoX-style gate: $$S_t = f_t \\odot S_{t-1}H_t + v_t k_t^\\top$$ Unrolling yields logits that factor into two independent position biases: $$ {\\color{#dc2626} \\text{FoX gate:}}\\;\\prod_{s=j+1}^{i}f_s \\qquad {\\color{#1d4ed8} \\text{PaTH:}}\\;k_j^\\top\\!\\left(\\prod_{s=j+1}^{i}H_s\\right)\\!q_i$$ so that $$A_{ij}=\\left(\\prod_{s=j+1}^{i}f_s\\right)\\cdot k_j^\\top\\!\\left(\\prod_{s=j+1}^{i}H_s\\right)\\!q_i$$ Inside softmax the log decomposes additively: \\(\\log A_{ij} = \\sum \\log f_s + \\log|k_j^\\top P_{j\\to i}\\,q_i|\\). Setting \\(H_s=I\\) recovers <strong>FoX</strong>; setting \\(f_s=1\\) recovers <strong>PaTH</strong>.</p>`,
-    mathR:'A_{ij}=\\!\\left(\\prod_{s=j+1}^{i}\\!f_s\\right)\\cdot k_j^\\top\\!\\!\\left(\\prod_{s=j+1}^{i}\\!H_s\\right)\\!q_i',
-    mathO:'O = \\operatorname{softmax}(A)\\,V',
+    desc:`<p><strong>PaTH-FoX</strong> is the softmax attention obtained by unrolling <strong>Gated DeltaNet (GDN)</strong> — which is exactly DeltaNet with a scalar forget gate — and using the result as a position encoding. GDN couples the Householder transition of DeltaNet with a FoX-style gate: $$S_t = f_t \\odot S_{t-1}H_t + v_t k_t^\\top$$ Unrolling yields logits that factor into two independent position biases: $$ {\\color{#dc2626} \\text{FoX gate:}}\\;\\prod_{s=j+1}^{i}f_s \\qquad {\\color{#1d4ed8} \\text{PaTH:}}\\;k_j^\\top\\!\\left(\\prod_{s=j+1}^{i}H_s\\right)\\!q_i$$ so that $$\\operatorname{Attn}(q_i,k_j,f,P)=\\left(\\prod_{s=j+1}^{i}f_s\\right)\\cdot k_j^\\top\\!\\left(\\prod_{s=j+1}^{i}H_s\\right)\\!q_i$$ Inside softmax the log decomposes additively: \\(\\log\\operatorname{Attn}(q_i,k_j,f,P) = \\sum \\log f_s + \\log|k_j^\\top P_{j\\to i}\\,q_i|\\). Setting \\(H_s=I\\) recovers <strong>FoX</strong>; setting \\(f_s=1\\) recovers <strong>PaTH</strong>.</p>`,
+    mathR:'\\operatorname{Attn}(q_i,k_j,f,P) =\\!\\left(\\prod_{s=j+1}^{i}\\!f_s\\right)\\cdot k_j^\\top\\!\\!\\left(\\prod_{s=j+1}^{i}\\!H_s\\right)\\!q_i',
+    mathO:'O = \\operatorname{softmax}(L)\\,V',
   },
   {
     id:'wall', name:'🧱 Wall', full:'Wall Attention',
@@ -802,9 +802,9 @@ const MODELS = [
     imgRef:'wall-custom',
     maskViz: true,
     maskType: 'wall',
-    desc:`<p><strong>Wall Attention</strong> generalises <strong>diagonal forget gates</strong> from linear RNNs — such as GLA — to softmax attention via a principled <em>induced-action</em> framework. The starting point is the same diagonal-gate recurrence as GLA: $$S_t = S_{t-1}\\operatorname{Diag}(\\boldsymbol{\\alpha}_t) + v_t k_t^\\top$$ Unrolling accumulates a per-channel product of gates across positions, $$\\boldsymbol{F}_{ij} = \\prod_{s=j+1}^{i} \\boldsymbol{\\alpha}_s$$ The <em>induced action</em> principle — gating the feature-map input equals gating the embedded state — then lifts this diagonal decay into softmax attention: $$A_{ij} = q_i^\\top\\operatorname{Diag}(\\boldsymbol{F}_{ij})\\,k_j$$ Defining \\(P_t = \\sum_{u \\le t}\\log\\boldsymbol{\\alpha}_u\\) (elementwise), this factors into standard attention on rescaled queries and keys \\(\\tilde{q}_i = e^{P_i}\\odot\\,q_i\\), \\(\\tilde{k}_j = e^{-P_j}\\odot\\,k_j\\), giving \\(A_{ij} = \\tilde{q}_i^\\top\\tilde{k}_j\\). Unlike <strong>FoX</strong> (additive scalar bias — ALiBi family), Wall applies a <em>multiplicative per-channel</em> rescaling — placing it in the <strong>RoPE family</strong> and making it strictly more expressive. Models trained at 4k tokens generalise to 160k+ without any length fine-tuning.</p>`,
-    mathR:'A_{ij} = q_i^\\top\\operatorname{Diag}(\\boldsymbol{F}_{ij})\\,k_j',
-    mathO:'O = \\operatorname{softmax}(A)\\,V',
+    desc:`<p><strong>Wall Attention</strong> generalises <strong>diagonal forget gates</strong> from linear RNNs — such as GLA — to softmax attention via a principled <em>induced-action</em> framework. The starting point is the same diagonal-gate recurrence as GLA: $$S_t = S_{t-1}\\operatorname{Diag}(\\boldsymbol{\\alpha}_t) + v_t k_t^\\top$$ Unrolling accumulates a per-channel product of gates across positions, $$\\boldsymbol{F}_{ij} = \\prod_{s=j+1}^{i} \\boldsymbol{\\alpha}_s$$ The <em>induced action</em> principle — gating the feature-map input equals gating the embedded state — then lifts this diagonal decay into softmax attention: $$\\operatorname{Attn}(q_i,k_j,\\boldsymbol{F}) = q_i^\\top\\operatorname{Diag}(\\boldsymbol{F}_{ij})\\,k_j$$ Defining \\(P_t = \\sum_{u \\le t}\\log\\boldsymbol{\\alpha}_u\\) (elementwise), this factors into standard attention on rescaled queries and keys \\(\\tilde{q}_i = e^{P_i}\\odot\\,q_i\\), \\(\\tilde{k}_j = e^{-P_j}\\odot\\,k_j\\), giving \\(\\operatorname{Attn}(q_i,k_j,\\boldsymbol{F}) = \\tilde{q}_i^\\top\\tilde{k}_j\\). Unlike <strong>FoX</strong> (additive scalar bias — ALiBi family), Wall applies a <em>multiplicative per-channel</em> rescaling — placing it in the <strong>RoPE family</strong> and making it strictly more expressive. Models trained at 4k tokens generalise to 160k+ without any length fine-tuning.</p>`,
+    mathR:'\\operatorname{Attn}(q_i,k_j,\\boldsymbol{F}) = q_i^\\top\\operatorname{Diag}(\\boldsymbol{F}_{ij})\\,k_j',
+    mathO:'O = \\operatorname{softmax}(L)\\,V',
   },
   {
     id:'nope', name:'🤖 NoPE', full:'NoPE Attention',
@@ -814,9 +814,9 @@ const MODELS = [
     attn:'softmax', decays:['none'], accent:'#475569',
     imgRef:'nope-custom',
     maskViz: true,
-    desc:`<p><strong>NoPE Attention</strong> is vanilla softmax attention without any positional embedding. The output is computed as \\(O = \\operatorname{softmax}(QK^\\top/\\sqrt{d} + M)\\,V\\), where \\(d\\) is the head dimension. Dividing by \\(\\sqrt{d}\\) prevents the dot products from growing too large in high dimensions, which would push softmax into saturation regions with near-zero gradients. \\(M \\in \\mathbb{R}^{T \\times T}\\) is a binary causal mask that prevents each token from attending to future positions, preserving the autoregressive nature of the model. For <a href="https://arxiv.org/abs/2010.11929" target="_blank">vision transformers</a> the mask is removed, yielding full bidirectional attention \\(A = QK^\\top/\\sqrt{d}\\).</p><p>Since NoPE adds no positional signal to the attention scores, the attention is <a href="https://en.wikipedia.org/wiki/Equivariant_map" target="_blank"><strong>permutation-equivariant</strong></a>: reordering the input tokens simply reorders the output (in the mask-free, bidirectional setting). Despite this, NoPE exhibits stronger length generalisation than encodings such as <strong>RoPE</strong> and <strong>ALiBi</strong>, suggesting the triangular causal structure itself carries a sufficient implicit positional signal.</p>`,
-    mathR:'A_{ij} = \\tfrac{q_i^\\top k_j}{\\sqrt{d}}',
-    mathO:'O = \\operatorname{softmax}(A + {\\color{#9333ea} M})\\,V',
+    desc:`<p><strong>NoPE Attention</strong> is vanilla softmax attention without any positional embedding. The output is computed as \\(O = \\operatorname{softmax}(QK^\\top/\\sqrt{d} + M)\\,V\\), where \\(d\\) is the head dimension. Dividing by \\(\\sqrt{d}\\) prevents the dot products from growing too large in high dimensions, which would push softmax into saturation regions with near-zero gradients. \\(M \\in \\mathbb{R}^{T \\times T}\\) is a binary causal mask that prevents each token from attending to future positions, preserving the autoregressive nature of the model. For <a href="https://arxiv.org/abs/2010.11929" target="_blank">vision transformers</a> the mask is removed, yielding full bidirectional attention \\(L = QK^\\top/\\sqrt{d}\\).</p><p>Since NoPE adds no positional signal to the attention scores, the attention is <a href="https://en.wikipedia.org/wiki/Equivariant_map" target="_blank"><strong>permutation-equivariant</strong></a>: reordering the input tokens simply reorders the output (in the mask-free, bidirectional setting). Despite this, NoPE exhibits stronger length generalisation than encodings such as <strong>RoPE</strong> and <strong>ALiBi</strong>, suggesting the triangular causal structure itself carries a sufficient implicit positional signal.</p>`,
+    mathR:'\\operatorname{Attn}(q_i,k_j) = \\tfrac{q_i^\\top k_j}{\\sqrt{d}}',
+    mathO:'O = \\operatorname{softmax}(L + {\\color{#9333ea} M})\\,V',
   },
 ];
 
@@ -1000,9 +1000,9 @@ function renderMask(m) {
       : isFox
         ? `\\({\\color{#059669} M} =\\)`
         : isPaTH
-          ? `\\({\\color{#1d4ed8} A_{ij}} =\\)`
+          ? `\\({\\color{#1d4ed8} \\operatorname{Attn}_{ij}} =\\)`
           : isWall
-            ? `\\({\\color{#0891b2} A_{ij}} =\\)`
+            ? `\\({\\color{#0891b2} \\operatorname{Attn}_{ij}} =\\)`
             : `\\({\\color{#c084fc} M} =\\)`;
   const legend = isRope
     ? `<div class="az-mask-legend">
@@ -1058,15 +1058,15 @@ function renderMask(m) {
       <div class="az-mask-eq-panel" style="border-right:none;border-bottom:1px solid var(--c-border);display:flex;flex-direction:column;gap:.6rem;padding:.9rem 1.5rem">
         <div>
           <div class="az-eq-lbl">Attention logit</div>
-          <div class="az-eq-val">\\( A_{ij} = {\\color{#dc2626}\\Bigl(\\prod_{s=j+1}^{i}\\!f_s\\Bigr)} \\cdot {\\color{#1d4ed8} k_j^\\top\\!\\Bigl(\\prod_{s=j+1}^{i}\\!H_s\\Bigr)\\!q_i} \\)</div>
+          <div class="az-eq-val">\\( \\operatorname{Attn}(q_i,k_j,f,P) = {\\color{#dc2626}\\Bigl(\\prod_{s=j+1}^{i}\\!f_s\\Bigr)} \\cdot {\\color{#1d4ed8} k_j^\\top\\!\\Bigl(\\prod_{s=j+1}^{i}\\!H_s\\Bigr)\\!q_i} \\)</div>
         </div>
         <div>
           <div class="az-eq-lbl" style="color:#94a3b8;font-style:italic">in log-space (additive)</div>
-          <div class="az-eq-val">\\( \\log A_{ij} = {\\color{#dc2626}\\textstyle\\sum_{s}\\!\\log f_s} + {\\color{#1d4ed8}\\log|k_j^\\top P_{j\\to i}\\,q_i|} \\)</div>
+          <div class="az-eq-val">\\( \\log\\operatorname{Attn}(q_i,k_j,f,P) = {\\color{#dc2626}\\textstyle\\sum_{s}\\!\\log f_s} + {\\color{#1d4ed8}\\log|k_j^\\top P_{j\\to i}\\,q_i|} \\)</div>
         </div>
         <div>
           <div class="az-eq-lbl">Readout</div>
-          <div class="az-eq-val">\\( O = \\operatorname{softmax}(A)\\,V \\)</div>
+          <div class="az-eq-val">\\( O = \\operatorname{softmax}(L)\\,V \\)</div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;padding:1rem 1.5rem .9rem;gap:.8rem;background:linear-gradient(to bottom,#f8fafc,#eef2f7)">
