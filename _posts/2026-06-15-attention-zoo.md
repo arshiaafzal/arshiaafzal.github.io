@@ -586,14 +586,12 @@ function hlE(nodeId,on){
 
   <div class="az-label">Readout</div>
   <div class="az-pills" id="az-attn">
-    <button class="az-pill active" data-type="all">All</button>
     <button class="az-pill" data-type="linear">Linear</button>
     <button class="az-pill" data-type="softmax">Softmax</button>
   </div>
 
   <div class="az-label">Decay Type <span style="font-weight:400;font-size:.65rem;letter-spacing:0;text-transform:none;margin-left:.25rem">(exact match, selects unique models)</span></div>
   <div class="az-pills" id="az-decay">
-    <button class="az-pill active" data-decay="all">All</button>
     <button class="az-pill" data-decay="none">None</button>
     <button class="az-pill" data-decay="delta">Delta-Rule</button>
     <button class="az-pill" data-decay="diagonal">Diagonal</button>
@@ -899,7 +897,7 @@ var ICONS={
   'mamba':'🐍','deltanet':'🔺','gated-deltanet':'🌀',
   'kimi-linear':'🌙','gdn2':'🌀','mamba2':'🐍','mamba3':'🐍',
   'fox':'🦊','swa':'🪟','abc':'🔑','gsa':'🗄️',
-  'raven':'🐦‍⬛','rope-attn':'🪲','alibi':'📐',
+  'raven':'🐦‍⬛','rope-attn':'🪢','alibi':'📐',
   'path':'🛣️','path-fox':'🛣️🦊','wall':'🧱','nope':'🤖'
 };
 var BOOK_IDX=0;
@@ -1406,15 +1404,15 @@ function applyFilters(){
 
 document.getElementById('az-attn').addEventListener('click', e => {
   const p = e.target.closest('.az-pill'); if (!p) return;
-  activeAttn = p.dataset.type;
+  activeAttn = (activeAttn === p.dataset.type) ? 'all' : p.dataset.type;
   if (activeAttn === 'linear' && activeDecays.has('window')) {
     activeDecays.delete('window');
     if (!activeDecays.size) activeDecays.add('all');
     document.querySelectorAll('#az-decay .az-pill').forEach(x => {
-      x.classList.toggle('active', x.dataset.decay === 'all' ? activeDecays.has('all') : activeDecays.has(x.dataset.decay));
+      x.classList.toggle('active', activeDecays.has(x.dataset.decay));
     });
   }
-  document.querySelectorAll('#az-attn .az-pill').forEach(x => x.classList.toggle('active', x === p));
+  document.querySelectorAll('#az-attn .az-pill').forEach(x => x.classList.toggle('active', x.dataset.type === activeAttn));
   applyFilters();
 });
 
