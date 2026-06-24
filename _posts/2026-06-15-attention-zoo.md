@@ -16,8 +16,6 @@ authors:
       name: EPFL
 
 toc:
-  - name: Introduction
-  - name: Notation
   - name: The ZOO
 ---
 
@@ -351,44 +349,28 @@ toc:
   .az-bm-strip { width:100%; max-height:120px; flex-direction:row; flex-wrap:wrap; overflow-x:auto; }
   .az-bm { flex:0 0 auto; width:auto; }
 }
+/* ── Cover page ──────────────────────────────────── */
+.az-cover-wrap { display:flex; flex-direction:column; }
+.az-cover-img-wrap { position:relative; flex-shrink:0; background:#1e293b; border-radius:var(--radius) var(--radius) 0 0; overflow:hidden; }
+.az-cover-img { width:100%; display:block; max-height:220px; object-fit:cover; object-position:center top; }
+.az-cover-overlay { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(15,23,42,.15) 0%,rgba(15,23,42,.88) 100%); display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:1.25rem 2rem; text-align:center; }
+.az-cover-title { font-size:1.65rem; font-weight:900; color:#fff; letter-spacing:-.03em; line-height:1.1; text-shadow:0 2px 12px rgba(0,0,0,.5); }
+.az-cover-subtitle { font-size:.72rem; color:rgba(255,255,255,.72); margin-top:.35rem; font-weight:500; letter-spacing:.07em; text-transform:uppercase; }
+.az-cover-body { padding:1.25rem 1.75rem; color:var(--c-text); line-height:1.7; font-size:.875rem; }
+.az-cover-body p { margin:0 0 .85rem; }
+.az-cover-body p:last-child { margin-bottom:0; }
+/* ── Notation page ───────────────────────────────── */
+.az-notation-body { padding:1.25rem 1.75rem; font-size:.875rem; line-height:1.75; }
+.az-notation-body p { margin:0 0 .75rem; }
+.az-notation-body strong { color:var(--c-text); }
+#az-ls { margin:.6rem 0 0 !important; }
+/* ── Bookmark separator ──────────────────────────── */
+.az-bm-sep { height:1px; background:var(--c-border); margin:.3rem .4rem; }
 </style>
 
----
+## The ZOO
 
-<img src="/assets/img/attention-zoo/zoo_new.png" alt="Attention Zoo teaser" style="width:100%;border-radius:10px;margin-bottom:1.25rem;box-shadow:0 2px 16px rgba(0,0,0,.1);">
-
-## Intro
-
-When I first started learning about SSMs and linear transformers, I was overwhelmed. From simple linear attention models to Mamba, Kimi Linear, and many others, it was hard to understand how everything connected and where to even begin.
-
-This blog is the guide I wish I had. Its goal is to provide an intuitive overview of linear transformers, SSMs, and the ideas behind modern hybrid architectures without diving too deeply into the math. If you want the technical details, I've linked the relevant papers throughout the blog ;)!
-
-I hope this helps make the rapidly evolving world of SSMs and linear models easier to navigate. If there's a model you'd like to see added or you have suggestions, feel free to reach out — I'll keep updating this guide as the field evolves.
-
-Modern sequence models share a deep mathematical skeleton: a **key-value memory** written to at each step and read by a query. The differences lie in *how* that memory decays, and this page makes those differences interactive and visual.
-
-Filter by **attention kernel** and **memory decay type** below. Each model card shows the architecture diagram for that model.
-
-## 📓 Notation
-
-Throughout this post, vectors are lowercase and matrices are uppercase. The query, key, and value vectors at a single timestep and their full-sequence stacks are:
-
-$$q_t,\, k_t,\, v_t \in \mathbb{R}^d \qquad Q,\, K,\, V \in \mathbb{R}^{T \times d}$$
-
-The SSM hidden state is:
-
-$$S_t \in \mathbb{R}^{d \times d}$$
-
-**The general linear transformer recurrence.** Every linear model in this Zoo can be written as:
-
-$$S_t = S_{t-1}\mathbf{A}_t + v_t k_t^\top, \qquad o_t = S_t q_t$$
-
-where $$\mathbf{A}_t \in \mathbb{R}^{d \times d}$$ is the **decay matrix**. Unrolling the recurrence gives:
-
-$$o_t = \sum_{j=1}^{t} \underbrace{\left(q_t^\top \prod_{i=j+1}^{t} \mathbf{A}_i\; k_j\right)}_{\text{position-aware score}} v_j$$
-
-The decay matrices sit between the query and key, acting as a position-dependent bias — connecting linear models to positional encodings in softmax transformers. For a deeper treatment see [On the Legacy of Linear Transformers in Positional Embeddings]({% post_url 2025-01-06-pe %}).
-
+<div id="az-ls-park" style="display:none">
 <div id="az-ls" style="margin:1.8rem 0 2.4rem;">
 <style>
 #az-ls,#az-ls *{box-sizing:border-box;}
@@ -577,10 +559,7 @@ function hlE(nodeId,on){
 </script>
 
 </div>
-
----
-
-## The ZOO
+</div>
 
 <div id="az-root">
 
@@ -608,7 +587,7 @@ function hlE(nodeId,on){
         <div class="az-page" id="az-page"></div>
         <div class="az-page-nav">
           <button class="az-nav-btn" id="az-prev">← Prev</button>
-          <div class="az-page-ctr"><span class="az-page-ctr-dot" id="az-ctr-dot"></span><span id="az-counter">1 / 21</span></div>
+          <div class="az-page-ctr"><span class="az-page-ctr-dot" id="az-ctr-dot"></span><span id="az-counter">1 / 23</span></div>
           <button class="az-nav-btn" id="az-next">Next →</button>
         </div>
       </div>
@@ -620,7 +599,10 @@ function hlE(nodeId,on){
 
 <script>
 const AZ_HTML_BASE = "{{ '/assets/html' | relative_url }}";
+const AZ_IMG_BASE = "{{ '/assets/img/attention-zoo' | relative_url }}";
 const MODELS = [
+  {id:'cover', name:'Intro', full:'Introduction &amp; Welcome', attn:'__meta__', decays:[], accent:'#1e293b', _meta:'cover'},
+  {id:'notation', name:'Notation', full:'Math &amp; Timeline', attn:'__meta__', decays:[], accent:'#4f46e5', _meta:'notation'},
   {
     id:'la', name:'LinAtt', full:'Linear Attention',
     paperTitle:'Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention',
@@ -893,6 +875,7 @@ const MODELS = [
 ];
 
 var ICONS={
+  'cover':'📖','notation':'📐',
   'la':'🧮','retnet':'🔁','gla':'⚡',
   'mamba':'🐍','deltanet':'🔺','gated-deltanet':'🌀',
   'kimi-linear':'🌙','gdn2':'🌀','mamba2':'🐍','mamba3':'🐍',
@@ -909,6 +892,7 @@ let activeAttn = 'all';
 let activeDecays = new Set(['all']);
 
 function exactMatch(m) {
+  if (m._meta) return true;
   if (activeAttn !== 'all' && m.attn !== activeAttn) return false;
   if (activeDecays.has('all')) return true;
   const candidates = m.decayOptions || [m.decays];
@@ -1250,7 +1234,44 @@ function renderMask(m) {
   </div>`;
 }
 
+function renderCoverPage() {
+  return '<div class="az-cover-wrap">'
+    +'<div class="az-cover-img-wrap">'
+    +'<img class="az-cover-img" src="'+AZ_IMG_BASE+'/zoo_new.png" alt="Attention Zoo">'
+    +'<div class="az-cover-overlay">'
+    +'<div class="az-cover-title">Attention Zoo</div>'
+    +'<div class="az-cover-subtitle">An Interactive Guide to SSMs &amp; Transformers</div>'
+    +'</div></div>'
+    +'<div class="az-cover-body">'
+    +'<p>When I first started learning about SSMs and linear transformers, I was overwhelmed. From simple linear attention models to Mamba, Kimi Linear, and many others, it was hard to understand how everything connected and where to even begin.</p>'
+    +'<p>This blog is the guide I wish I had. Its goal is to provide an intuitive overview of linear transformers, SSMs, and the ideas behind modern hybrid architectures without diving too deeply into the math. If you want the technical details, I\'ve linked the relevant papers throughout the blog ;)!</p>'
+    +'<p>I hope this helps make the rapidly evolving world of SSMs and linear models easier to navigate. If there\'s a model you\'d like to see added or you have suggestions, feel free to reach out \u2014 I\'ll keep updating this guide as the field evolves.</p>'
+    +'<p>Modern sequence models share a deep mathematical skeleton: a <strong>key-value memory</strong> written to at each step and read by a query. The differences lie in <em>how</em> that memory decays, and this page makes those differences interactive and visual.</p>'
+    +'<p>Filter by <strong>attention kernel</strong> and <strong>memory decay type</strong> below. Each model card shows the architecture diagram for that model.</p>'
+    +'</div></div>';
+}
+function renderNotationPage() {
+  return '<div class="az-page-hero" data-emoji="\u{1F4D0}" style="--page-accent:#4f46e5;">'
+    +'<div class="az-page-icon">\u{1F4D0}</div>'
+    +'<div class="az-page-meta">'
+    +'<div class="az-page-name">Notation</div>'
+    +'<div class="az-page-full">Mathematical conventions used throughout</div>'
+    +'</div></div>'
+    +'<div class="az-notation-body">'
+    +'<p>Throughout this post, vectors are lowercase and matrices are uppercase. The query, key, and value vectors at a single timestep and their full-sequence stacks are:</p>'
+    +'<p>$$q_t,\\, k_t,\\, v_t \\in \\mathbb{R}^d \\qquad Q,\\, K,\\, V \\in \\mathbb{R}^{T \\times d}$$</p>'
+    +'<p>The SSM hidden state is: $$S_t \\in \\mathbb{R}^{d \\times d}$$</p>'
+    +'<p><strong>The general linear transformer recurrence.</strong> Every linear model in this Zoo can be written as:</p>'
+    +'<p>$$S_t = S_{t-1}\\mathbf{A}_t + v_t k_t^\\top, \\qquad o_t = S_t q_t$$</p>'
+    +'<p>where \\(\\mathbf{A}_t \\in \\mathbb{R}^{d \\times d}\\) is the <strong>decay matrix</strong>. Unrolling the recurrence gives:</p>'
+    +'<p>$$o_t = \\sum_{j=1}^{t} \\underbrace{\\left(q_t^\\top \\prod_{i=j+1}^{t} \\mathbf{A}_i\\; k_j\\right)}_{\\text{position-aware score}} v_j$$</p>'
+    +'<p>The decay matrices sit between the query and key, acting as a position-dependent bias \u2014 connecting linear models to positional encodings in softmax transformers. For a deeper treatment see <a href="{% post_url 2025-01-06-pe %}" target="_blank">On the Legacy of Linear Transformers in Positional Embeddings</a>.</p>'
+    +'<div id="az-notation-tl"></div>'
+    +'</div>';
+}
 function renderPage(m) {
+  if(m._meta==='cover')return renderCoverPage();
+  if(m._meta==='notation')return renderNotationPage();
   var icon=getIcon(m.id);
   var nm=cleanName(m);
   var attnBadge='<span class="az-badge b-'+m.attn+'">'+m.attn+'</span>';
@@ -1329,8 +1350,12 @@ function goToPage(idx,dir){
   pg.style.opacity='0';
   pg.style.transform=dir?(dir>0?'translateX(24px)':'translateX(-24px)'):'none';
   setTimeout(function(){
+    var park=document.getElementById('az-ls-park');
+    var tlDiv=document.getElementById('az-ls');
+    if(park&&tlDiv&&!park.contains(tlDiv))park.appendChild(tlDiv);
     pg.innerHTML=renderPage(m);
-    pg.style.setProperty('--page-accent',m.accent);
+    if(m._meta==='notation'){var tl=document.getElementById('az-notation-tl');if(tl&&tlDiv)tl.appendChild(tlDiv);}
+    pg.style.setProperty('--page-accent',m.accent||'#6366f1');
     pg.style.setProperty('--card-accent',m.accent);
     var counter=document.getElementById('az-counter');
     if(counter)counter.textContent=(BOOK_IDX+1)+' / '+n;
@@ -1362,11 +1387,12 @@ function updateBookmarks(){
 function buildBookmarks(){
   var strip=document.getElementById('az-bm-strip');
   strip.innerHTML=MODELS.map(function(m,i){
-    var bmc=m.attn==='linear'?'#6366f1':m.accent;
+    var bmc=m._meta?m.accent:(m.attn==='linear'?'#6366f1':m.accent);
+    var sep=(m._meta&&i+1<MODELS.length&&!MODELS[i+1]._meta)?'<div class="az-bm-sep"></div>':'';
     return '<button class="az-bm" data-id="'+m.id+'" data-idx="'+i+'" style="--bm-c:'+bmc+';">'
         +'<span class="az-bm-icon">'+getIcon(m.id)+'</span>'
         +'<span class="az-bm-nm">'+cleanName(m)+'</span>'
-        +'</button>';
+        +'</button>'+sep;
   }).join('');
   strip.addEventListener('click',function(e){
     var bm=e.target.closest('.az-bm');
