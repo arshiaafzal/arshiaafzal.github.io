@@ -352,9 +352,9 @@ toc:
 /* ── Cover page ──────────────────────────────────── */
 .az-cover-wrap { display:flex; flex-direction:column; }
 .az-cover-img-wrap { position:relative; flex-shrink:0; background:#1e293b; border-radius:var(--radius) var(--radius) 0 0; overflow:hidden; }
-.az-cover-img { width:100%; display:block; max-height:220px; object-fit:cover; object-position:center top; }
-.az-cover-overlay { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(15,23,42,.15) 0%,rgba(15,23,42,.88) 100%); display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:1.25rem 2rem; text-align:center; }
-.az-cover-title { font-size:1.65rem; font-weight:900; color:#fff; letter-spacing:-.03em; line-height:1.1; text-shadow:0 2px 12px rgba(0,0,0,.5); }
+.az-cover-img { width:100%; display:block; max-height:300px; object-fit:cover; object-position:center top; }
+.az-cover-overlay { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(15,23,42,.05) 0%,rgba(15,23,42,.82) 100%); display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:1.5rem 2rem; text-align:center; }
+.az-cover-title { font-size:2rem; font-weight:900; color:#fff; letter-spacing:-.03em; line-height:1.1; text-shadow:0 2px 16px rgba(0,0,0,.6); }
 .az-cover-subtitle { font-size:.72rem; color:rgba(255,255,255,.72); margin-top:.35rem; font-weight:500; letter-spacing:.07em; text-transform:uppercase; }
 .az-cover-body { padding:1.25rem 1.75rem; color:var(--c-text); line-height:1.7; font-size:.875rem; }
 .az-cover-body p { margin:0 0 .85rem; }
@@ -892,7 +892,7 @@ let activeAttn = 'all';
 let activeDecays = new Set(['all']);
 
 function exactMatch(m) {
-  if (m._meta) return true;
+  if (m._meta) return (activeAttn === 'all' && activeDecays.has('all'));
   if (activeAttn !== 'all' && m.attn !== activeAttn) return false;
   if (activeDecays.has('all')) return true;
   const candidates = m.decayOptions || [m.decays];
