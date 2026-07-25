@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101311" />
+  <title>SmartAsk — Route Claude Code between Sonnet and Opus</title>
+  <meta name="description" content="SmartAsk is a local Claude Code model router that sends clear work to Sonnet, difficult work to Opus, escalates from tool evidence, and shows the cost of every turn." />
+  <link rel="canonical" href="https://arshiaafzal.github.io/smart-ask/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Stop paying Opus prices for every coding-agent step." />
+  <meta property="og:description" content="One Claude Code session. Per-step model routing. Auditable cost." />
+  <meta property="og:url" content="https://arshiaafzal.github.io/smart-ask/" />
+  <meta property="og:image" content="https://arshiaafzal.github.io/smart-ask/social-card.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="SmartAsk home">
+        <svg class="brand-mark" viewBox="0 0 38 30" aria-hidden="true"><path d="M3 15h9m0 0 7-9m-7 9 7 9m0-18h15M19 24h15"/><circle cx="12" cy="15" r="2.5"/><circle cx="20" cy="6" r="2.5"/><circle cx="20" cy="24" r="2.5"/></svg>
+        <span>smart<span>ask</span></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links"><span></span><span></span></button>
+      <div class="nav-links" id="nav-links">
+        <a href="#how">How it works</a><a href="#proof">Proof</a><a href="#claude-code">Claude Code</a><a href="#metrics">Metrics</a>
+        <a href="https://github.com/arshiaafzal/smart-ask">GitHub <span aria-hidden="true">↗</span></a>
+        <a class="button button-small" href="#install">Try SmartAsk <span aria-hidden="true">→</span></a>
+      </div>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="hero shell" id="top">
+      <div class="hero-copy reveal">
+        <p class="eyebrow"><span class="status-dot"></span> A smarter model budget for Claude Code</p>
+        <h1>Your coding agent doesn't need <em>Opus</em> for every turn.</h1>
+        <p class="lede">SmartAsk routes each Claude Code step to Sonnet or Opus, escalates when the work gets harder, and shows exactly what every turn costs.</p>
+        <div class="hero-actions"><a class="button" href="#install">Route my first session <span>→</span></a><a class="text-link" href="#proof">See the benchmark <span>↓</span></a></div>
+        <p class="trust-line"><span>Local proxy</span><span>Native Anthropic API</span><span>Auditable JSONL metrics</span></p>
+      </div>
+      <div class="switchboard reveal" aria-label="Interactive model-routing simulation">
+        <div class="dollar dollar-one" aria-hidden="true">$</div><div class="dollar dollar-two" aria-hidden="true">$</div>
+        <div class="switchboard-top">
+          <div><span class="window-dot"></span><span class="window-dot"></span><span class="window-dot"></span><b>slugify-fix</b></div>
+          <div class="mode-toggle" role="group" aria-label="Routing strategy">
+            <button type="button" class="active" data-mode="smart" aria-pressed="true">SmartAsk</button>
+            <button type="button" data-mode="opus" aria-pressed="false">Opus every turn</button>
+          </div>
+        </div>
+        <div class="session-view">
+          <div class="terminal-lines" id="terminal-lines" aria-live="polite"></div>
+          <div class="route-rail" aria-hidden="true"><span class="route-node input">ASK</span><i></i><span class="route-node sonnet">S</span><span class="route-node opus">O</span></div>
+        </div>
+        <div class="terminal-footer">via <strong id="footer-model">claude-sonnet-4-6</strong><span class="turn-cost" id="turn-cost">$0.0848 this turn</span><span class="total-cost" id="total-cost">$0.1273 total</span></div>
+        <div class="cost-track"><span>SESSION COST</span><div><i id="cost-bar"></i></div><strong id="cost-delta">−39.6%</strong></div>
+        <p class="simulation-note">Interactive product simulation · not benchmark output</p>
+      </div>
+    </section>
+    <section class="statement band"><div class="shell statement-inner reveal"><p>One coding session.</p><p>Two models.</p><p><span>No wasted intelligence.</span></p></div></section>
+    <section class="section shell" id="how">
+      <div class="section-heading reveal"><p class="kicker">01 / UNEVEN WORK</p><h2>Coding sessions are not uniformly hard.</h2><p>A session is a sequence of different jobs. Every one should earn the model it uses.</p></div>
+      <div class="work-timeline reveal" role="list">
+        <article class="work-step opus" role="listitem"><span>01</span><i></i><b>Understand architecture</b><small>OPUS · DEEP CONTEXT</small></article>
+        <article class="work-step sonnet" role="listitem"><span>02</span><i></i><b>Locate a known file</b><small>SONNET · LOCAL</small></article>
+        <article class="work-step sonnet" role="listitem"><span>03</span><i></i><b>Make a config edit</b><small>SONNET · MECHANICAL</small></article>
+        <article class="work-step opus" role="listitem"><span>04</span><i></i><b>Investigate a race</b><small>OPUS · SUBTLE DEBUG</small></article>
+        <article class="work-step sonnet" role="listitem"><span>05</span><i></i><b>Report passing tests</b><small>SONNET · VERIFIED</small></article>
+      </div>
+    </section>
+    <section class="section routing-section">
+      <div class="shell split-heading reveal"><div><p class="kicker">02 / THE ROUTER</p><h2>Judge. Work. Adapt.</h2></div><p>Routing is not a one-time choice. SmartAsk judges every substantive message, then checks the evidence that comes back from Sonnet's tools.</p></div>
+      <div class="decision-map shell reveal">
+        <div class="decision-input"><span>INCOMING REQUEST</span><strong>“Fix the intermittent cache race”</strong><small>Claude Code · complete turn context</small></div>
+        <div class="flow-arrow"><i></i><span>classify</span></div>
+        <div class="classifier"><div class="pulse-ring"></div><span>SONNET CLASSIFIER</span><strong>route + confidence</strong><div class="confidence"><i style="--confidence:.82"></i></div><small>0.82 · substantive prompt</small></div>
+        <div class="branch branch-sonnet"><span>clear / local</span><strong>SONNET</strong><small>mechanical work</small></div>
+        <div class="branch branch-opus"><span>deep / uncertain</span><strong>OPUS</strong><small>complexity or &lt; 0.75</small></div>
+        <div class="tool-loop"><span>TOOL EVIDENCE RETURNS</span><strong>Failure exposes non-local locking</strong><div><b>still clear → continue</b><b>complexity → compact handoff ↗</b></div></div>
+      </div>
+    </section>
+    <section class="section shell" id="proof">
+      <div class="section-heading proof-heading reveal"><p class="kicker">03 / MEASURED EVIDENCE</p><h2>Proof, not promises.</h2><p>Controlled results, exact outcomes, and the sample size in plain sight.</p></div>
+      <div class="evidence-grid">
+        <article class="evidence-card reveal"><div class="evidence-top"><span class="verified">● VERIFIED</span><span>N=1 LIVE TASK</span></div><strong class="big-number">39.6<sup>%</sup></strong><h3>lower cost on a live repository lookup</h3><div class="cost-comparison"><div><span>SMARTASK</span><b>$0.1814475</b></div><i></i><div><span>OPUS-ONLY</span><b>$0.3002575</b></div></div><p>Both returned the same correct <code>schema_version</code> answer. SmartAsk routed 2/2 visible steps to Sonnet.</p><small>One controlled live task · not a general average.</small></article>
+        <article class="evidence-card accent reveal"><div class="evidence-top"><span class="verified">● VERIFIED</span><span>N=2 PAIRS / STRATEGY</span></div><strong class="big-number">21.59<sup>%</sup></strong><h3>lower aggregate cost on a real SWE-bench repository task</h3><div class="cost-comparison"><div><span>SMARTASK</span><b>$1.020621</b></div><i></i><div><span>OPUS-ONLY</span><b>$1.301636</b></div></div><p>Same exact patch across all four runs. Both strategies reached <code>115 passed, 1 skipped</code>.</p><small>One SWE-bench task · two isolated pairs per strategy.</small></article>
+      </div>
+      <details class="methodology reveal"><summary><span>Read the methodology</span><span>FULL DISCLOSURE <b>+</b></span></summary><div class="method-content"><div><h3>Real upstream repository</h3><p><code>pytest-dev/pytest</code> at commit <code>6995257cf470d2143ad1683824962de4071c0eb7</code>, task <code>pytest-dev__pytest-11143</code>.</p></div><div><h3>Counterbalanced result</h3><p>Two isolated pairs per strategy. One reversed pair favored Opus-only due to provider-cache variance; the aggregate result favored SmartAsk.</p></div><div><h3>Identical outcome</h3><p>Patch SHA-256: <code>6574b635…ec89a8f</code>. The official hidden regression patch produced 115 passed, 1 skipped.</p></div><a class="text-link" href="https://github.com/arshiaafzal/smart-ask/blob/main/benchmark/REAL_SWEBENCH.md">Inspect the benchmark source ↗</a></div></details>
+    </section>
+    <section class="section handoff-section">
+      <div class="shell handoff-grid">
+        <div class="handoff-copy reveal"><p class="kicker">04 / COMPACT HANDOFF</p><h2>Change models without making the new model reread the whole room.</h2><p>Caches do not transfer between models. SmartAsk does something explicit instead: the warm model creates a bounded factual handoff.</p><div class="metric-stamp"><strong>84.97%</strong><span>less Opus input<br/>in a controlled trace</span></div></div>
+        <div class="compressor reveal"><div class="compressor-label"><span>DRAG TO COMPRESS</span><output id="compress-output">3,523 tokens</output></div><div class="context-stage" id="context-stage"><div class="full-context"><span>FULL CODING SESSION</span><b>23,443 input tokens</b><div class="token-lines"></div></div><div class="compact-context"><span>FACTUAL HANDOFF</span><b>3,523 input tokens</b><p>task + verified state + latest tool result</p></div><input id="compress-range" type="range" min="15" max="100" value="15" aria-label="Compare compact handoff with full context" /></div><div class="handoff-cost"><span>Observed Opus call cost</span><del>$0.1480925</del><strong>$0.01969</strong><b>−86.70%</b></div><p class="qualifier">Controlled live trace comparison. Context and savings vary by switch.</p></div>
+      </div>
+    </section>
+    <section class="section shell" id="claude-code">
+      <div class="claude-grid">
+        <div class="terminal-mock reveal"><div class="terminal-bar"><span></span><span></span><span></span><b>claude</b></div><div class="terminal-body"><p><i>❯</i> Fix the failing slugify tests.</p><p class="muted">⏺ Read(tests/test_slugify.py)</p><p class="muted">⏺ Update(src/slugify.py)</p><p><span class="success">⏺</span> Fixed the delimiter branch. 3 tests passed.</p><p class="mock-footer">via <b>claude-sonnet-4-6</b> · <em>$0.0848 this turn</em> · <strong>$0.1273 total</strong></p><span class="cursor"></span></div></div>
+        <div class="claude-copy reveal"><p class="kicker">05 / NATIVE WORKFLOW</p><h2>Claude Code stays Claude Code.</h2><p>No new chat UI. No copy-pasting between models. Start Claude Code through one launcher and work normally.</p><ul><li>Same interactive workflow, tools, and normal flags</li><li>Private loopback proxy to the native Anthropic API</li><li>Colored model and cost footer after every response</li><li>Prompt-free JSONL metrics written locally</li></ul><div class="mini-command"><code>./scripts/claude-smart-ask</code><button class="copy-button" data-copy="./scripts/claude-smart-ask" aria-label="Copy launch command">Copy</button></div><small>The display footer is removed before the next model sees history.</small></div>
+      </div>
+    </section>
+    <section class="section metrics-section" id="metrics">
+      <div class="shell split-heading reveal"><div><p class="kicker">06 / OBSERVABILITY</p><h2>The router is not a black box.</h2></div><p>Every decision and provider request becomes structured evidence. See why a turn escalated, what model answered, and what the switch cost.</p></div>
+      <div class="ledger shell reveal"><div class="ledger-sidebar"><span>RUN LEDGER</span><button class="active">turn_04 <i>COMPLETED</i></button><button>turn_03 <i>COMPLETED</i></button><button>turn_02 <i>COMPLETED</i></button><small>.smart-ask/claude-code/<br/>metrics.jsonl</small></div><div class="ledger-main"><div class="ledger-header"><div><span>REQUEST ID</span><b>req_8f42…a91c</b></div><div><span>STATUS</span><b class="success">● completed</b></div><div><span>LATENCY</span><b>4,218 ms</b></div></div><div class="ledger-route"><div><span>CLASSIFIER</span><b>sonnet</b><small>confidence 0.79</small></div><i>→</i><div><span>TOOL EVIDENCE</span><b class="warning">complexity</b><small>lock spans modules</small></div><i>→</i><div><span>ANSWERING MODEL</span><b class="opus-text">opus</b><small>compact handoff</small></div></div><div class="ledger-table"><div><span>CALL</span><span>MODEL</span><span>INPUT</span><span>OUTPUT</span><span>CACHE READ</span><span>COST</span></div><div><b>classifier</b><span>Sonnet 4.6</span><span>1,204</span><span>42</span><span>—</span><span>$0.0041</span></div><div><b>summarizer</b><span>Sonnet 4.6</span><span>8,912</span><span>438</span><span>7,104</span><span>$0.0137</span></div><div><b>generator</b><span>Opus 4.1</span><span>3,523</span><span>912</span><span>—</span><span>$0.0334</span></div></div><div class="ledger-total"><span>TURN TOTAL</span><strong>$0.0512</strong><span>SESSION</span><strong>$0.2847</strong></div></div></div>
+    </section>
+    <section class="section shell calculator-section" id="calculator">
+      <div class="section-heading reveal"><p class="kicker">07 / YOUR NUMBERS</p><h2>Run the economics on your workload.</h2><p>No magical total. Start from an observed Opus-only session and inspect every assumption.</p></div>
+      <div class="calculator reveal"><div class="calc-controls"><div class="presets" role="group" aria-label="Calculator presets"><button data-preset="mechanical">Mostly mechanical</button><button class="active" data-preset="mixed">Mixed coding</button><button data-preset="architecture">Architecture-heavy</button></div><label>Opus-only session cost <span><b>$</b><input id="baseline" type="number" value="25" min="0" step="1" /></span></label><label>Work safely handled by Sonnet <output id="share-output">58%</output><input id="sonnet-share" type="range" min="0" max="100" value="58" /></label><div class="paired-inputs"><label>Compact handoffs <input id="handoffs" type="number" value="2" min="0" max="20" /></label><label>Classifier overhead <span><input id="overhead" type="number" value="6" min="0" max="100" /><b>%</b></span></label></div><p class="pricing-note">Assumption: equivalent Sonnet work costs 20% of Opus work. Replace this with your observed ratio as pricing changes.</p></div><div class="calc-result"><span>ESTIMATED ROUTED COST</span><strong id="routed-cost">$15.20</strong><p><b id="saving-cost">$9.80</b> estimated saving <em id="saving-percent">39.2%</em></p><div class="formula" id="formula">$10.50 Opus work<br/>+ $2.90 Sonnet work<br/>+ $1.50 classifier<br/>+ $0.30 handoffs</div><small>Estimate, not a guarantee. Task mix, provider caching, and stochastic behavior vary.</small></div></div>
+    </section>
+    <section class="section principles-section"><div class="shell"><div class="split-heading reveal"><div><p class="kicker">08 / QUALITY BOUNDARIES</p><h2>Conservative by design.</h2></div><p>The cheap route is never the default when the evidence is unclear.</p></div><div class="principles"><article class="reveal"><span>01</span><h3>Uncertainty goes up.</h3><p>Below 0.75 confidence routes to Opus.</p></article><article class="reveal"><span>02</span><h3>Evidence can escalate.</h3><p>Tool failures trigger a new judgment.</p></article><article class="reveal"><span>03</span><h3>Opus keeps hard loops.</h3><p>No oscillation during deep reasoning.</p></article><article class="reveal"><span>04</span><h3>Unsafe summaries fail closed.</h3><p>Incomplete handoffs use full context.</p></article></div></div></section>
+    <section class="section shell architecture-section"><div class="architecture-copy reveal"><p class="kicker">09 / OPEN ARCHITECTURE</p><h2>Local, inspectable, and bounded.</h2><p>Strategy files choose trusted target IDs. They cannot inject endpoints, credential names, or commands.</p><a class="button button-outline" href="https://github.com/arshiaafzal/smart-ask/blob/main/smart_ask/resources/strategies/agentic-coding-v1.yaml">Inspect the routing policy ↗</a></div><div class="architecture-stack reveal"><div><span>01</span><b>Claude Code</b><small>normal UI + tools</small></div><i>↓</i><div><span>02</span><b>Localhost adapter</b><small>generated bearer token</small></div><i>↓</i><div><span>03</span><b>Confidence router</b><small>schema-v3 YAML + route memory</small></div><i>↙ ↘</i><div class="model-pair"><b>Native Sonnet</b><b>Native Opus</b></div><i>↓</i><div><span>04</span><b>Metrics ledger</b><small>bounded requests + per-turn cost</small></div></div></section>
+    <section class="section faq-section"><div class="shell faq-grid"><div class="faq-title reveal"><p class="kicker">10 / FAQ</p><h2>The sharp questions.</h2><p>And the non-marketing answers.</p></div><div class="faq-list">
+      <details class="reveal"><summary>Is routing decided only once per session?<b>+</b></summary><p>No. Every substantive user message is classified. Sonnet tool results are also reclassified so newly exposed complexity can escalate the current task.</p></details>
+      <details class="reveal"><summary>What model decides?<b>+</b></summary><p>Claude Sonnet 4.6 is the default classifier. It returns <code>sonnet</code>, <code>opus</code>, or <code>uncertain</code> plus confidence.</p></details>
+      <details class="reveal"><summary>What happens on classifier failure?<b>+</b></summary><p>The default strategy fails conservatively to Opus.</p></details>
+      <details class="reveal"><summary>Can “fix” automatically mean easy?<b>+</b></summary><p>No. Substantive prompts are judged semantically. Keywords such as “fix” do not determine the route.</p></details>
+      <details class="reveal"><summary>Do Sonnet and Opus share prompt cache?<b>+</b></summary><p>No. Provider caches are model-specific. SmartAsk reduces switch cost with a compact factual handoff.</p></details>
+      <details class="reveal"><summary>Will it always save money?<b>+</b></summary><p>No router can guarantee that for every stochastic session. Savings depend on task mix and cache state. SmartAsk exposes the real cost so you can evaluate your own workload.</p></details>
+      <details class="reveal"><summary>Does SmartAsk replace Claude Code?<b>+</b></summary><p>No. It runs as a local proxy underneath the existing Claude Code harness.</p></details>
+      <details class="reveal"><summary>Does traffic go through a SmartAsk cloud?<b>+</b></summary><p>No. The default setup uses the native Anthropic API from the local adapter.</p></details>
+    </div></div></section>
+    <section class="final-cta" id="install"><div class="shell final-inner reveal"><p class="kicker">READY WHEN YOU ARE</p><h2>Let every turn earn its model.</h2><p>Clone. Add your Anthropic key locally. Keep working in Claude Code.</p><div class="install-command"><pre><code>git clone git@github.com:arshiaafzal/smart-ask.git
+cd smart-ask
+cp scripts/claude-smart-ask.local.env.example scripts/claude-smart-ask.local.env
+# Add ANTHROPIC_API_KEY, then:
+./scripts/claude-smart-ask</code></pre><button class="copy-button" id="copy-install">Copy command</button></div><div class="final-links"><a class="button" href="https://github.com/arshiaafzal/smart-ask">Start a routed session ↗</a><a class="text-link" href="https://github.com/arshiaafzal/smart-ask/blob/main/benchmark/REAL_SWEBENCH.md">View real-repository benchmark ↗</a></div><div class="giant-dollar" aria-hidden="true">$</div></div></section>
+  </main>
+  <footer><div class="shell"><a class="brand" href="#top"><svg class="brand-mark" viewBox="0 0 38 30" aria-hidden="true"><path d="M3 15h9m0 0 7-9m-7 9 7 9m0-18h15M19 24h15"/><circle cx="12" cy="15" r="2.5"/><circle cx="20" cy="6" r="2.5"/><circle cx="20" cy="24" r="2.5"/></svg><span>smart<span>ask</span></span></a><p>Spend Opus where it changes the outcome.</p><div><a href="https://github.com/arshiaafzal/smart-ask">GitHub</a><a href="#proof">Evidence</a><a href="#calculator">Calculator</a></div></div></footer>
+</body>
+</html>

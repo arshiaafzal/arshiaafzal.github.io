@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://arshiaafzal.github.io/smart-ask/sitemap.xml

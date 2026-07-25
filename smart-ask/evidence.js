@@ -1,0 +1,51 @@
+export const evidence = Object.freeze({
+  lookup: {
+    value: 39.57,
+    display: "39.6%",
+    smartAskCost: 0.1814475,
+    baselineCost: 0.3002575,
+    sample: "One controlled live repository lookup",
+    outcome: "Same correct schema_version answer",
+    measuredAt: "2026-07-25",
+    sourcePath: "benchmark/REAL_SWEBENCH.md",
+  },
+  swebench: {
+    value: 21.59,
+    display: "21.59%",
+    smartAskCost: 1.020621,
+    baselineCost: 1.301636,
+    absoluteSaving: 0.281015,
+    sample: "One SWE-bench task · two isolated pairs per strategy",
+    outcome: "Same patch · 115 passed, 1 skipped",
+    task: "pytest-dev__pytest-11143",
+    commit: "6995257cf470d2143ad1683824962de4071c0eb7",
+    patchSha: "6574b635425adbf73a6238c2a15c17bd4076981843ee5c1d43782efe0ec89a8f",
+    measuredAt: "2026-07-25",
+    sourcePath: "benchmark/REAL_SWEBENCH.md",
+  },
+  handoff: {
+    inputReduction: 84.97,
+    costReduction: 86.7,
+    compactTokens: 3523,
+    fullTokens: 23443,
+    compactCost: 0.01969,
+    fullCost: 0.1480925,
+    sample: "Controlled live trace comparison",
+    measuredAt: "2026-07-25",
+  },
+  reliability: {
+    confidenceThreshold: 0.75,
+    coreTests: 131,
+    adapterTests: 22,
+    totalTests: 153,
+    cacheReadTokens: 20064,
+  },
+});
+
+export const sessionSteps = Object.freeze([
+  { task: "Understand architecture", route: "opus", confidence: 0.91, smart: 0.0472, opus: 0.0781 },
+  { task: "Locate test_slugify.py", route: "sonnet", confidence: 0.96, smart: 0.0168, opus: 0.0542 },
+  { task: "Apply delimiter fix", route: "sonnet", confidence: 0.98, smart: 0.0195, opus: 0.0588 },
+  { task: "Investigate race signal", route: "opus", confidence: 0.89, smart: 0.0614, opus: 0.0614 },
+  { task: "Report 3 tests passed", route: "sonnet", confidence: 0.97, smart: 0.0098, opus: 0.0417 },
+]);

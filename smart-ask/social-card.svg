@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#101311"/>
+  <g stroke="#252b26" stroke-width="1" opacity=".8"><path d="M0 90h1200M0 180h1200M0 270h1200M0 360h1200M0 450h1200M0 540h1200"/><path d="M90 0v630M180 0v630M270 0v630M360 0v630M450 0v630M540 0v630M630 0v630M720 0v630M810 0v630M900 0v630M990 0v630M1080 0v630"/></g>
+  <g transform="translate(80 70)" fill="none" stroke="#f4c95d" stroke-width="5" stroke-linecap="round"><path d="M0 25h27m0 0 21-23M27 25l21 23M48 2h38M48 48h38"/><circle cx="27" cy="25" r="6" fill="#101311"/><circle cx="48" cy="2" r="6" fill="#101311"/><circle cx="48" cy="48" r="6" fill="#101311"/></g>
+  <text x="185" y="114" fill="#f2eddf" font-family="Arial, sans-serif" font-weight="700" font-size="43">smart<tspan fill="#f4c95d">ask</tspan></text>
+  <text x="80" y="275" fill="#f2eddf" font-family="Arial, sans-serif" font-weight="650" font-size="66">Stop paying Opus prices</text><text x="80" y="357" fill="#f2eddf" font-family="Arial, sans-serif" font-weight="650" font-size="66">for every coding-agent step.</text>
+  <text x="82" y="440" fill="#aab2aa" font-family="monospace" font-size="23">ONE SESSION  ·  PER-STEP ROUTING  ·  AUDITABLE COST</text>
+  <g transform="translate(82 510)"><rect width="286" height="56" fill="#f4c95d"/><text x="22" y="36" fill="#101311" font-family="monospace" font-weight="700" font-size="19">SONNET  →  $  →  OPUS</text></g>
+  <text x="965" y="565" fill="#86e59a" font-family="monospace" font-size="30">−39.6%*</text><text x="965" y="592" fill="#788078" font-family="monospace" font-size="12">one live lookup</text>
+</svg>
