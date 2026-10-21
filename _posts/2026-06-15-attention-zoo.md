@@ -484,6 +484,7 @@ var M=[
   {id:'km', nm:'Kimi Linear', em:'',   yr:2025,c:'#0891b2',t:'L',x:790,y:200,tip:'Channel-wise diagonal decay \xd7 delta rule. Used in the KimiLinear hybrid model trained at scale.',dec:'Diag \xb7 Delta'},
   {id:'m3', nm:'Mamba-3',     em:'',yr:2026,c:'#0f766e',t:'L',x:840,y:182,tip:'Trapezoidal discretization subsumes causal convolutions. Complex RoPE decay enables state tracking.',dec:'Scalar + RoPE'},
   {id:'g2', nm:'GDN-2',       em:'',   yr:2026,c:'#0e7490',t:'L',x:858,y:228,tip:'Decouples erase gate b_t from write gate w_t. Unifies GDN and Kimi Linear into one expressive framework.',dec:'Diag \xb7 Delta'},
+  {id:'kl', nm:'KronLSTM',    em:'',   yr:2026,c:'#a21caf',t:'L',x:905,y:268,tip:'Kronecker delta rule: corrects the scalar association v_t^T S k_t along v_t k_t^T only, so a write disturbs a stored pair only if it overlaps in both key and value.',dec:'Diag \xb7 Kron-Delta'},
   {id:'swa',nm:'SWA',         em:'',   yr:2020,c:'#475569',t:'S',x:130,y:78, tip:'Sliding window: O(W) KV cache with exact recurrent form. First to bound attention to local context.',dec:'Window'},
   {id:'ab', nm:'ALiBi',       em:'',   yr:2021,c:'#dc2626',t:'S',x:290,y:38, tip:'Fixed linear distance penalty M_ij = \u2212m|i\u2212j| added to attention logits. Extrapolates naturally to longer sequences.',dec:'Scalar bias'},
   {id:'rp', nm:'RoPE',        em:'',   yr:2021,c:'#b45309',t:'S',x:250,y:78, tip:'Rotates Q and K by absolute position so their dot product encodes relative offset. Now the de facto LLM standard.',dec:'Rotary PE'},
@@ -508,7 +509,7 @@ var E=[
   ['gla','wl','D'],
 ];
 var mm={};M.forEach(function(m){mm[m.id]=m;});
-var idMap={la:'la',rn:'retnet',gla:'gla',mb:'mamba',dn:'deltanet',m2:'mamba2',gdn:'gated-deltanet',km:'kimi-linear',m3:'mamba3',g2:'gdn2',swa:'swa',ab:'alibi',rp:'rope-attn',abc:'abc',np:'nope',gsa:'gsa',fx:'fox',path:'path',wl:'wall',raven:'raven'};
+var idMap={la:'la',rn:'retnet',gla:'gla',mb:'mamba',dn:'deltanet',m2:'mamba2',gdn:'gated-deltanet',km:'kimi-linear',m3:'mamba3',g2:'gdn2',kl:'kronlstm',swa:'swa',ab:'alibi',rp:'rope-attn',abc:'abc',np:'nope',gsa:'gsa',fx:'fox',path:'path',wl:'wall',raven:'raven'};
 var stg=document.getElementById('az2-stg');
 var svgEl=document.getElementById('az2-svg');
 var tp=document.getElementById('az2-tp');
@@ -733,6 +734,18 @@ const MODELS = [
     mathR:'S_t = \\bigl(\\mathbf{I} - k_t(b_t\\odot k_t)^\\top\\bigr)\\operatorname{Diag}(\\boldsymbol{\\alpha}_t)\\,S_{t-1} + k_t(w_t\\odot v_t)^\\top',
     mathO:'o_t = S_t q_t',
     stateViz:{decay:'diag-delta', color:'0e7490', name:'GDN-2'},
+  },
+  {
+    id:'kronlstm', name:'KronLSTM', full:'KronLSTM',
+    paperTitle:'Kronecker Delta Rule for Long Context Linear Attention',
+    paperAuthors:'Anamaria-Roberta Hartl*, Levente Zólyomi*, Michael List, Günter Klambauer, Sebastian Böck, Sepp Hochreiter<br>*equal contribution',
+    paper:'https://arxiv.org/abs/2610.26834',
+    attn:'linear', decays:['delta','diagonal'], accent:'#a21caf',
+    imgRef:'kronlstm-custom',
+    desc:`<p><strong>KronLSTM</strong> is a new member of the xLSTM family, built on the <strong>Kronecker Delta Rule</strong>, an update rule for associative matrix memories. The delta rule corrects the whole vector stored at a key. KronLSTM corrects only the scalar association \\(v_t^\\top S k_t\\), along the single direction \\(v_t k_t^\\top\\). A write therefore disturbs a stored pair only if it overlaps in <strong>both key and value</strong>, so stored memories survive long contexts. Three gates control the memory: a channel-wise forget gate \\(\\operatorname{Diag}(\\boldsymbol{f}_t)\\), an erase gate \\(\\beta_t\\) and a write gate \\(c_t\\): $$S_t = S_{t-1}\\operatorname{Diag}(\\boldsymbol{f}_t) - \\beta_t\\,\\bigl(v_t^\\top S_{t-1}\\operatorname{Diag}(\\boldsymbol{f}_t)\\,k_t\\bigr)\\,v_t k_t^\\top + c_t\\,v_t k_t^\\top$$ On \\(\\operatorname{vec}(S)\\) this is the delta rule with key \\(k_t \\otimes v_t\\), so it trains with the same chunkwise kernels as KDA and GDN-2.</p>`,
+    mathR:'S_t = S_{t-1}\\operatorname{Diag}(\\boldsymbol{f}_t) - \\beta_t\\,\\bigl(v_t^\\top S_{t-1}\\operatorname{Diag}(\\boldsymbol{f}_t)\\,k_t\\bigr)\\,v_t k_t^\\top + c_t\\,v_t k_t^\\top',
+    mathO:'o_t = S_t q_t',
+    stateViz:{decay:'diagonal', color:'a21caf', name:'KronLSTM'},
   },
   {
     id:'mamba2', name:'Mamba-2', full:'Mamba-2',
