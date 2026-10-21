@@ -179,7 +179,10 @@ html[data-theme="dark"] #az-root .b-none     { color:var(--c-muted); }
   grid-template-columns: 60% 40%;
   min-height: 280px;
 }
-@media(max-width:680px){ .az-card-body{ grid-template-columns:1fr; } }
+@media(max-width:680px){ .az-card-body{ grid-template-columns:minmax(0,1fr); } }
+/* long display equations scroll inside their column instead of widening it */
+.az-desc, .az-eq-cell, .az-notation-body { min-width:0; }
+#az-root mjx-container[display="true"] { max-width:100%; overflow-x:auto; overflow-y:hidden; }
 
 .az-desc {
   padding: 1.2rem 1.4rem;
@@ -457,7 +460,7 @@ html[data-theme="dark"] #az-ls .az2-nd:hover{background:color-mix(in srgb,var(--
 </div></div>
 <div class="az2-ft">
   <span>Solid lines&nbsp;= direct lineage &nbsp;&middot;&nbsp; Dashed&nbsp;= architectural influence</span>
-  <span>20 models &middot; 2020&ndash;2026</span>
+  <span>21 models &middot; 2020&ndash;2026</span>
 </div>
 </div>
 
