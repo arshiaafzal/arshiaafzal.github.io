@@ -497,7 +497,7 @@ var M=[
   {id:'raven',nm:'Raven',     em:'',yr:2026,c:'#0f172a',t:'S',x:850,y:38, tip:'Sparse router r_t selects which slots to write; per-slot decay a_t controls forgetting. Extrapolates to 16\xd7 training length.',dec:'Window + sparse'},
 ];
 var E=[
-  ['la','rn','S'],['la','gla','S'],['la','dn','D'],
+  ['la','rn','S'],['la','gla','S'],['la','dn','D'],['la','kl','D'],
   ['rn','mb','S'],['rn','m2','S'],
   ['gla','km','S'],
   ['dn','gdn','S'],['dn','km','S'],
