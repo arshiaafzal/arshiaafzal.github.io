@@ -85,6 +85,7 @@ const COLOR = '#' + (P.get('color') || '6366f1');
 const NAME  = P.get('name')  || '';
 const IS_M3   = NAME === 'Mamba-3';
 const IS_GDN2 = NAME === 'GDN-2';
+const IS_KRON = NAME === 'KronLSTM';
 const N     = 8;
 
 // Main card: 8×12 + 7×1 = 103 content + 10 pad + 3 border = 116 px tall
@@ -127,6 +128,8 @@ const EQ = {
 };
 document.getElementById('eq').textContent = IS_M3
     ? 'S\u209c = e^(\u03b4A+i\u03b4\u03a9) S\u209c\u208b\u2081 + \u03b2 v\u209c\u208b\u2081(Rk\u209c\u208b\u2081)\u1d40 + \u03b3 v\u209c(Rk\u209c)\u1d40'
+    : IS_KRON
+    ? 'S\u209c = S\u209c\u208b\u2081\u00b7Diag(f\u209c) \u2212 \u03b2\u209c(v\u209c\u1d40S\u209c\u208b\u2081Diag(f\u209c)k\u209c)\u00b7v\u209ck\u209c\u1d40 + c\u209c\u00b7v\u209ck\u209c\u1d40'
     : IS_GDN2
     ? 'S\u209c = (I \u2212 k\u209c(b\u209c\u2299k\u209c)\u1d40)\u00b7Diag(\u03b1\u209c)\u00b7S\u209c\u208b\u2081 + k\u209c(w\u209c\u2299v\u209c)\u1d40'
     : (EQ[DECAY] || '');
@@ -183,6 +186,14 @@ function eraseGrid() {
             ? px(7, 7, `hsl(210,8%,${Math.round(92-m*38)}%)`)
             : px(7, 7, COLOR, Math.min(m*5, .80)));
     }
+    return g;
+}
+
+// KronLSTM erase: the rank-one direction v_t k_t^T in the accent colour, sized like the other gate cards
+function kronEraseGrid() {
+    const g = mk(); g.className = 'g-op';
+    for (let r=0; r<N; r++) for (let c=0; c<N; c++)
+        g.appendChild(px(7, 7, COLOR, Math.min(.15 + vWN[r]*kWN[c]*.75, .90)));
     return g;
 }
 
@@ -293,7 +304,12 @@ row.appendChild(mkCol('S<sub>t\u22121</sub>', stateGrid(265)));
 // Right decay operators (gate matrices — light rose background)
 if (hasDiag) {
     row.appendChild(opCol('\u00b7'));
-    row.appendChild(mkCol('Diag(\u03b1<sub>t</sub>)', diagGrid(), CARD_H, GATE_BG));
+    row.appendChild(mkCol(IS_KRON ? 'Diag(f<sub>t</sub>)' : 'Diag(\u03b1<sub>t</sub>)', diagGrid(), CARD_H, GATE_BG));
+}
+// KronLSTM erase: the write direction v_t k_t^T, scaled by beta_t (v_t^T S_{t-1} Diag(f_t) k_t) and subtracted
+if (IS_KRON) {
+    row.appendChild(opCol('\u2212'));
+    row.appendChild(mkCol('\u03b2(v<sup>T</sup>S<sub>t\u22121</sub>Diag(f<sub>t</sub>)k)vk<sup>T</sup>', kronEraseGrid(), CARD_H, GATE_BG));
 }
 if (hasDelta) {
     row.appendChild(opCol('\u00b7'));
@@ -309,7 +325,8 @@ if (IS_M3) {
     row.appendChild(mkCol('v<sub>t</sub>(Rk<sub>t</sub>)<sup>T</sup>', writeEl(vWN, kWN, 205)));
 } else {
     row.appendChild(mkCol(
-        IS_GDN2 ? 'k<sub>t</sub>(w<sub>t</sub>\u2299v<sub>t</sub>)<sup>T</sup>' : 'v<sub>t</sub>k<sub>t</sub><sup>T</sup>',
+        IS_GDN2 ? 'k<sub>t</sub>(w<sub>t</sub>\u2299v<sub>t</sub>)<sup>T</sup>'
+        : IS_KRON ? 'c<sub>t</sub>v<sub>t</sub>k<sub>t</sub><sup>T</sup>' : 'v<sub>t</sub>k<sub>t</sub><sup>T</sup>',
         writeEl(vWN, kWN, 210)
     ));
 }
