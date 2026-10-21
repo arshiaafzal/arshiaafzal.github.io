@@ -325,7 +325,8 @@ if (IS_M3) {
     row.appendChild(mkCol('v<sub>t</sub>(Rk<sub>t</sub>)<sup>T</sup>', writeEl(vWN, kWN, 205)));
 } else {
     row.appendChild(mkCol(
-        IS_GDN2 ? 'k<sub>t</sub>(w<sub>t</sub>\u2299v<sub>t</sub>)<sup>T</sup>' : 'v<sub>t</sub>k<sub>t</sub><sup>T</sup>',
+        IS_GDN2 ? 'k<sub>t</sub>(w<sub>t</sub>\u2299v<sub>t</sub>)<sup>T</sup>'
+        : IS_KRON ? 'c<sub>t</sub>v<sub>t</sub>k<sub>t</sub><sup>T</sup>' : 'v<sub>t</sub>k<sub>t</sub><sup>T</sup>',
         writeEl(vWN, kWN, 210)
     ));
 }
