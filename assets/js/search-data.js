@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-attention-zoo-summary-of-ssms-and-transformers",
+        },{id: "post-memory-attention",
+      
+        title: "Memory Attention",
+      
+      description: "Replacing attention&#39;s value projection with a token-indexed memory table",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2026/memory-attention/";
+        
+      },
+    },{id: "post-attention-zoo-summary-of-ssms-and-transformers",
       
         title: "Attention Zoo: Summary of SSMs and Transformers",
       
