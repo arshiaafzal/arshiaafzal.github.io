@@ -164,6 +164,8 @@ html[data-theme="dark"] #az-root .az-pill.active { color:#18181b; }
 .b-window   { background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; }
 .b-none     { background:#f8fafc; color:#334155; border:1px solid #cbd5e1; }
 .b-value    { background:#fff1f2; color:#9f1239; border:1px solid #fecdd3; }
+.b-memory   { background:#fdf4ff; color:#86198f; border:1px solid #f5d0fe; }
+.b-embedding{ background:#f0fdfa; color:#115e59; border:1px solid #99f6e4; }
 html[data-theme="dark"] #az-root .az-badge { background:transparent; border-color:currentColor; }
 html[data-theme="dark"] #az-root .b-linear   { color:var(--c-linear); }
 html[data-theme="dark"] #az-root .b-softmax  { color:var(--c-softmax); }
@@ -174,6 +176,8 @@ html[data-theme="dark"] #az-root .b-rope     { color:var(--c-rope); }
 html[data-theme="dark"] #az-root .b-window   { color:var(--c-window); }
 html[data-theme="dark"] #az-root .b-none     { color:var(--c-muted); }
 html[data-theme="dark"] #az-root .b-value    { color:#fb7185; }
+html[data-theme="dark"] #az-root .b-memory   { color:#e879f9; }
+html[data-theme="dark"] #az-root .b-embedding{ color:#5eead4; }
 
 /* Card body layout */
 .az-card-body {
@@ -928,7 +932,7 @@ const MODELS = [
     paperTitle:'Memory Attention',
     paperAuthors:'Jiale Kang',
     paper:'https://arxiv.org/abs/2609.28399',
-    attn:'softmax', decays:['none'], extraBadge:'value path', accent:'#be123c',
+    attn:'softmax', decays:['none'], hideDecays:true, extraBadges:['memory','embedding'], extraBadge:'value path', accent:'#be123c',
     imgRef:'ma-custom',
     eqLbl:'Value path',
     desc:`<p><strong>Memory Attention (MA)</strong> replaces the value projection with a per-layer token table \\(\\mathbf{E} \\in \\mathbb{R}^{N \\times d_v}\\). A token ID retrieves a row, which is RMS-normalized per KV head into the token memory \\(\\mathbf{M}\\) and added to the contextual key: $$\\mathbf{M} = \\operatorname{Norm}(\\mathbf{E}[s]), \\qquad \\mathbf{V} = \\mathbf{K} + \\mathbf{M}$$ RoPE is applied only to \\(\\mathbf{Q}\\) and \\(\\mathbf{K}\\) (\\(\\mathbf{Q}^{R} = \\operatorname{RoPE}(\\mathbf{Q})\\), \\(\\mathbf{K}^{R} = \\operatorname{RoPE}(\\mathbf{K})\\)), so the value uses the pre-RoPE key \\(\\mathbf{K}\\).</p><p>The table is fixed per token, but the retrieval is not: the same row \\(\\mathbf{M}\\) is read with different attention weights depending on the query and context. At inference the normalization folds into the table, making value construction a gather and an add; because lookup addresses depend only on token IDs, the table can be prefetched from CPU memory. MA adds no forget gate or recurrent state — it changes the value path, not the decay axis.</p>`,
@@ -1354,7 +1358,7 @@ function renderCoverPage() {
     +'<p>This blog is the guide I wish I had. Its goal is to provide an intuitive overview of linear transformers, SSMs, and the ideas behind modern hybrid architectures without diving too deeply into the math. If you want the technical details, I\'ve linked the relevant papers throughout the blog ;)!</p>'
     +'<p>I hope this helps make the rapidly evolving world of SSMs and linear models easier to navigate. If there\'s a model you\'d like to see added or you have suggestions, feel free to reach out \u2014 I\'ll keep updating this guide as the field evolves.</p>'
     +'<p>Modern sequence models share a deep mathematical skeleton: a <strong>key-value memory</strong> written to at each step and read by a query. The differences lie in <em>how</em> that memory decays, and this page makes those differences interactive and visual.</p>'
-    +'<p>One entry, <strong>Memory Attention</strong>, is deliberately off-axis: it keeps the softmax weights and moves the memory into the value path, so read its <em>none</em> decay label as "no additional decay".</p>'
+    +'<p>One entry, <strong>Memory Attention</strong>, is deliberately off-axis: it keeps the softmax weights and moves the memory into the value path, so it is tagged <em>memory</em> and <em>embedding</em> rather than a decay type.</p>'
     +'<p>Filter by <strong>attention kernel</strong> and <strong>memory decay type</strong> below. Each model card shows the architecture diagram for that model.</p>'
     +'</div></div>';
 }
@@ -1381,7 +1385,8 @@ function renderPage(m) {
   if(m._meta==='notation')return renderNotationPage();
   var nm=cleanName(m);
   var attnBadge='<span class="az-badge b-'+m.attn+'">'+m.attn+'</span>';
-  var decayBadges=m.decays.map(function(d){return '<span class="az-badge b-'+d+'">'+d+'</span>';}).join('');
+  var decayBadges=m.hideDecays?'':m.decays.map(function(d){return '<span class="az-badge b-'+d+'">'+d+'</span>';}).join('');
+  var extraBadges=(m.extraBadges||[]).map(function(d){return '<span class="az-badge b-'+d+'">'+d+'</span>';}).join('');
   var extraBadge=m.extraBadge?'<span class="az-badge b-value">'+m.extraBadge+'</span>':'';
   var eqLbl=m.eqLbl||(m.attn==='linear'?'Recurrence':'Attention logit');
   var html='<div class="az-page-hero" style="--page-accent:'+m.accent+';">';
@@ -1393,7 +1398,7 @@ function renderPage(m) {
   html+='<span class="az-paper-authors">'+m.paperAuthors+'</span>';
   html+='</div>';
   html+='<div style="display:flex;align-items:center;gap:.5rem;margin-top:.35rem;flex-wrap:wrap;">';
-  html+='<div class="az-card-badges" style="flex-direction:row;">'+attnBadge+decayBadges+extraBadge+'</div>';
+  html+='<div class="az-card-badges" style="flex-direction:row;">'+attnBadge+decayBadges+extraBadges+extraBadge+'</div>';
   html+='<a class="az-paper-btn" href="'+m.paper+'" target="_blank">';
   html+='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">';
   html+='<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>';
