@@ -39,13 +39,18 @@ toc:
 {% include figure.liquid loading="eager" path="assets/img/memory-attention/cover.png" width="55%" class="rounded mx-auto d-block" %}
 {% endcomment %}
 
+<style>
+/* wide result tables scroll sideways on phones instead of being cut off */
+@media (max-width: 768px) { d-article table { display: block; overflow-x: auto; } }
+</style>
+
 Attention is a soft lookup. Queries ask, keys answer, and values are what gets carried back. The first two get the architectural attention: their interaction is where context mixing happens, and most efficiency tricks in the book are about making that interaction cheaper. The value projection is the quiet third member of the trio — a dense matrix that turns the same hidden state into the payload.
 
 That symmetry is suspicious. Queries and keys are irreducibly contextual: the same word must be able to look for different things in different sentences. Values are different. A value vector is what gets averaged and written back into the residual stream, and a large part of it is plausibly about the token itself — the entity, the verb, the name — content that is the same every time the token appears.
 
 The question behind Memory Attention is whether that part can come from a table instead of a projection. Each layer learns one vector per vocabulary token. The value becomes the contextual key plus the retrieved row, and the value projection disappears.
 
-<div style="background:#eff6ff; border-radius:10px; padding:0.5rem 1.5rem; margin:1rem 0;">
+<div style="background:rgba(59,130,246,.10); border-radius:10px; padding:0.5rem 1.5rem; margin:1rem 0;">
 
 $$
 \mathbf{V} = \mathbf{K} + \operatorname{Norm}\left(\mathbf{E}[\mathbf{s}]\right)
