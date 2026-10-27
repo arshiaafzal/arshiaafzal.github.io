@@ -163,6 +163,7 @@ html[data-theme="dark"] #az-root .az-pill.active { color:#18181b; }
 .b-rope     { background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
 .b-window   { background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; }
 .b-none     { background:#f8fafc; color:#334155; border:1px solid #cbd5e1; }
+.b-value    { background:#fff1f2; color:#9f1239; border:1px solid #fecdd3; }
 html[data-theme="dark"] #az-root .az-badge { background:transparent; border-color:currentColor; }
 html[data-theme="dark"] #az-root .b-linear   { color:var(--c-linear); }
 html[data-theme="dark"] #az-root .b-softmax  { color:var(--c-softmax); }
@@ -172,6 +173,7 @@ html[data-theme="dark"] #az-root .b-scalar   { color:var(--c-scalar); }
 html[data-theme="dark"] #az-root .b-rope     { color:var(--c-rope); }
 html[data-theme="dark"] #az-root .b-window   { color:var(--c-window); }
 html[data-theme="dark"] #az-root .b-none     { color:var(--c-muted); }
+html[data-theme="dark"] #az-root .b-value    { color:#fb7185; }
 
 /* Card body layout */
 .az-card-body {
@@ -460,7 +462,7 @@ html[data-theme="dark"] #az-ls .az2-nd:hover{background:color-mix(in srgb,var(--
 </div></div>
 <div class="az2-ft">
   <span>Solid lines&nbsp;= direct lineage &nbsp;&middot;&nbsp; Dashed&nbsp;= architectural influence</span>
-  <span>21 models &middot; 2020&ndash;2026</span>
+  <span>22 models &middot; 2020&ndash;2026</span>
 </div>
 </div>
 
@@ -498,6 +500,7 @@ var M=[
   {id:'path',nm:'PaTH',       em:'',yr:2025,c:'#1d4ed8',t:'S',x:740,y:78, tip:'Derives position encoding by unrolling DeltaNet: a product of Householder transforms P_{j\u2192t} replaces the dot product k_j^T q_i, giving data-dependent PE.',dec:'Delta (PE)'},
   {id:'wl', nm:'Wall',        em:'',yr:2026,c:'#0891b2',t:'S',x:830,y:118,tip:'GLA diagonal gate lifted into softmax via induced-action principle. Per-channel decay. Extrapolates to 160k tokens.',dec:'Diagonal'},
   {id:'raven',nm:'Raven',     em:'',yr:2026,c:'#0f172a',t:'S',x:850,y:38, tip:'Sparse router r_t selects which slots to write; per-slot decay a_t controls forgetting. Extrapolates to 16\xd7 training length.',dec:'Window + sparse'},
+  {id:'ma',  nm:'MemAttn',    em:'',yr:2026,c:'#be123c',t:'S',x:930,y:78, tip:'Token-indexed memory in the value path: V = K + Norm(E[s]). Softmax scoring, the causal mask, and RoPE are unchanged; the memory table is gathered by token ID.',dec:'Value path'},
 ];
 var E=[
   ['la','rn','S'],['la','gla','S'],['la','dn','D'],['la','kl','D'],
@@ -512,7 +515,7 @@ var E=[
   ['gla','wl','D'],
 ];
 var mm={};M.forEach(function(m){mm[m.id]=m;});
-var idMap={la:'la',rn:'retnet',gla:'gla',mb:'mamba',dn:'deltanet',m2:'mamba2',gdn:'gated-deltanet',km:'kimi-linear',m3:'mamba3',g2:'gdn2',kl:'kronlstm',swa:'swa',ab:'alibi',rp:'rope-attn',abc:'abc',np:'nope',gsa:'gsa',fx:'fox',path:'path',wl:'wall',raven:'raven'};
+var idMap={la:'la',rn:'retnet',gla:'gla',mb:'mamba',dn:'deltanet',m2:'mamba2',gdn:'gated-deltanet',km:'kimi-linear',m3:'mamba3',g2:'gdn2',kl:'kronlstm',swa:'swa',ab:'alibi',rp:'rope-attn',abc:'abc',np:'nope',gsa:'gsa',fx:'fox',path:'path',wl:'wall',raven:'raven',ma:'memory-attention'};
 var stg=document.getElementById('az2-stg');
 var svgEl=document.getElementById('az2-svg');
 var tp=document.getElementById('az2-tp');
@@ -605,7 +608,7 @@ function hlE(nodeId,on){
     <button class="az-pill" data-type="softmax">Softmax</button>
   </div>
 
-  <div class="az-label">Decay Type <span style="font-weight:400;font-size:.65rem;letter-spacing:0;text-transform:none;margin-left:.25rem">(exact match, selects unique models)</span></div>
+  <div class="az-label">Decay Type <span style="font-weight:400;font-size:.65rem;letter-spacing:0;text-transform:none;margin-left:.25rem">(exact match on the decay set)</span></div>
   <div class="az-pills" id="az-decay">
     <button class="az-pill" data-decay="none">None</button>
     <button class="az-pill" data-decay="delta">Delta-Rule</button>
@@ -623,7 +626,7 @@ function hlE(nodeId,on){
         <div class="az-page" id="az-page"></div>
         <div class="az-page-nav">
           <button class="az-nav-btn" id="az-prev">← Prev</button>
-          <div class="az-page-ctr"><span class="az-page-ctr-dot" id="az-ctr-dot"></span><span id="az-counter">1 / 23</span></div>
+          <div class="az-page-ctr"><span class="az-page-ctr-dot" id="az-ctr-dot"></span><span id="az-counter">1 / 25</span></div>
           <button class="az-nav-btn" id="az-next">Next →</button>
         </div>
       </div>
@@ -919,6 +922,18 @@ const MODELS = [
     desc:`<p><strong>NoPE Attention</strong> is vanilla softmax attention without any positional embedding. The output is computed as \\(O = \\operatorname{softmax}(QK^\\top/\\sqrt{d} + M)\\,V\\), where \\(d\\) is the head dimension. Dividing by \\(\\sqrt{d}\\) prevents the dot products from growing too large in high dimensions, which would push softmax into saturation regions with near-zero gradients. \\(M \\in \\mathbb{R}^{T \\times T}\\) is a binary causal mask that prevents each token from attending to future positions, preserving the autoregressive nature of the model. For <a href="https://arxiv.org/abs/2010.11929" target="_blank">vision transformers</a> the mask is removed, yielding full bidirectional attention \\(L = QK^\\top/\\sqrt{d}\\).</p><p>Since NoPE adds no positional signal to the attention scores, the attention is <a href="https://en.wikipedia.org/wiki/Equivariant_map" target="_blank"><strong>permutation-equivariant</strong></a>: reordering the input tokens simply reorders the output (in the mask-free, bidirectional setting). Despite this, NoPE exhibits stronger length generalisation than encodings such as <strong>RoPE</strong> and <strong>ALiBi</strong>, suggesting the triangular causal structure itself carries a sufficient implicit positional signal.</p>`,
     mathR:'\\operatorname{Attn}(q_i,k_j) = \\tfrac{q_i^\\top k_j}{\\sqrt{d}}',
     mathO:'O = \\operatorname{softmax}(L + {\\color{#9333ea} M})\\,V',
+  },
+  {
+    id:'memory-attention', name:'Memory Attention', full:'Memory Attention',
+    paperTitle:'Memory Attention',
+    paperAuthors:'Jiale Kang',
+    paper:'https://arxiv.org/abs/2609.28399',
+    attn:'softmax', decays:['none'], extraBadge:'value path', accent:'#be123c',
+    imgRef:'ma-custom',
+    eqLbl:'Value path',
+    desc:`<p><strong>Memory Attention (MA)</strong> replaces the value projection with a per-layer token table \\(\\mathbf{E} \\in \\mathbb{R}^{N \\times d_v}\\). A token ID retrieves a row, which is RMS-normalized per KV head into the token memory \\(\\mathbf{M}\\) and added to the contextual key: $$\\mathbf{M} = \\operatorname{Norm}(\\mathbf{E}[s]), \\qquad \\mathbf{V} = \\mathbf{K} + \\mathbf{M}$$ RoPE is applied only to \\(\\mathbf{Q}\\) and \\(\\mathbf{K}\\) (\\(\\mathbf{Q}^{R} = \\operatorname{RoPE}(\\mathbf{Q})\\), \\(\\mathbf{K}^{R} = \\operatorname{RoPE}(\\mathbf{K})\\)), so the value uses the pre-RoPE key \\(\\mathbf{K}\\).</p><p>The table is fixed per token, but the retrieval is not: the same row \\(\\mathbf{M}\\) is read with different attention weights depending on the query and context. At inference the normalization folds into the table, making value construction a gather and an add; because lookup addresses depend only on token IDs, the table can be prefetched from CPU memory. MA adds no forget gate or recurrent state — it changes the value path, not the decay axis.</p>`,
+    mathR:'\\mathbf{M} = \\operatorname{Norm}(\\mathbf{E}[s]), \\qquad \\mathbf{V} = \\mathbf{K} + \\mathbf{M}',
+    mathO:'\\mathbf{O} = \\operatorname{softmax}\\!\\left(\\frac{\\mathbf{Q}\\mathbf{K}^\\top}{\\sqrt{d}}\\right)\\mathbf{V}',
   },
 ];
 
@@ -1339,6 +1354,7 @@ function renderCoverPage() {
     +'<p>This blog is the guide I wish I had. Its goal is to provide an intuitive overview of linear transformers, SSMs, and the ideas behind modern hybrid architectures without diving too deeply into the math. If you want the technical details, I\'ve linked the relevant papers throughout the blog ;)!</p>'
     +'<p>I hope this helps make the rapidly evolving world of SSMs and linear models easier to navigate. If there\'s a model you\'d like to see added or you have suggestions, feel free to reach out \u2014 I\'ll keep updating this guide as the field evolves.</p>'
     +'<p>Modern sequence models share a deep mathematical skeleton: a <strong>key-value memory</strong> written to at each step and read by a query. The differences lie in <em>how</em> that memory decays, and this page makes those differences interactive and visual.</p>'
+    +'<p>One entry, <strong>Memory Attention</strong>, is deliberately off-axis: it keeps the softmax weights and moves the memory into the value path, so read its <em>none</em> decay label as "no additional decay".</p>'
     +'<p>Filter by <strong>attention kernel</strong> and <strong>memory decay type</strong> below. Each model card shows the architecture diagram for that model.</p>'
     +'</div></div>';
 }
@@ -1366,6 +1382,7 @@ function renderPage(m) {
   var nm=cleanName(m);
   var attnBadge='<span class="az-badge b-'+m.attn+'">'+m.attn+'</span>';
   var decayBadges=m.decays.map(function(d){return '<span class="az-badge b-'+d+'">'+d+'</span>';}).join('');
+  var extraBadge=m.extraBadge?'<span class="az-badge b-value">'+m.extraBadge+'</span>':'';
   var eqLbl=m.eqLbl||(m.attn==='linear'?'Recurrence':'Attention logit');
   var html='<div class="az-page-hero" style="--page-accent:'+m.accent+';">';
   html+='<div class="az-page-meta">';
@@ -1376,7 +1393,7 @@ function renderPage(m) {
   html+='<span class="az-paper-authors">'+m.paperAuthors+'</span>';
   html+='</div>';
   html+='<div style="display:flex;align-items:center;gap:.5rem;margin-top:.35rem;flex-wrap:wrap;">';
-  html+='<div class="az-card-badges" style="flex-direction:row;">'+attnBadge+decayBadges+'</div>';
+  html+='<div class="az-card-badges" style="flex-direction:row;">'+attnBadge+decayBadges+extraBadge+'</div>';
   html+='<a class="az-paper-btn" href="'+m.paper+'" target="_blank">';
   html+='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">';
   html+='<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>';
